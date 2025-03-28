@@ -13,16 +13,17 @@ namespace final_project_be.Repository
             _dao = dao;
         }
 
-        public async Task<IEnumerable<T>> GetAllAsync() => await _dao.GetAllAsync();
+        public IEnumerable<T> GetAll() => _dao.GetAll();
 
-        public async Task<T?> GetByIdAsync(object id) => await _dao.GetByIdAsync(id);
+        public T? GetById(object id) => _dao.GetById(id);
 
-        public async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate) => await _dao.FindAsync(predicate);
+        public IEnumerable<T> Find(Expression<Func<T, bool>> predicate) => _dao.Find(predicate);
 
-        public async Task AddAsync(T entity) => await _dao.AddAsync(entity);
+        public void Add(T entity) => _dao.Add(entity);
 
-        public async Task UpdateAsync(T entity) => await _dao.UpdateAsync(entity);
+        public void Update(T entity) => _dao.Update(entity);
 
-        public async Task DeleteAsync(object id) => await _dao.DeleteAsync(id);
+        public void Delete(object id) => _dao.Delete(id);
     }
+
 }

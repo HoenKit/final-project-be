@@ -5,12 +5,11 @@ namespace final_project_be.Interface
 {
     public interface IRepository<T> where T : class
     {
-        Task<IEnumerable<T>> GetAllAsync();
-        Task<T?> GetByIdAsync(object id);
-        Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate);
-        Task AddAsync(T entity);
-        Task UpdateAsync(T entity);
-        Task DeleteAsync(object id);
-        
+        IEnumerable<T> GetAll();
+        T? GetById(object id);
+        IEnumerable<T> Find(Expression<Func<T, bool>> predicate);
+        void Add(T entity);
+        void Update(T entity);
+        void Delete(object id);
     }
 }

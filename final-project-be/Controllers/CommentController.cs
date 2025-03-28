@@ -1,4 +1,6 @@
-﻿using final_project_be.Dtos.Comment;
+﻿using final_project_be.Data.Models;
+using final_project_be.Dtos;
+using final_project_be.Dtos.Comment;
 using final_project_be.Interface;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,16 +19,23 @@ namespace final_project_be.Controllers
         }
         // GET: api/<CommentController>
         [HttpGet]
-        public IEnumerable<string> Get()
+        public IActionResult GetAll(int? page)  
         {
-            return new string[] { "value1", "value2" };
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            int currentPage = page ?? 1;
+            var pagedComments = _commentRepository.GetAllComments(currentPage, 5);
+            return Ok(pagedComments);
         }
+
+
 
         // GET api/<CommentController>/5
         [HttpGet("{id}")]
-        public string Get(int id)
+        public IActionResult Get(int id)
         {
-            return "value";
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            return Ok(_commentRepository.GetComment(id));
         }
 
         // POST api/<CommentController>
@@ -39,15 +48,21 @@ namespace final_project_be.Controllers
         }
 
         // PUT api/<CommentController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        [HttpPut]
+        public IActionResult Put(CommentDto commentDto)
         {
+            if (!ModelState.IsValid) { return BadRequest(ModelState); }
+            _commentRepository.UpdateComment(commentDto);
+            return Ok(commentDto);
         }
 
         // DELETE api/<CommentController>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public IActionResult Delete(int id)
         {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            _commentRepository.DeleteComment(id);
+            return Ok();
         }
     }
 }

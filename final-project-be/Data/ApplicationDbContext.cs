@@ -26,14 +26,14 @@ namespace final_project_be.Data
             : base(options)
         {
         }
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            var config = new ConfigurationBuilder()
-                 .SetBasePath(Directory.GetCurrentDirectory())
-                 .AddJsonFile("appsettings.json").Build();
+        //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        //{
+        //    var config = new ConfigurationBuilder()
+        //         .SetBasePath(Directory.GetCurrentDirectory())
+        //         .AddJsonFile("appsettings.json").Build();
 
-            optionsBuilder.UseSqlServer(config.GetConnectionString("MyConnection"));
-        }
+        //    optionsBuilder.UseSqlServer(config.GetConnectionString("MyConnection"));
+        //}
         protected override void OnModelCreating(ModelBuilder builder)
         {
             builder.Entity<User>()
