@@ -42,8 +42,10 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddControllers();
 // Config DAO
 builder.Services.AddScoped<CommentDAO>();
+builder.Services.AddScoped<UserManagerDAO>();
 // Config Repository
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
+builder.Services.AddScoped<IUserManagerRepository, UserManagerRepository>();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
