@@ -27,7 +27,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Dtos\Category\" />
     <Folder Include="Dtos\Courses\Lesson\Answer\" />
     <Folder Include="Dtos\Courses\Lesson\Question\" />
     <Folder Include="Dtos\Mentor\" />
@@ -38,7 +37,6 @@
     <Folder Include="Dtos\Role\" />
     <Folder Include="Dtos\Report\" />
     <Folder Include="Dtos\User\" />
-    <Folder Include="Dtos\PollOption\" />
     <Folder Include="Dtos\Post\" />
   </ItemGroup>
 
