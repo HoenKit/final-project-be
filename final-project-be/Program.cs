@@ -1,9 +1,16 @@
-﻿using final_project_be.Service.Mapping;
+﻿using final_project_be.DAO;
+using final_project_be.Data;
+using final_project_be.Interface;
+using final_project_be.Repository;
+using final_project_be.Service.Mapping;
+using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Formatting.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("MyConnection")));
 
 Log.Logger = new LoggerConfiguration()
     
@@ -30,6 +37,10 @@ builder.Services.AddControllersWithViews();
 // Add services to the container.
 
 builder.Services.AddControllers();
+// Config DAO
+builder.Services.AddScoped<CommentDAO>();
+// Config Repository
+builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

@@ -28,7 +28,6 @@
 
   <ItemGroup>
     <Folder Include="Dtos\Category\" />
-    <Folder Include="Dtos\Comment\" />
     <Folder Include="Dtos\Courses\Lesson\Answer\" />
     <Folder Include="Dtos\Courses\Lesson\Question\" />
     <Folder Include="Dtos\Mentor\" />

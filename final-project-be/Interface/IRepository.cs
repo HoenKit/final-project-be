@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using final_project_be.Dtos.Comment;
+using System.Linq.Expressions;
 
 namespace final_project_be.Interface
 {
@@ -10,5 +11,6 @@ namespace final_project_be.Interface
         Task AddAsync(T entity);
         Task UpdateAsync(T entity);
         Task DeleteAsync(object id);
+        
     }
 }
