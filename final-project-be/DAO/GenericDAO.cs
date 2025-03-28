@@ -18,9 +18,9 @@ namespace final_project_be.DAO
             _dbSet = _context.Set<T>();
         }
 
-        public IEnumerable<T> GetAll()
+        public IQueryable<T> GetAll()
         {
-            return _dbSet.ToList();
+            return _dbSet.AsQueryable();
         }
 
         public T? GetById(object id)
@@ -36,6 +36,11 @@ namespace final_project_be.DAO
         public void Add(T entity)
         {
             _dbSet.Add(entity);
+            _context.SaveChanges();
+        }
+
+        public void SaveChanges()
+        {
             _context.SaveChanges();
         }
 

@@ -39,11 +39,25 @@ builder.Host.UseSerilog();
 builder.Services.AddControllersWithViews();
 // Add services to the container.
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
+        options.JsonSerializerOptions.WriteIndented = true; 
+    });
+
 // Config DAO
 builder.Services.AddScoped<CommentDAO>();
+builder.Services.AddScoped<NotificationDAO>();
+builder.Services.AddScoped<PollOptionDAO>();
+builder.Services.AddScoped<ReportCommentDAO>();
+builder.Services.AddScoped<ReportDAO>();
 // Config Repository
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
+builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+builder.Services.AddScoped<IPollOptionRepository, PollOptionRepository>();
+builder.Services.AddScoped<IReportCommentRepository, ReportCommentRepository>();
+builder.Services.AddScoped<IReportRepository, ReportRepository>();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace final_project_be.Data.Models
 {
@@ -19,7 +20,9 @@ namespace final_project_be.Data.Models
         public Post? Post { get; set; }
         public User? User { get; set; }
         public Comment? ParentComment { get; set; }
+        [JsonIgnore]
         public ICollection<Comment>? Comments { get; set; }
+        [JsonIgnore]
         public ICollection<ReportComment>? ReportComments { get; set; }
     }
 }

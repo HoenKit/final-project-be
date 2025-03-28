@@ -34,11 +34,8 @@
     <Folder Include="Dtos\Event\" />
     <Folder Include="Dtos\Certificate\" />
     <Folder Include="Dtos\Transaction\" />
-    <Folder Include="Dtos\Notification\" />
     <Folder Include="Dtos\Role\" />
-    <Folder Include="Dtos\Report\" />
     <Folder Include="Dtos\User\" />
-    <Folder Include="Dtos\PollOption\" />
     <Folder Include="Dtos\Post\" />
   </ItemGroup>
 
