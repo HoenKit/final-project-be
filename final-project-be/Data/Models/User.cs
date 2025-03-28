@@ -7,8 +7,6 @@ namespace final_project_be.Data.Models
     {
         [Key]
         public Guid UserId { get; set; } 
-        [ForeignKey("UserMetadata")]
-        public int UserMetadataId { get; set; }
         public string Email { get; set; }
         public string Phone { get; set; }
         public string Password { get; set; }
