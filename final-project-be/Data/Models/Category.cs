@@ -7,8 +7,6 @@ namespace final_project_be.Data.Models
     {
         [Key]
         public int CategoryId { get; set; }
-        [ForeignKey("SubCategory")]
-        public int SubCategoryId { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
         public bool? IsDeleted { get; set; } = false;

@@ -5,6 +5,7 @@ namespace final_project_be.Data.Models
 {
     public class UserMetadata
     {
+        [Key]
         public int UserMetadataId { get; set; }
         [ForeignKey("User")]
         public Guid UserId { get; set; }
