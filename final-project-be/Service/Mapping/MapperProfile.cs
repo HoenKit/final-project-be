@@ -5,6 +5,7 @@ using final_project_be.Dtos.Notification;
 using final_project_be.Dtos.PollOption;
 using final_project_be.Dtos.Report;
 using final_project_be.Dtos.User;
+using final_project_be.Dtos.Post;
 
 namespace final_project_be.Service.Mapping
 {
@@ -19,6 +20,7 @@ namespace final_project_be.Service.Mapping
             CreateMap<ReportCommentDto, Report>().ReverseMap();
             CreateMap<ReportCommentDto, ReportDto>().ReverseMap();
             CreateMap<UserManagerDto, User>().ReverseMap();
+            CreateMap<PostDto, Post>().ReverseMap();
         }
     }
 }
