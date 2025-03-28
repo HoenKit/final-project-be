@@ -38,6 +38,7 @@
     <Folder Include="Dtos\Report\" />
     <Folder Include="Dtos\User\" />
     <Folder Include="Dtos\Post\" />
+	  <Folder Include="Dtos\PollOption\" />
   </ItemGroup>
 
 </Project>
