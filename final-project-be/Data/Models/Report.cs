@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace final_project_be.Data.Models
 {
@@ -13,8 +14,11 @@ namespace final_project_be.Data.Models
         public DateTime CreateAt { get; set; } = DateTime.Now;
         public DateTime? UpdateAt { get; set; } = DateTime.Now;
         public User? User { get; set; }
-        public ICollection<ReportUser>? ReportUsers { get; set; } 
-        public ICollection<ReportPost>? ReportPosts { get; set; } 
+        [JsonIgnore]
+        public ICollection<ReportUser>? ReportUsers { get; set; }
+        [JsonIgnore]
+        public ICollection<ReportPost>? ReportPosts { get; set; }
+        [JsonIgnore]
         public ICollection<ReportComment>? ReportComments { get; set; } 
     }
 }
