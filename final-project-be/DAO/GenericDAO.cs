@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using final_project_be.Data;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 
@@ -6,51 +8,70 @@ namespace final_project_be.DAO
 {
     public class GenericDAO<T> where T : class
     {
-        private readonly DbContext _context;
+        private readonly ApplicationDbContext _context;
         private readonly DbSet<T> _dbSet;
+        private IDbContextTransaction? _transaction;
 
-        public GenericDAO(DbContext context)
+        public GenericDAO(ApplicationDbContext context)
         {
             _context = context;
             _dbSet = _context.Set<T>();
         }
 
-        public async Task<IEnumerable<T>> GetAllAsync()
+        public IEnumerable<T> GetAll()
         {
-            return await _dbSet.ToListAsync();
+            return _dbSet.ToList();
         }
 
-        public async Task<T?> GetByIdAsync(object id)
+        public T? GetById(object id)
         {
-            return await _dbSet.FindAsync(id);
+            return _dbSet.Find(id);
         }
 
-        public async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate)
+        public IEnumerable<T> Find(Expression<Func<T, bool>> predicate)
         {
-            return await _dbSet.Where(predicate).ToListAsync();
+            return _dbSet.Where(predicate).ToList();
         }
 
-        public async Task AddAsync(T entity)
+        public void Add(T entity)
         {
-            await _dbSet.AddAsync(entity);
-            await _context.SaveChangesAsync();
+            _dbSet.Add(entity);
+            _context.SaveChanges();
         }
 
-        public async Task UpdateAsync(T entity)
+        public void Update(T entity)
         {
             _dbSet.Attach(entity);
             _context.Entry(entity).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
         }
 
-        public async Task DeleteAsync(object id)
+        public void Delete(object id)
         {
-            var entity = await GetByIdAsync(id);
+            var entity = GetById(id);
             if (entity != null)
             {
                 _dbSet.Remove(entity);
-                await _context.SaveChangesAsync();
+                _context.SaveChanges();
             }
+        }
+
+        // Transaction handling without async
+        public void BeginTransaction()
+        {
+            _transaction = _context.Database.BeginTransaction();
+        }
+
+        public void CommitTransaction()
+        {
+            _transaction?.Commit();
+            _transaction?.Dispose();
+        }
+
+        public void RollbackTransaction()
+        {
+            _transaction?.Rollback();
+            _transaction?.Dispose();
         }
     }
 }
