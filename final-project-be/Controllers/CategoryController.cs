@@ -1,5 +1,6 @@
 ﻿using final_project_be.Dtos.Category;
 using final_project_be.Interface;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -17,6 +18,7 @@ namespace final_project_be.Controllers
         }
         // GET: api/<CategoryController>
         [HttpGet]
+        
         public IActionResult GetAll(int? page)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);

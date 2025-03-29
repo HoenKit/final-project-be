@@ -52,5 +52,22 @@ namespace final_project_be.Controllers
             _usermanagerRepository.UpdateUser(usermanagerDto);
             return Ok(usermanagerDto);
         }
+        [HttpPut("UpdateProfile")]
+        public async Task<IActionResult> UpdateProfile([FromBody] UserProfileDto dto)
+        {
+            if (dto == null || dto.UserId == Guid.Empty)
+            {
+                return BadRequest("Invalid user data.");
+            }
+
+            var updatedUser = await _usermanagerRepository.UpdateUserProfileAsync(dto);
+
+            if (updatedUser == null)
+            {
+                return NotFound("User not found.");
+            }
+
+            return Ok(updatedUser);
+        }
     }
 }
