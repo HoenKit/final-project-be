@@ -19,6 +19,9 @@ namespace final_project_be.Service.Mapping
             CreateMap<ReportCommentDto, ReportComment>().ReverseMap();
             CreateMap<ReportCommentDto, Report>().ReverseMap();
             CreateMap<ReportCommentDto, ReportDto>().ReverseMap();
+            CreateMap<ReportPostDto, ReportPost>().ReverseMap();
+            CreateMap<ReportPostDto, Report>().ReverseMap();
+            CreateMap<ReportPostDto, ReportDto>().ReverseMap();
             CreateMap<UserManagerDto, User>().ReverseMap();
             CreateMap<PostDto, Post>().ReverseMap();
         }
