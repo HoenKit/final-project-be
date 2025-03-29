@@ -10,5 +10,12 @@ namespace final_project_be.DAO
         public PostDAO(ApplicationDbContext context) : base(context)
         {
         }
+        //Update SearchPosts
+        public IEnumerable<Post> SearchPosts(string query)
+        {
+            Expression<Func<Post, bool>> predicate = p => p.Title.Contains(query) || p.Content.Contains(query);
+
+            return Find(predicate);
+        }
     }
 }
