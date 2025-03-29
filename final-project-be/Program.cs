@@ -1,13 +1,13 @@
-﻿using final_project_be.DAO;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using final_project_be.DAO;
 using final_project_be.Data;
 using final_project_be.Interface;
 using final_project_be.Repository;
 using final_project_be.Service.Mapping;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using Serilog.Formatting.Json;
+using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -48,6 +48,7 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
         options.JsonSerializerOptions.WriteIndented = true; 
     });
+    
 
 // Config DAO
 builder.Services.AddScoped<CommentDAO>();
@@ -137,6 +138,7 @@ app.UseCookiePolicy(new CookiePolicyOptions
 });
 
 app.UseCors("AllowAll");
+
 
 app.UseHttpsRedirection();
 
