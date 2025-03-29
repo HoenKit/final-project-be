@@ -6,6 +6,7 @@ using final_project_be.Dtos.PollOption;
 using final_project_be.Dtos.Report;
 using final_project_be.Dtos.User;
 using final_project_be.Dtos.Post;
+using final_project_be.Dtos.Category;
 
 namespace final_project_be.Service.Mapping
 {
@@ -19,8 +20,14 @@ namespace final_project_be.Service.Mapping
             CreateMap<ReportCommentDto, ReportComment>().ReverseMap();
             CreateMap<ReportCommentDto, Report>().ReverseMap();
             CreateMap<ReportCommentDto, ReportDto>().ReverseMap();
+            CreateMap<ReportPostDto, ReportPost>().ReverseMap();
+            CreateMap<ReportPostDto, Report>().ReverseMap();
+            CreateMap<ReportPostDto, ReportDto>().ReverseMap();
             CreateMap<UserManagerDto, User>().ReverseMap();
             CreateMap<PostDto, Post>().ReverseMap();
+            CreateMap<CategoryDto, Category>().ReverseMap();
+            CreateMap<SubCategoryDto, SubCategory>().ReverseMap();
+            CreateMap<PollOptionVoteDto, PollOptionVote>().ReverseMap();
         }
     }
 }
