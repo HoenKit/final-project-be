@@ -54,6 +54,9 @@ builder.Services.AddScoped<ReportCommentDAO>();
 builder.Services.AddScoped<ReportDAO>();
 builder.Services.AddScoped<UserManagerDAO>();
 builder.Services.AddScoped<PostDAO>();
+builder.Services.AddScoped<CategoryDAO>();
+builder.Services.AddScoped<SubCategoryDAO>();
+builder.Services.AddScoped<PollOptionVoteDAO>();
 // Config Repository
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
@@ -62,6 +65,9 @@ builder.Services.AddScoped<IReportCommentRepository, ReportCommentRepository>();
 builder.Services.AddScoped<IReportRepository, ReportRepository>();
 builder.Services.AddScoped<IUserManagerRepository, UserManagerRepository>();
 builder.Services.AddScoped<IPostRepository, PostRepository>();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<ISubCategoryRepository, SubCategoryRepository>();
+builder.Services.AddScoped<IPollOptionVoteRepository, PollOptionVoteRepository>();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
