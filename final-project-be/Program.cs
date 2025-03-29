@@ -48,9 +48,11 @@ builder.Services.AddControllers()
 
 // Config DAO
 builder.Services.AddScoped<CommentDAO>();
+builder.Services.AddScoped<PostDAO>();
 builder.Services.AddScoped<NotificationDAO>();
 builder.Services.AddScoped<PollOptionDAO>();
 builder.Services.AddScoped<ReportCommentDAO>();
+builder.Services.AddScoped<ReportPostDAO>();
 builder.Services.AddScoped<ReportDAO>();
 builder.Services.AddScoped<UserManagerDAO>();
 builder.Services.AddScoped<PostDAO>();
@@ -62,6 +64,7 @@ builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<IPollOptionRepository, PollOptionRepository>();
 builder.Services.AddScoped<IReportCommentRepository, ReportCommentRepository>();
+builder.Services.AddScoped<IReportPostRepository, ReportPostRepository>();
 builder.Services.AddScoped<IReportRepository, ReportRepository>();
 builder.Services.AddScoped<IUserManagerRepository, UserManagerRepository>();
 builder.Services.AddScoped<IPostRepository, PostRepository>();

@@ -37,6 +37,7 @@
     <Folder Include="Dtos\User\" />
     <Folder Include="Dtos\Notification\" />
     <Folder Include="Dtos\Role\" />
+    <Folder Include="Dtos\PollOption\" />
     <Folder Include="Dtos\Report\" />
   </ItemGroup>
 
