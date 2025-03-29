@@ -120,5 +120,10 @@ namespace final_project_be.Repository
                 return null;
             }
         }
+        //Update SearchPosts
+        public IEnumerable<Post> SearchPosts(string query)
+        {
+            return _postDAO.SearchPosts(query);
+        }
     }
 }

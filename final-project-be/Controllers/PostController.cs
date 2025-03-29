@@ -32,6 +32,20 @@ namespace final_project_be.Controllers
             return Ok(_postRepository.GetPost(id));
         }
 
+        //Update SearchPosts
+        // GET: api/Post/search
+        [HttpGet("search")]
+        public IActionResult SearchPosts([FromQuery] string query)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                return BadRequest("Search query cannot be empty.");
+            }
+
+            var posts = _postRepository.SearchPosts(query);
+            return Ok(posts);
+        }
+
         // POST api/<PostController>
         [HttpPost]
         public IActionResult Post([FromBody] PostDto postDto)
