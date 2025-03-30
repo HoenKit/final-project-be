@@ -61,6 +61,7 @@ builder.Services.AddScoped<SubCategoryDAO>();
 builder.Services.AddScoped<PollOptionVoteDAO>();
 builder.Services.AddScoped<ReportUserDAO>();
 builder.Services.AddScoped<PostManagerDAO>();
+builder.Services.AddScoped<PostFileDAO>();
 // Config Repository
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
@@ -76,6 +77,7 @@ builder.Services.AddScoped<IPollOptionVoteRepository, PollOptionVoteRepository>(
 builder.Services.AddScoped<IUserAuthRepository, UserAuthRepository>();
 builder.Services.AddScoped<IReportUserRepository, ReportUserRepository>();
 builder.Services.AddScoped<IPostManagerRepository, PostManagerRepository>();
+builder.Services.AddScoped<IPostFileRepository, PostFileRepository>();
 
 //Config Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
