@@ -10,10 +10,9 @@ namespace final_project_be.Data.Models
         [ForeignKey("Post")]
         public int PostId { get; set; }
         public string Title { get; set; }
-        public string? PollOptionImage { get; set; }
+        public string PollOptionImages { get; set; }
         public DateTime CreateAt { get; set; } = DateTime.Now;
         public DateTime? UpdateAt { get; set; } = DateTime.Now;
-
         public Post? Post { get; set; }
         public ICollection<PollOptionVote>? PollOptionVotes { get; set; }
     }

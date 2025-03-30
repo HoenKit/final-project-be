@@ -12,8 +12,8 @@ using final_project_be.Data;
 namespace final_project_be.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250328135841_Updatedatabase-03")]
-    partial class Updatedatabase03
+    [Migration("20250330025939_AddDB")]
+    partial class AddDB
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -131,6 +131,10 @@ namespace final_project_be.Data.Migrations
 
                     b.Property<DateTime>("CreateAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("PollOptionImages")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("PostId")
                         .HasColumnType("int");
@@ -419,9 +423,6 @@ namespace final_project_be.Data.Migrations
 
                     b.Property<DateTime?>("UpdateAt")
                         .HasColumnType("datetime2");
-
-                    b.Property<int>("UserMetadataId")
-                        .HasColumnType("int");
 
                     b.HasKey("UserId");
 

@@ -35,6 +35,7 @@ Log.Logger = new LoggerConfiguration()
         restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Error, 
         retainedFileCountLimit: 7)
     .CreateLogger();
+
 // Config Mapper
 builder.Services.AddAutoMapper(typeof(MapperProfile));
 
