@@ -28,8 +28,16 @@ namespace final_project_be.Service.Mapping
             CreateMap<CategoryDto, Category>().ReverseMap();
             CreateMap<SubCategoryDto, SubCategory>().ReverseMap();
             CreateMap<PollOptionVoteDto, PollOptionVote>().ReverseMap();
+            CreateMap<UserRegisterDto, User>().ReverseMap();
+            CreateMap<UserLoginDto, User>().ReverseMap();
+            CreateMap<ReportUserDto, ReportUser>().ReverseMap();
+            CreateMap<ReportUserDto, Report>().ReverseMap();
+            CreateMap<ReportUserDto, ReportDto>().ReverseMap();
+            CreateMap<UserProfileDto, User>().ReverseMap();
+            CreateMap<UserProfileDto, UserMetadata>().ReverseMap();
             CreateMap<PostFileDto, PostFile>().ReverseMap();
             CreateMap<PostManagerDto, Post>().ReverseMap();
+
         }
     }
 }

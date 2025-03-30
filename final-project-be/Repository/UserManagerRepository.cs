@@ -22,6 +22,7 @@ namespace final_project_be.Repository
             _userManagerDAO = userManagerDAO;
             _mapper = mapper;
             _logger = logger;
+
         }
 
         public async Task<User> ToggleIsBanned(Guid userId)
@@ -107,6 +108,39 @@ namespace final_project_be.Repository
                 _logger.LogInformation("Update user success");
                 return user;
             }
+            catch (Exception ex)
+            {
+                _userManagerDAO.RollbackTransaction();
+                _logger.LogError(ex, "Error when update user");
+                return null;
+            }
+        }
+        public async Task<User> UpdateUserProfileAsync(UserProfileDto dto)
+        {
+            try
+            {
+                var user = _userManagerDAO.GetUserandUserMetadata(dto.UserId);
+            if (user == null)
+            {
+                return null;
+            }
+
+            _mapper.Map(dto, user);
+
+            if (user.UserMetaData == null)
+            {
+                user.UserMetaData = new UserMetadata();
+            }
+
+            _mapper.Map(dto, user.UserMetaData);
+
+            _userManagerDAO.Update(user);
+
+             _userManagerDAO.SaveChanges();
+
+            _logger.LogInformation("User profile and metadata updated successfully for UserId: {UserId}", dto.UserId);
+
+            return user;}
             catch (Exception ex)
             {
                 _userManagerDAO.RollbackTransaction();
