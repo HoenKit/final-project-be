@@ -21,7 +21,7 @@ namespace final_project_be.Controllers
         public async Task<ActionResult> Register(UserRegisterDto registerDto) {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             var user = await _userAuthRepository.RegisterAsync(registerDto);
-            return Ok(user);
+            return Ok("Register successfully");
         }
 
         [HttpPost("Login")]
