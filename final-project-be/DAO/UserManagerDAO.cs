@@ -12,7 +12,13 @@ namespace final_project_be.DAO
         {
             _context = context;
         }
-        public bool UserRegisterExist(UserRegisterDto registerDto) => _context.users.Any(u => u.Email == registerDto.Email);
+		public User GetById(Guid userId)
+		{
+			return _context.users
+				.Include(u => u.UserMetaData) // Include UserMetadata
+				.FirstOrDefault(u => u.UserId == userId);
+		}
+		public bool UserRegisterExist(UserRegisterDto registerDto) => _context.users.Any(u => u.Email == registerDto.Email);
         public User GetUserbyEmail(UserLoginDto loginDto) => _context.users.FirstOrDefault(u=> u.Email == loginDto.Email);
         public IEnumerable<string> GetRolesByUserId(Guid userId) => _context.userRoles.Where(ur => ur.UserId == userId).Select(ur => ur.Role.RoleName).ToList();
         public  Role GetRoleByName(string roleName)  => _context.roles.FirstOrDefault(r => r.RoleName == roleName);

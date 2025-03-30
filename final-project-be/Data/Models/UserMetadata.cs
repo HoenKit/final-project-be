@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace final_project_be.Data.Models
 {
@@ -15,6 +16,7 @@ namespace final_project_be.Data.Models
         public string? Gender { get; set; }
         public string? Avatar { get; set; }
         public string? Address { get; set; }
+        [JsonIgnore]
         public User? User { get; set; }
     }
 }

@@ -66,6 +66,7 @@ namespace final_project_be.Repository
             {
                 var totalCount = _postDAO.GetAll().Count();
                 var Posts = _postDAO.GetAll()
+                    .Where(p => p.IsDeleted == false)
                     .Skip((page - 1) * pageSize)
                     .Take(pageSize)
                     .ToList();
