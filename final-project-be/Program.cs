@@ -1,3 +1,4 @@
+
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using final_project_be.DAO;
 using final_project_be.Data;
@@ -64,6 +65,7 @@ builder.Services.AddScoped<CategoryDAO>();
 builder.Services.AddScoped<SubCategoryDAO>();
 builder.Services.AddScoped<PollOptionVoteDAO>();
 builder.Services.AddScoped<ReportUserDAO>();
+builder.Services.AddScoped<PostManagerDAO>();
 // Config Repository
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
@@ -78,6 +80,7 @@ builder.Services.AddScoped<ISubCategoryRepository, SubCategoryRepository>();
 builder.Services.AddScoped<IPollOptionVoteRepository, PollOptionVoteRepository>();
 builder.Services.AddScoped<IUserAuthRepository, UserAuthRepository>();
 builder.Services.AddScoped<IReportUserRepository, ReportUserRepository>();
+builder.Services.AddScoped<IPostManagerRepository, PostManagerRepository>();
 
 //Config Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

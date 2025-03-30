@@ -35,6 +35,8 @@ namespace final_project_be.Service.Mapping
             CreateMap<ReportUserDto, ReportDto>().ReverseMap();
             CreateMap<UserProfileDto, User>().ReverseMap();
             CreateMap<UserProfileDto, UserMetadata>().ReverseMap();
+            CreateMap<PostFileDto, PostFile>().ReverseMap();
+            CreateMap<PostManagerDto, Post>().ReverseMap();
 
         }
     }
