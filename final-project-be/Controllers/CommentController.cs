@@ -19,12 +19,12 @@ namespace final_project_be.Controllers
         }
         // GET: api/<CommentController>
         [HttpGet]
-        public IActionResult GetAll(int? page)  
+        public IActionResult GetAll(int? page, int postId)  
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
             int currentPage = page ?? 1;
-            var pagedComments = _commentRepository.GetAllComments(currentPage, 5);
+            var pagedComments = _commentRepository.GetAllCommentsByPostId(currentPage, 5, postId);
             return Ok(pagedComments);
         }
 

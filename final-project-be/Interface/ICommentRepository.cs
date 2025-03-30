@@ -10,6 +10,6 @@ namespace final_project_be.Interface
         public bool DeleteComment(int id);
         public Task<Comment> GetComment(int id);
         public Task<Comment> UpdateComment(CommentDto dto);
-        public PageResult<Comment> GetAllComments(int page, int pageSize);
+        public PageResult<Comment> GetAllCommentsByPostId(int page, int pageSize, int postId);
     }
 }

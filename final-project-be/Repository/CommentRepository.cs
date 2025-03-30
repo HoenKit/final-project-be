@@ -61,12 +61,13 @@ namespace final_project_be.Repository
             }
         }
 
-        public PageResult<Comment> GetAllComments(int page, int pageSize)
+        public PageResult<Comment> GetAllCommentsByPostId(int page, int pageSize, int postId)
         {
             try
             {
                 var totalCount = _commentDAO.GetAll().Count(); 
                 var comments = _commentDAO.GetAll()
+                    .Where(p => p.PostId == postId)
                     .Skip((page - 1) * pageSize)
                     .Take(pageSize)
                     .ToList();
