@@ -21,7 +21,7 @@ namespace final_project_be.Controllers
         public async Task<ActionResult> Register(UserRegisterDto registerDto) {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             var user = await _userAuthRepository.RegisterAsync(registerDto);
-            return Ok(user);
+            return Ok("Register Success");
         }
 
         [HttpPost("Login")]
@@ -31,7 +31,7 @@ namespace final_project_be.Controllers
             var token = await _userAuthRepository.LoginAsync(loginDto);
             if (token == null)
                 return BadRequest("Invalid username or password");
-            return Ok(token);
+            return Ok("Login Success");
         }
 
         [HttpPost("logout")]
