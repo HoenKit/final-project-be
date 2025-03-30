@@ -129,7 +129,8 @@ namespace final_project_be.Data.Migrations
                     b.Property<DateTime>("CreateAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("PollOptionImage")
+                    b.Property<string>("PollOptionImages")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("PostId")
