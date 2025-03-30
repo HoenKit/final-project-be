@@ -39,12 +39,8 @@ builder.Host.UseSerilog();
 builder.Services.AddControllersWithViews();
 // Add services to the container.
 
-builder.Services.AddControllers()
-    .AddJsonOptions(options =>
-    {
-        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
-        options.JsonSerializerOptions.WriteIndented = true; 
-    });
+builder.Services.AddControllers();
+    
 
 // Config DAO
 builder.Services.AddScoped<CommentDAO>();
