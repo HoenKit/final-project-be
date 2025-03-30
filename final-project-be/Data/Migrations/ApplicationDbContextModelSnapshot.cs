@@ -49,7 +49,7 @@ namespace final_project_be.Data.Migrations
 
                     b.HasKey("CategoryId");
 
-                    b.ToTable("categories");
+                    b.ToTable("categories", (string)null);
                 });
 
             modelBuilder.Entity("final_project_be.Data.Models.Comment", b =>
@@ -87,7 +87,7 @@ namespace final_project_be.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("comments");
+                    b.ToTable("comments", (string)null);
                 });
 
             modelBuilder.Entity("final_project_be.Data.Models.Notification", b =>
@@ -115,7 +115,7 @@ namespace final_project_be.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("notification");
+                    b.ToTable("notification", (string)null);
                 });
 
             modelBuilder.Entity("final_project_be.Data.Models.PollOption", b =>
@@ -146,7 +146,7 @@ namespace final_project_be.Data.Migrations
 
                     b.HasIndex("PostId");
 
-                    b.ToTable("pollOptions");
+                    b.ToTable("pollOptions", (string)null);
                 });
 
             modelBuilder.Entity("final_project_be.Data.Models.PollOptionVote", b =>
@@ -182,7 +182,7 @@ namespace final_project_be.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("pollVotes");
+                    b.ToTable("pollVotes", (string)null);
                 });
 
             modelBuilder.Entity("final_project_be.Data.Models.Post", b =>
@@ -227,7 +227,7 @@ namespace final_project_be.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("posts");
+                    b.ToTable("posts", (string)null);
                 });
 
             modelBuilder.Entity("final_project_be.Data.Models.PostFile", b =>
@@ -256,7 +256,7 @@ namespace final_project_be.Data.Migrations
 
                     b.HasIndex("PostId");
 
-                    b.ToTable("postFiles");
+                    b.ToTable("postFiles", (string)null);
                 });
 
             modelBuilder.Entity("final_project_be.Data.Models.Report", b =>
@@ -284,7 +284,7 @@ namespace final_project_be.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("report");
+                    b.ToTable("report", (string)null);
                 });
 
             modelBuilder.Entity("final_project_be.Data.Models.ReportComment", b =>
@@ -299,7 +299,7 @@ namespace final_project_be.Data.Migrations
 
                     b.HasIndex("CommentId");
 
-                    b.ToTable("reportComments");
+                    b.ToTable("reportComments", (string)null);
                 });
 
             modelBuilder.Entity("final_project_be.Data.Models.ReportPost", b =>
@@ -314,7 +314,7 @@ namespace final_project_be.Data.Migrations
 
                     b.HasIndex("PostId");
 
-                    b.ToTable("reportPost");
+                    b.ToTable("reportPost", (string)null);
                 });
 
             modelBuilder.Entity("final_project_be.Data.Models.ReportUser", b =>
@@ -329,7 +329,7 @@ namespace final_project_be.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("reportUser");
+                    b.ToTable("reportUser", (string)null);
                 });
 
             modelBuilder.Entity("final_project_be.Data.Models.Role", b =>
@@ -352,7 +352,7 @@ namespace final_project_be.Data.Migrations
 
                     b.HasKey("RoleId");
 
-                    b.ToTable("roles");
+                    b.ToTable("roles", (string)null);
                 });
 
             modelBuilder.Entity("final_project_be.Data.Models.SubCategory", b =>
@@ -387,7 +387,7 @@ namespace final_project_be.Data.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("subcategories");
+                    b.ToTable("subcategories", (string)null);
                 });
 
             modelBuilder.Entity("final_project_be.Data.Models.User", b =>
@@ -422,7 +422,7 @@ namespace final_project_be.Data.Migrations
 
                     b.HasKey("UserId");
 
-                    b.ToTable("users");
+                    b.ToTable("users", (string)null);
                 });
 
             modelBuilder.Entity("final_project_be.Data.Models.UserMetadata", b =>
@@ -461,7 +461,7 @@ namespace final_project_be.Data.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("UserMetadata");
+                    b.ToTable("UserMetadata", (string)null);
                 });
 
             modelBuilder.Entity("final_project_be.Data.Models.UserRole", b =>
@@ -476,7 +476,7 @@ namespace final_project_be.Data.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("userRoles");
+                    b.ToTable("userRoles", (string)null);
                 });
 
             modelBuilder.Entity("final_project_be.Data.Models.Comment", b =>

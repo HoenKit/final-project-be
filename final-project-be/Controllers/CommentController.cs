@@ -28,8 +28,6 @@ namespace final_project_be.Controllers
             return Ok(pagedComments);
         }
 
-
-
         // GET api/<CommentController>/5
         [HttpGet("{id}")]
         public IActionResult Get(int id)
