@@ -17,5 +17,10 @@ namespace final_project_be.DAO
 
             return Find(predicate);
         }
+        //Get Get Post By UserId
+        public IEnumerable<Post> GetByUserId(Guid userId)
+        {
+            return Find(p => p.UserId == userId);
+        }
     }
 }
