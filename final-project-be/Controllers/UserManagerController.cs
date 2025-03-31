@@ -2,6 +2,7 @@
 using final_project_be.Dtos.User;
 using final_project_be.Interface;
 using final_project_be.Repository;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,6 +18,7 @@ namespace final_project_be.Controllers
             _usermanagerRepository = usermanagerRepository;
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPut("toggle-ban/{userId}")]
         public async Task<IActionResult> ToggleUserBanStatus(Guid userId)
         {
@@ -39,10 +41,43 @@ namespace final_project_be.Controllers
         }
 
         [HttpGet("{id}")]
-        public IActionResult Get(Guid id)
+        public async Task<IActionResult> Get(Guid id)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            return Ok(_usermanagerRepository.GetUser(id));
+
+            var user = await _usermanagerRepository.GetUserandUserMetadata(id);
+
+            if (user == null)
+            {
+                return NotFound($"User with ID {id} not found.");
+            }
+
+            var userDto = new UserManagerDto
+            {
+                UserId = user.UserId,
+                Email = user.Email,
+                Phone = user.Phone,
+                Password = user.Password,
+                Point = user.Point,
+                IsBanned = user.IsBanned,
+                CreateAt = user.CreateAt,
+                UpdateAt = user.UpdateAt,
+                UserProfile = user.UserMetaData != null
+                    ? new UserProfileDto
+                    {
+                        UserId = user.UserId,
+                        Email = user.Email,
+                        Phone = user.Phone,
+                        FirstName = user.UserMetaData.FirstName,
+                        LastName = user.UserMetaData.LastName,
+                        Birthday = user.UserMetaData.Birthday,
+                        Gender = user.UserMetaData.Gender,
+                        Address = user.UserMetaData.Address
+                    }
+                    : null
+            };
+
+            return Ok(userDto);
         }
 
         [HttpPut]

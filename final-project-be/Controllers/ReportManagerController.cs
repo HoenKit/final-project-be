@@ -10,10 +10,12 @@ namespace final_project_be.Controllers
     {
         private readonly IReportPostRepository _reportPostRepository;
         private readonly IReportCommentRepository _reportCommentRepository;
-        public ReportManagerController(IReportPostRepository reportPostRepository, IReportCommentRepository reportCommentRepository)
+        private readonly IReportUserRepository _reportUserRepository;
+        public ReportManagerController(IReportPostRepository reportPostRepository, IReportCommentRepository reportCommentRepository, IReportUserRepository reportUserRepository)
         {
             _reportPostRepository = reportPostRepository;
             _reportCommentRepository = reportCommentRepository;
+            _reportUserRepository = reportUserRepository;
         }
 
         [HttpGet("ReportComment")]
@@ -33,6 +35,16 @@ namespace final_project_be.Controllers
 
             int currentPage = page ?? 1;
             var pagedReportPosts = _reportPostRepository.GetAllReportPosts(currentPage, 5);
+            return Ok(pagedReportPosts);
+        }
+
+        [HttpGet("ReportUser")]
+        public IActionResult GetAllReportUser(int? page)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            int currentPage = page ?? 1;
+            var pagedReportPosts = _reportUserRepository.GetAllReportUsers(currentPage, 5);
             return Ok(pagedReportPosts);
         }
     }

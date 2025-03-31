@@ -31,7 +31,7 @@ namespace final_project_be.Controllers
             var token = await _userAuthRepository.LoginAsync(loginDto);
             if (token == null)
                 return BadRequest("Invalid username or password");
-            return Ok("Login Success");
+            return Ok(token);
         }
 
         [HttpPost("logout")]

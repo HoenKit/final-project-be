@@ -76,12 +76,12 @@ namespace final_project_be.Repository
             }
         }
 
-        public async Task<User> GetUser(Guid userId)
+        public async Task<User> GetUserandUserMetadata(Guid userId)
         {
             try
             {
                 _userManagerDAO.BeginTransaction();
-                var user = _userManagerDAO.GetById(userId);
+                var user = _userManagerDAO.GetUserandUserMetadata(userId);
                 _userManagerDAO.CommitTransaction();
 
                 _logger.LogInformation("Get user success");
