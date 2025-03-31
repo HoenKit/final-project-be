@@ -14,6 +14,8 @@ namespace final_project_be.Interface
 
         //Update SearchPosts
         IEnumerable<Post> SearchPosts(string query);
+        //Get post by userId
+        Task<PageResult<PostDto>> GetPostsByUserId(Guid userId, int page, int pageSize);
 
     }
 }

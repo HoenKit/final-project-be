@@ -126,5 +126,38 @@ namespace final_project_be.Repository
         {
             return _postDAO.SearchPosts(query);
         }
+        //Get post by userid
+        public async Task<PageResult<PostDto>> GetPostsByUserId(Guid userId, int page, int pageSize)
+        {
+            try
+            {
+                _postDAO.BeginTransaction();
+
+                // Get list of posts by userId
+                var query = _postDAO.Find(p => p.UserId == userId);
+
+                int totalItems = query.Count();
+
+                // pagination
+                var pagedPosts = query
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToList();
+
+                _postDAO.CommitTransaction();
+                _logger.LogInformation($"Lấy danh sách bài viết của user {userId} thành công.");
+
+                var postDtos = _mapper.Map<List<PostDto>>(pagedPosts);
+
+                return new PageResult<PostDto>(postDtos, totalItems, page, pageSize);
+            }
+            catch (Exception ex)
+            {
+                _postDAO.RollbackTransaction();
+                _logger.LogError(ex, $"Lỗi khi lấy danh sách bài viết của user {userId}");
+
+                return new PageResult<PostDto>(new List<PostDto>(), 0, page, pageSize);
+            }
+        }
     }
 }

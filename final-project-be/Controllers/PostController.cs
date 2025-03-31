@@ -45,6 +45,25 @@ namespace final_project_be.Controllers
             var posts = _postRepository.SearchPosts(query);
             return Ok(posts);
         }
+        //Update get post by userId
+        //GET: api/Post/user/userId
+        [HttpGet("user/{userId}")]
+        public async Task<IActionResult> GetByUserId(Guid userId, int? page)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            int currentPage = page ?? 1;
+            int pageSize = 5;
+
+            var pagedPosts = await _postRepository.GetPostsByUserId(userId, currentPage, pageSize);
+
+            if (pagedPosts == null || !pagedPosts.Items.Any())
+            {
+                return NotFound($"No posts found by user {userId}.");
+            }
+
+            return Ok(pagedPosts);
+        }
 
         // POST api/<PostController>
         [HttpPost]
