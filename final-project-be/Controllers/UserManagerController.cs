@@ -80,6 +80,20 @@ namespace final_project_be.Controllers
             return Ok(userDto);
         }
 
+        [HttpGet("GetUserById")]
+        public async Task<IActionResult> GetUserId(Guid id)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            var user = await _usermanagerRepository.GetUserandUserMetadata(id);
+
+            if (user == null)
+            {
+                return NotFound($"User with ID {id} not found.");
+            }
+            return Ok(user);
+        }
+
         [HttpPut]
         public IActionResult Put(UserManagerDto usermanagerDto)
         {
