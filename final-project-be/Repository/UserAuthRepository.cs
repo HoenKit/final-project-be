@@ -1,10 +1,12 @@
 ﻿using AutoMapper;
+using Azure.Core;
 using final_project_be.DAO;
 using final_project_be.Data.Models;
 using final_project_be.Dtos.User;
 using final_project_be.Interface;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.Data;
 using System.IdentityModel.Tokens.Jwt;
@@ -58,6 +60,7 @@ namespace final_project_be.Repository
                     SameSite = SameSiteMode.Strict, 
                     Expires = DateTime.UtcNow.AddHours(1) 
                 };
+
                 _httpContextAccessor.HttpContext.Response.Cookies.Append("AccessToken", token, cookieOptions);
 
                 return token;
@@ -94,6 +97,59 @@ namespace final_project_be.Repository
             }
         }
 
+        public async Task<UsercurrentDto> GetCurrentUserAsync()
+        {
+            var token = _httpContextAccessor.HttpContext.Request.Cookies["AccessToken"];
+            if (string.IsNullOrEmpty(token))
+            {
+                throw new UnauthorizedAccessException("No token found");
+            }
+
+            try
+            {
+
+                var handler = new JwtSecurityTokenHandler();
+                var jwtToken = handler.ReadJwtToken(token);
+                var userIdString = jwtToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+
+                if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out Guid userId))
+                {
+                    throw new UnauthorizedAccessException("Invalid token");
+                }
+
+                var user =  _userManagerDAO.GetById(userId);
+                if (user == null)
+                {
+                    throw new KeyNotFoundException("User not found");
+                }
+
+                var roles =  _userManagerDAO.GetRolesByUserId(userId);
+
+                return new UsercurrentDto
+                {
+                    UserId = user.UserId,
+                    Email = user.Email,
+                    Roles = roles.ToList(),
+                };
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogWarning(ex, "Unauthorized access attempt");
+                throw;
+            }
+            catch (KeyNotFoundException ex)
+            {
+                _logger.LogWarning(ex, "User not found");
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while retrieving current user");
+                throw new Exception("An error occurred while retrieving the current user");
+            }
+        }
+
+
         public async Task<User> RegisterAsync(UserRegisterDto dto)
         {
             _userManagerDAO.BeginTransaction();
@@ -112,6 +168,19 @@ namespace final_project_be.Repository
                 user.Password = hashedPassword;
 
                 _userManagerDAO.Add(user);
+                _userManagerDAO.SaveChanges();
+
+                var userMeta = new UserMetadata
+                {
+                    UserId = user.UserId,
+                    FirstName = dto.userMetadataDto.FirstName,
+                    LastName = dto.userMetadataDto.LastName,
+                    Birthday = dto.userMetadataDto.Birthday,
+                    Gender = dto.userMetadataDto.Gender,
+                    Address = dto.userMetadataDto.Address
+                };
+
+                _userManagerDAO.AddUserMetaData(userMeta);
                 _userManagerDAO.SaveChanges();
 
                 var defaultRole = _userManagerDAO.GetRoleByName("User");
@@ -138,6 +207,7 @@ namespace final_project_be.Repository
                 return null;
             }
         }
+
 
 
         private string GenerateToken(User user)

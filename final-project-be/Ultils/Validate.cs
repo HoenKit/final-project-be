@@ -1,9 +1,26 @@
-﻿using System.Text.RegularExpressions;
+﻿using Azure.Core;
+using System.Text.RegularExpressions;
 
 namespace final_project_be.Ultils
 {
     public class Validate
     {
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        public Validate(IHttpContextAccessor httpContextAccessor)
+        {
+            _httpContextAccessor = httpContextAccessor;
+        }
+        public  bool IsValidToken()
+        {
+            var token = _httpContextAccessor?.HttpContext?.Request.Cookies["AccessToken"];
+            if (string.IsNullOrEmpty(token))
+            {
+                return false;
+            }
+
+            return true;
+        }
+
         public static bool IsNotNullOrEmpty(string input)
         {
             return !string.IsNullOrEmpty(input);

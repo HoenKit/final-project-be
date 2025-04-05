@@ -10,6 +10,7 @@ using Serilog;
 using Serilog.Formatting.Json;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using final_project_be.Ultils;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -78,6 +79,9 @@ builder.Services.AddScoped<IUserAuthRepository, UserAuthRepository>();
 builder.Services.AddScoped<IReportUserRepository, ReportUserRepository>();
 builder.Services.AddScoped<IPostManagerRepository, PostManagerRepository>();
 builder.Services.AddScoped<IPostFileRepository, PostFileRepository>();
+
+//config Valid class
+builder.Services.AddScoped<Validate>();
 
 //Config Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
