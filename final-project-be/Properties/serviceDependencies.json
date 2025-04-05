@@ -1,12 +1,13 @@
 {
   "dependencies": {
-    "mssql1": {
-      "type": "mssql",
-      "connectionId": "ConnectionStrings:Phronesis"
-    },
     "storage1": {
       "type": "storage",
       "connectionId": "ConnectionStrings:MyConnection"
+    },
+    "mssql2": {
+      "type": "mssql",
+      "connectionId": "ConnectionStrings:MyConnection",
+      "dynamicId": null
     }
   }
 }
