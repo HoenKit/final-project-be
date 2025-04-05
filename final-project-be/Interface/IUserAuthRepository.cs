@@ -7,6 +7,7 @@ namespace final_project_be.Interface
     {
         public Task<User> RegisterAsync(UserRegisterDto dto);
         public Task<string> LoginAsync(UserLoginDto dto);
+        public Task<UsercurrentDto> GetCurrentUserAsync();
         public Task LogoutAsync();
     }
 }
