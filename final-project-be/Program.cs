@@ -11,6 +11,7 @@ using Serilog.Formatting.Json;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using final_project_be.Ultils;
+using Microsoft.Extensions.Azure;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -124,6 +125,11 @@ builder.Services.AddCors(options =>
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddAzureClients(clientBuilder =>
+{
+	clientBuilder.AddBlobServiceClient(builder.Configuration["ConnectionStrings:MyConnection:blob"]!, preferMsi: true);
+	clientBuilder.AddQueueServiceClient(builder.Configuration["ConnectionStrings:MyConnection:queue"]!, preferMsi: true);
+});
 
 
 var app = builder.Build();
