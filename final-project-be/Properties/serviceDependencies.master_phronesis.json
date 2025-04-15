@@ -1,12 +1,5 @@
 {
   "dependencies": {
-    "storage1": {
-      "serviceConnectorResourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('resourceGroupName')]/providers/Microsoft.Web/sites/Phronesis/providers/Microsoft.ServiceLinker/linkers/ConnectionStringsMyConnection_F176EC0F3F, /subscriptions/05cf4e19-f60b-461f-91ae-3f854342e843/resourceGroups/Phronesis/providers/Microsoft.Web/sites/Phronesis/providers/Microsoft.ServiceLinker/linkers/ConnectionStringsMyConnection_27A93B98CC",
-      "secretStore": "AzureAppSettings",
-      "resourceId": "/subscriptions/[parameters('subscriptionId')]/resourcegroups/[parameters('resourceGroupName')]/providers/Microsoft.Storage/storageAccounts/finalprojectbestorage",
-      "type": "storage.azure",
-      "connectionId": "ConnectionStrings:MyConnection"
-    },
     "mssql2": {
       "serviceConnectorResourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('resourceGroupName')]/providers/Microsoft.Web/sites/Phronesis/providers/Microsoft.ServiceLinker/linkers/ConnectionStringsMyConnection_1823061477",
       "secretStore": "AzureAppSettings",
@@ -14,6 +7,13 @@
       "type": "mssql.azure",
       "connectionId": "ConnectionStrings:MyConnection",
       "dynamicId": null
+    },
+    "storage1": {
+      "serviceConnectorResourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('resourceGroupName')]/providers/Microsoft.Web/sites/Phronesis/providers/Microsoft.ServiceLinker/linkers/AzureStorageMyConnection_591095F7C5, /subscriptions/05cf4e19-f60b-461f-91ae-3f854342e843/resourceGroups/Phronesis/providers/Microsoft.Web/sites/Phronesis/providers/Microsoft.ServiceLinker/linkers/AzureStorageMyConnection_214361A5FB",
+      "secretStore": "AzureAppSettings",
+      "resourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('resourceGroupName')]/providers/Microsoft.Storage/storageAccounts/finalprojectbestorage",
+      "type": "storage.azure",
+      "connectionId": "AzureStorage:MyConnection"
     }
   }
 }
