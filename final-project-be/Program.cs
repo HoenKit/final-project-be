@@ -1,4 +1,4 @@
-
+﻿
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using final_project_be.DAO;
 using final_project_be.Data;
@@ -143,10 +143,14 @@ builder.Services.AddAzureClients(clientBuilder =>
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+	app.UseSwaggerUI(c =>
+	{
+		c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+		c.RoutePrefix = "swagger";
+	});
 }
 
 app.UseCookiePolicy(new CookiePolicyOptions
