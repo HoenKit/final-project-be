@@ -12,6 +12,8 @@ namespace final_project_be.Interface
         public Task<Post> UpdatePost(PostDto dto);
         public PageResult<Post> GetAllPosts(int page, int pageSize);
 
+        public Task<Post> GetPostandUser(int id);
+
         //Update SearchPosts
         IEnumerable<Post> SearchPosts(string query);
         //Get post by userId
