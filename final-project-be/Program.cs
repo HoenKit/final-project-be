@@ -47,7 +47,11 @@ builder.Services.AddControllersWithViews();
 // Add services to the container.
 
 builder.Services.AddControllers();
-    
+
+// Config SignalR
+
+builder.Services.AddSignalR();
+
 // Config DAO
 builder.Services.AddScoped<CommentDAO>();
 builder.Services.AddScoped<PostDAO>();
@@ -116,9 +120,13 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
-        policy.AllowAnyOrigin() 
+        policy.WithOrigins(
+            "https://localhost:7191",
+            "https://phronesis-c2dzfzakfwe9eyf0.southeastasia-01.azurewebsites.net"
+        )
               .AllowAnyHeader()
-              .AllowAnyMethod();
+              .AllowAnyMethod().
+              AllowCredentials();
     });
 });
 
@@ -155,7 +163,7 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 
 app.UseAuthorization();
-
+app.MapHub<SignalRHub>("/postHub");
 app.MapControllers();
 
 app.Run();

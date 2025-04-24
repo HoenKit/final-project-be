@@ -7,8 +7,10 @@ namespace final_project_be.DAO
 {
     public class PostDAO : GenericDAO<Post>
     {
+        private readonly ApplicationDbContext _context;
         public PostDAO(ApplicationDbContext context) : base(context)
         {
+           _context = context;
         }
         //Update SearchPosts
         public IEnumerable<Post> SearchPosts(string query)
@@ -21,6 +23,14 @@ namespace final_project_be.DAO
         public IEnumerable<Post> GetByUserId(Guid userId)
         {
             return Find(p => p.UserId == userId);
+        }
+
+        public Post GetPostandUser(int postId)
+        {
+            return _context.posts
+                .Include(p => p.User)
+                .ThenInclude(u => u.UserMetaData)
+                .FirstOrDefault(p => p.PostId == postId);
         }
     }
 }

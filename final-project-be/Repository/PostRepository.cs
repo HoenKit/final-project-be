@@ -81,7 +81,24 @@ namespace final_project_be.Repository
                 return new PageResult<Post>(new List<Post>(), 0, page, pageSize);
             }
         }
+        public async Task<Post> GetPostandUser(int id)
+        {
+            try
+            {
+                _postDAO.BeginTransaction();
+                var Post = _postDAO.GetPostandUser(id);
+                _postDAO.CommitTransaction();
 
+                _logger.LogInformation("Get Post success");
+                return Post;
+            }
+            catch (Exception ex)
+            {
+                _postDAO.RollbackTransaction();
+                _logger.LogError(ex, "Error when get Post");
+                return null;
+            }
+        }
         public async Task<Post> GetPost(int id)
         {
             try

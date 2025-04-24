@@ -2,7 +2,9 @@
 using final_project_be.Dtos;
 using final_project_be.Dtos.Comment;
 using final_project_be.Interface;
+using final_project_be.Ultils;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -13,9 +15,11 @@ namespace final_project_be.Controllers
     public class CommentController : ControllerBase
     {
         private readonly ICommentRepository _commentRepository;
-        public CommentController(ICommentRepository commentRepository)
+        private readonly IHubContext<SignalRHub> _hubContext;
+        public CommentController(ICommentRepository commentRepository, IHubContext<SignalRHub> hubContext)
         {
             _commentRepository = commentRepository;
+            _hubContext = hubContext;
         }
         // GET: api/<CommentController>
         [HttpGet]
@@ -38,10 +42,11 @@ namespace final_project_be.Controllers
 
         // POST api/<CommentController>
         [HttpPost]
-        public IActionResult Post([FromBody] CommentDto commentDto)
+        public async Task<IActionResult> Post([FromBody] CommentDto commentDto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            _commentRepository.CreateComment(commentDto);
+            var comment = await _commentRepository.CreateComment(commentDto);
+            await _hubContext.Clients.All.SendAsync("ReceiveComment", comment);
             return Ok(commentDto);
         }
 

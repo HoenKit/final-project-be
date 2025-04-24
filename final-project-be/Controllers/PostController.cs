@@ -1,6 +1,8 @@
 ﻿using final_project_be.Dtos.Post;
 using final_project_be.Interface;
+using final_project_be.Ultils;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 
 namespace final_project_be.Controllers
 {
@@ -8,10 +10,12 @@ namespace final_project_be.Controllers
     [ApiController]
     public class PostController : Controller
     {
+        private readonly IHubContext<SignalRHub> _hubContext;
         private readonly IPostRepository _postRepository;
-        public PostController(IPostRepository postRepository)
+        public PostController(IPostRepository postRepository, IHubContext<SignalRHub> hubContext)
         {
             _postRepository = postRepository;
+            _hubContext = hubContext;
         }
         // GET: api/<PostController>
         [HttpGet]
@@ -67,10 +71,13 @@ namespace final_project_be.Controllers
 
         // POST api/<PostController>
         [HttpPost]
-        public IActionResult Post([FromBody] PostDto postDto)
+        public async Task<IActionResult> Post([FromBody] PostDto postDto)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-            _postRepository.CreatePost(postDto);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            var post = await _postRepository.CreatePost(postDto);
+
+            await _hubContext.Clients.All.SendAsync("ReceivePost", post);
             return Ok(postDto);
         }
 
