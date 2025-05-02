@@ -2,32 +2,59 @@
 using final_project_be.DAO;
 using final_project_be.Data.Models;
 using final_project_be.Dtos;
-using final_project_be.Dtos.Post;
+using final_project_be.Dtos.Comment;
 using final_project_be.Dtos.Post;
 using final_project_be.Interface;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 
 namespace final_project_be.Repository
 {
     public class PostRepository : Repository<Post>, IPostRepository
     {
         private readonly PostDAO _postDAO;
+        private readonly PostFileDAO _postFileDAO;
+        private readonly CommentDAO _commentDAO;
         private readonly IMapper _mapper;
         private readonly ILogger<PostRepository> _logger;
-        public PostRepository(PostDAO postDAO, IMapper mapper, ILogger<PostRepository> logger) : base(postDAO)
+        public PostRepository(PostDAO postDAO,PostFileDAO postFileDAO, CommentDAO commentDAO, IMapper mapper, ILogger<PostRepository> logger) : base(postDAO)
         {
             _mapper = mapper;
             _logger = logger;
             _postDAO = postDAO;
-
+            _postFileDAO = postFileDAO;
+            _commentDAO = commentDAO;
         }
-
-        public async Task<Post> CreatePost(PostDto dto)
+        //Update CreatPost
+        public async Task<Post> CreatePost(PostCreateDto dto)
         {
             try
             {
                 _postDAO.BeginTransaction();
+                if (dto.ParentPostId == 0)
+                {
+                    dto.ParentPostId = null;
+                }
                 var Post = _mapper.Map<Post>(dto);
+                Post.PostFiles = null;
                 _postDAO.Add(Post);
+
+                if (dto.PostFileCreate != null && dto.PostFileCreate.Count > 0)
+                {
+                    Post.PostFiles = dto.PostFileCreate.Select(f => new PostFile
+                    {
+                        FileUrl = f.FileUrl,
+                        PostFileType = f.PostFileType,
+                        IsDeleted = f.IsDeleted ?? false,
+                        PostId = Post.PostId
+                    }).ToList();
+
+                    foreach (var file in Post.PostFiles)
+                    {
+                        _postFileDAO.Add(file);
+                    }
+                }
+
                 _postDAO.CommitTransaction();
 
                 _logger.LogInformation("Add Post success");
@@ -41,46 +68,120 @@ namespace final_project_be.Repository
             }
         }
 
+        //Update DeletePost
         public bool DeletePost(int id)
         {
             try
             {
                 _postDAO.BeginTransaction();
+
+                var post = _postDAO.GetPostWithFilesAndComments(id);
+                if (post == null)
+                {
+                    _logger.LogWarning("Post does not exist.");
+                    _postDAO.RollbackTransaction();
+                    return false;
+                }
+
+                if (post.PostFiles?.Any() == true)
+                {
+                    foreach (var file in post.PostFiles.ToList())
+                    {
+                        _postFileDAO.Delete(file.PostFileId);
+                    }
+                }
+
+                if (post.Comments?.Any() == true)
+                {
+                    foreach (var comment in post.Comments.ToList())
+                    {
+                        _commentDAO.Delete(comment.CommentId);
+                    }
+                }
+
                 _postDAO.Delete(id);
                 _postDAO.CommitTransaction();
 
-                _logger.LogInformation("Delete Post success");
+                _logger.LogInformation("Delete Post success.");
                 return true;
             }
             catch (Exception ex)
             {
                 _postDAO.RollbackTransaction();
-                _logger.LogError(ex, "Error when delete Post");
+                _logger.LogError(ex, "Error when deleting Post.");
                 return false;
             }
         }
 
-        public PageResult<Post> GetAllPosts(int page, int pageSize)
+        //Update GetAllPosts
+        public PageResult<PostDto> GetAllPosts(int page, int pageSize, int? subCategoryId, string? title, Guid? userId)
         {
             try
             {
-                var totalCount = _postDAO.GetAll().Count();
-                var Posts = _postDAO.GetAll()
-                    .Where(p => p.IsDeleted == false)
+                var baseQuery = _postDAO.GetAll()
+                    .Include(p => p.User)
+                        .ThenInclude(u => u.UserMetaData)
+                    .Include(p => p.PostFiles)
+                    .Include(p => p.Comments);
+
+                var query = baseQuery.Where(p => p.IsDeleted == false);
+
+                if (subCategoryId != null)
+                {
+                    query = query.Where(c => c.SubCategoryId == subCategoryId);
+                }
+
+                if (!string.IsNullOrEmpty(title))
+                {
+                    query = query.Where(c => c.Title.Contains(title));
+                }
+
+                if (userId.HasValue && userId != Guid.Empty)
+                {
+                    query = query.Where(p => p.UserId == userId.Value);
+                }
+
+                var totalCount = query.Count();
+
+                var posts = query
                     .Skip((page - 1) * pageSize)
                     .Take(pageSize)
                     .ToList();
 
+                var postDtos = posts.Select(p => new PostDto
+                {
+                    PostId = p.PostId,
+                    Title = p.Title,
+                    UserId = p.UserId,
+                    Content = p.Content,
+                    SubCategoryId = p.SubCategoryId,
+                    PostFiles = p.PostFiles.Select(f => new PostFileDto
+                    {
+                        PostFileId = f.PostFileId,
+                        FileUrl = f.FileUrl,
+                        IsDeleted = f.IsDeleted,
+                        PostFileType = f.PostFileType
+                    }).ToList(),
+                    Comments = p.Comments.Select(c => new CommentDto
+                    {
+                        CommentId = c.CommentId,
+                        Content = c.Content,
+                        UserId = c.UserId,
+                        ParentCommentId = c.ParentCommentId,
+                    }).ToList()
+                }).ToList();
+
                 _logger.LogInformation("Get Posts success");
 
-                return new PageResult<Post>(Posts, totalCount, page, pageSize);
+                return new PageResult<PostDto>(postDtos, totalCount, page, pageSize);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error when getting Posts");
-                return new PageResult<Post>(new List<Post>(), 0, page, pageSize);
+                return new PageResult<PostDto>(new List<PostDto>(), 0, page, pageSize);
             }
         }
+
         public async Task<Post> GetPostandUser(int id)
         {
             try
@@ -119,11 +220,16 @@ namespace final_project_be.Repository
 
         }
 
-        public async Task<Post> UpdatePost(PostDto dto)
+        //Update UpdatePost
+        public async Task<Post> UpdatePost(PostCreateDto dto)
         {
             try
             {
                 _postDAO.BeginTransaction();
+                if (dto.ParentPostId == 0)
+                {
+                    dto.ParentPostId = null;
+                }
                 var Post = _mapper.Map<Post>(dto);
                 _postDAO.Update(Post);
                 _postDAO.CommitTransaction();
@@ -136,44 +242,6 @@ namespace final_project_be.Repository
                 _postDAO.RollbackTransaction();
                 _logger.LogError(ex, "Error when update Post");
                 return null;
-            }
-        }
-        //Update SearchPosts
-        public IEnumerable<Post> SearchPosts(string query)
-        {
-            return _postDAO.SearchPosts(query);
-        }
-        //Get post by userid
-        public async Task<PageResult<PostDto>> GetPostsByUserId(Guid userId, int page, int pageSize)
-        {
-            try
-            {
-                _postDAO.BeginTransaction();
-
-                // Get list of posts by userId
-                var query = _postDAO.Find(p => p.UserId == userId);
-
-                int totalItems = query.Count();
-
-                // pagination
-                var pagedPosts = query
-                    .Skip((page - 1) * pageSize)
-                    .Take(pageSize)
-                    .ToList();
-
-                _postDAO.CommitTransaction();
-                _logger.LogInformation($"Lấy danh sách bài viết của user {userId} thành công.");
-
-                var postDtos = _mapper.Map<List<PostDto>>(pagedPosts);
-
-                return new PageResult<PostDto>(postDtos, totalItems, page, pageSize);
-            }
-            catch (Exception ex)
-            {
-                _postDAO.RollbackTransaction();
-                _logger.LogError(ex, $"Lỗi khi lấy danh sách bài viết của user {userId}");
-
-                return new PageResult<PostDto>(new List<PostDto>(), 0, page, pageSize);
             }
         }
     }

@@ -18,13 +18,13 @@ namespace final_project_be.Controllers
             _hubContext = hubContext;
         }
         // GET: api/<PostController>
+        //Update GetAllPost
         [HttpGet]
-        public IActionResult GetAll(int? page)
+        public IActionResult GetAll(int? page, int? subCategoryId, string? title, Guid? userId)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-
             int currentPage = page ?? 1;
-            var pagedPosts = _postRepository.GetAllPosts(currentPage, 5);
+
+            var pagedPosts = _postRepository.GetAllPosts(currentPage, 5, subCategoryId, title, userId);
             return Ok(pagedPosts);
         }
 
@@ -36,42 +36,10 @@ namespace final_project_be.Controllers
             return Ok(_postRepository.GetPost(id));
         }
 
-        //Update SearchPosts
-        // GET: api/Post/search
-        [HttpGet("search")]
-        public IActionResult SearchPosts([FromQuery] string query)
-        {
-            if (string.IsNullOrWhiteSpace(query))
-            {
-                return BadRequest("Search query cannot be empty.");
-            }
-
-            var posts = _postRepository.SearchPosts(query);
-            return Ok(posts);
-        }
-        //Update get post by userId
-        //GET: api/Post/user/userId
-        [HttpGet("user/{userId}")]
-        public async Task<IActionResult> GetByUserId(Guid userId, int? page)
-        {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-
-            int currentPage = page ?? 1;
-            int pageSize = 5;
-
-            var pagedPosts = await _postRepository.GetPostsByUserId(userId, currentPage, pageSize);
-
-            if (pagedPosts == null || !pagedPosts.Items.Any())
-            {
-                return NotFound($"No posts found by user {userId}.");
-            }
-
-            return Ok(pagedPosts);
-        }
 
         // POST api/<PostController>
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] PostDto postDto)
+        public async Task<IActionResult> Post([FromBody] PostCreateDto postDto)//Change PostDto to PostCreateDto
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -83,7 +51,7 @@ namespace final_project_be.Controllers
 
         // PUT api/<PostController>/5
         [HttpPut]
-        public IActionResult Put(PostDto postDto)
+        public IActionResult Put(PostCreateDto postDto)//Change PostDto to PostCreateDto
         {
             if (!ModelState.IsValid) { return BadRequest(ModelState); }
             _postRepository.UpdatePost(postDto);
