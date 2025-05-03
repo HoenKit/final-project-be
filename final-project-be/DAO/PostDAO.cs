@@ -12,17 +12,14 @@ namespace final_project_be.DAO
         {
            _context = context;
         }
-        //Update SearchPosts
-        public IEnumerable<Post> SearchPosts(string query)
-        {
-            Expression<Func<Post, bool>> predicate = p => p.Title.Contains(query) || p.Content.Contains(query);
 
-            return Find(predicate);
-        }
-        //Get Get Post By UserId
-        public IEnumerable<Post> GetByUserId(Guid userId)
+        //Add to Delete Post
+        public Post? GetPostWithFilesAndComments(int id)
         {
-            return Find(p => p.UserId == userId);
+            return GetAll()
+                .Include(p => EF.Property<ICollection<PostFile>>(p, "PostFiles"))
+                .Include(p => EF.Property<ICollection<Comment>>(p, "Comments"))
+                .FirstOrDefault(p => EF.Property<int>(p, "PostId") == id);
         }
 
         public Post GetPostandUser(int postId)
