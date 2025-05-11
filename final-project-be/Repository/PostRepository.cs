@@ -25,7 +25,7 @@ namespace final_project_be.Repository
             _postFileDAO = postFileDAO;
             _commentDAO = commentDAO;
         }
-        //Update CreatPost
+        //Update Creat Post
         public async Task<Post> CreatePost(PostCreateDto dto)
         {
             try
@@ -68,7 +68,7 @@ namespace final_project_be.Repository
             }
         }
 
-        //Update DeletePost
+        //Update Delete Post
         public bool DeletePost(int id)
         {
             try
@@ -113,7 +113,7 @@ namespace final_project_be.Repository
             }
         }
 
-        //Update GetAllPosts
+        //Update Get All Posts
         public PageResult<PostDto> GetAllPosts(int page, int pageSize, int? subCategoryId, string? title, Guid? userId)
         {
             try

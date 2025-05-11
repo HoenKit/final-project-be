@@ -13,6 +13,6 @@ namespace final_project_be.Dtos.User
         public bool IsBanned { get; set; } = false;
         public DateTime CreateAt { get; set; }
         public DateTime? UpdateAt { get; set; } = DateTime.Now;
-        public UserProfileDto UserProfile { get; set; }
+        public UserProfileDto UserMetaData { get; set; }
     }
 }

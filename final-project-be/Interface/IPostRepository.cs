@@ -12,6 +12,5 @@ namespace final_project_be.Interface
         public Task<Post> UpdatePost(PostCreateDto dto);
         public Task<Post> GetPostandUser(int id);
         public PageResult<PostDto> GetAllPosts(int page, int pageSize, int? subCategoryId, string? title, Guid? userId); //Update GetAllPosts
-
     }
 }

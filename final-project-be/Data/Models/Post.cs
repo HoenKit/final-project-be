@@ -25,5 +25,6 @@ namespace final_project_be.Data.Models
         public ICollection<PollOption>? PollOptions { get; set; }
         public ICollection<Comment>? Comments { get; set; }
         public ICollection<ReportPost>? ReportPosts { get; set; }
+        public int ReportCount { get; internal set; }
     }
 }
