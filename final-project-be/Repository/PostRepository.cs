@@ -144,6 +144,7 @@ namespace final_project_be.Repository
                 var totalCount = query.Count();
 
                 var posts = query
+                    .OrderByDescending(p => p.CreateAt)
                     .Skip((page - 1) * pageSize)
                     .Take(pageSize)
                     .ToList();
