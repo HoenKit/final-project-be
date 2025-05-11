@@ -60,13 +60,12 @@ builder.Services.AddScoped<PollOptionDAO>();
 builder.Services.AddScoped<ReportCommentDAO>();
 builder.Services.AddScoped<ReportPostDAO>();
 builder.Services.AddScoped<ReportDAO>();
-builder.Services.AddScoped<UserManagerDAO>();
+builder.Services.AddScoped<UserDAO>();
 builder.Services.AddScoped<PostDAO>();
 builder.Services.AddScoped<CategoryDAO>();
 builder.Services.AddScoped<SubCategoryDAO>();
 builder.Services.AddScoped<PollOptionVoteDAO>();
 builder.Services.AddScoped<ReportUserDAO>();
-builder.Services.AddScoped<PostManagerDAO>();
 builder.Services.AddScoped<PostFileDAO>();
 // Config Repository
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
@@ -75,14 +74,13 @@ builder.Services.AddScoped<IPollOptionRepository, PollOptionRepository>();
 builder.Services.AddScoped<IReportCommentRepository, ReportCommentRepository>();
 builder.Services.AddScoped<IReportPostRepository, ReportPostRepository>();
 builder.Services.AddScoped<IReportRepository, ReportRepository>();
-builder.Services.AddScoped<IUserManagerRepository, UserManagerRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IPostRepository, PostRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<ISubCategoryRepository, SubCategoryRepository>();
 builder.Services.AddScoped<IPollOptionVoteRepository, PollOptionVoteRepository>();
 builder.Services.AddScoped<IUserAuthRepository, UserAuthRepository>();
 builder.Services.AddScoped<IReportUserRepository, ReportUserRepository>();
-builder.Services.AddScoped<IPostManagerRepository, PostManagerRepository>();
 builder.Services.AddScoped<IPostFileRepository, PostFileRepository>();
 
 //config Valid class

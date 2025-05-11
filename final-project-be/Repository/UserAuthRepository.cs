@@ -19,14 +19,14 @@ namespace final_project_be.Repository
 {
     public class UserAuthRepository : IUserAuthRepository
     {
-        private readonly UserManagerDAO _userManagerDAO;
+        private readonly UserDAO _userDAO;
         private readonly IMapper _mapper;
         private readonly ILogger<UserAuthRepository> _logger;
         private readonly IConfiguration _configuration;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        public UserAuthRepository(UserManagerDAO userManagerDAO, IMapper mapper, ILogger<UserAuthRepository> logger, IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
+        public UserAuthRepository(UserDAO userDAO, IMapper mapper, ILogger<UserAuthRepository> logger, IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
         {
-            _userManagerDAO = userManagerDAO;
+            _userDAO = userDAO;
             _mapper = mapper;
             _logger = logger;
             _configuration = configuration;
@@ -37,7 +37,7 @@ namespace final_project_be.Repository
         {
             try
             {
-                var user = _userManagerDAO.GetUserbyEmail(dto);
+                var user = _userDAO.GetUserbyEmail(dto);
                 if (user == null)
                 {
                     _logger.LogWarning("Login failed: User not found with email: {Email}", dto.Email);
@@ -117,13 +117,13 @@ namespace final_project_be.Repository
                     throw new UnauthorizedAccessException("Invalid token");
                 }
 
-                var user =  _userManagerDAO.GetById(userId);
+                var user = _userDAO.GetById(userId);
                 if (user == null)
                 {
                     throw new KeyNotFoundException("User not found");
                 }
 
-                var roles =  _userManagerDAO.GetRolesByUserId(userId);
+                var roles = _userDAO.GetRolesByUserId(userId);
 
                 return new UsercurrentDto
                 {
@@ -152,10 +152,10 @@ namespace final_project_be.Repository
 
         public async Task<User> RegisterAsync(UserRegisterDto dto)
         {
-            _userManagerDAO.BeginTransaction();
+            _userDAO.BeginTransaction();
             try
             {
-                var userExists = _userManagerDAO.UserRegisterExist(dto);
+                var userExists = _userDAO.UserRegisterExist(dto);
                 if (userExists)
                 {
                     _logger.LogWarning("Registration failed: User with email {Email} already exists.", dto.Email);
@@ -167,8 +167,8 @@ namespace final_project_be.Repository
                 user.Email = dto.Email;
                 user.Password = hashedPassword;
 
-                _userManagerDAO.Add(user);
-                _userManagerDAO.SaveChanges();
+                _userDAO.Add(user);
+                _userDAO.SaveChanges();
 
                 var userMeta = new UserMetadata
                 {
@@ -180,10 +180,10 @@ namespace final_project_be.Repository
                     Address = dto.userMetadataDto.Address
                 };
 
-                _userManagerDAO.AddUserMetaData(userMeta);
-                _userManagerDAO.SaveChanges();
+                _userDAO.AddUserMetaData(userMeta);
+                _userDAO.SaveChanges();
 
-                var defaultRole = _userManagerDAO.GetRoleByName("User");
+                var defaultRole = _userDAO.GetRoleByName("User");
                 if (defaultRole != null)
                 {
                     var userRole = new UserRole
@@ -192,17 +192,17 @@ namespace final_project_be.Repository
                         RoleId = defaultRole.RoleId
                     };
 
-                    _userManagerDAO.AddUserRole(userRole);
-                    _userManagerDAO.SaveChanges(); 
+                    _userDAO.AddUserRole(userRole);
+                    _userDAO.SaveChanges(); 
                 }
 
-                _userManagerDAO.CommitTransaction();
+                _userDAO.CommitTransaction();
                 _logger.LogInformation("User registered successfully with email: {Email}", dto.Email);
                 return user;
             }
             catch (Exception ex)
             {
-                _userManagerDAO.RollbackTransaction();
+                _userDAO.RollbackTransaction();
                 _logger.LogError(ex, "Failed to register user with email: {Email}", dto.Email);
                 return null;
             }
@@ -213,7 +213,7 @@ namespace final_project_be.Repository
         private string GenerateToken(User user)
         {
             // Define JWT claims
-            var roles = _userManagerDAO.GetRolesByUserId(user.UserId);
+            var roles = _userDAO.GetRolesByUserId(user.UserId);
 
             var claims = new List<Claim>
             {
