@@ -122,7 +122,8 @@ namespace final_project_be.Repository
                     .Include(p => p.User)
                         .ThenInclude(u => u.UserMetaData)
                     .Include(p => p.PostFiles)
-                    .Include(p => p.Comments);
+                    .Include(p => p.Comments)
+                    .OrderByDescending(p => p.CreateAt);
 
                 var query = baseQuery.Where(p => p.IsDeleted == false);
 
