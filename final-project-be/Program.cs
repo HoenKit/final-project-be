@@ -120,7 +120,8 @@ builder.Services.AddCors(options =>
     {
         policy.WithOrigins(
             "https://localhost:7191",
-            "https://phronesis-c2dzfzakfwe9eyf0.southeastasia-01.azurewebsites.net"
+            "https://phronesis-c2dzfzakfwe9eyf0.southeastasia-01.azurewebsites.net",
+            "https://phronesis-fe-esd4fvddb4d8cnc4.eastasia-01.azurewebsites.net"
         )
               .AllowAnyHeader()
               .AllowAnyMethod().
