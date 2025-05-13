@@ -11,7 +11,8 @@ namespace final_project_be.Dtos.Post
         public int SubCategoryId { get; set; }
         public string Title { get; set; }
         public string Content { get; set; }
-        public DateTime? CreateAt { get; set; }
+        public DateTime CreateAt { get; set; } = DateTime.Now;
+        public DateTime? UpdateAt { get; set; } = DateTime.Now;
         public List<PostFileDto>? PostFiles { get; set; }
         public List<CommentDto>? Comments { get; set; }
     }

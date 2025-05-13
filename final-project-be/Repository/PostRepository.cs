@@ -158,6 +158,7 @@ namespace final_project_be.Repository
                     Content = p.Content,
                     SubCategoryId = p.SubCategoryId,
                     CreateAt = p.CreateAt,
+                    UpdateAt = p.UpdateAt,
                     PostFiles = p.PostFiles.Select(f => new PostFileDto
                     {
                         PostFileId = f.PostFileId,
