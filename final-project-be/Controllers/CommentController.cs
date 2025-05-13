@@ -3,6 +3,7 @@ using final_project_be.Dtos;
 using final_project_be.Dtos.Comment;
 using final_project_be.Interface;
 using final_project_be.Ultils;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 
@@ -22,6 +23,7 @@ namespace final_project_be.Controllers
             _hubContext = hubContext;
         }
         // GET: api/<CommentController>
+        
         [HttpGet]
         public IActionResult GetAll(int? page, int postId)  
         {
