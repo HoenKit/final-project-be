@@ -1,5 +1,6 @@
 ﻿using final_project_be.Dtos.Post;
 using final_project_be.Interface;
+using final_project_be.Repository;
 using final_project_be.Ultils;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
@@ -59,12 +60,15 @@ namespace final_project_be.Controllers
         }
 
         // DELETE api/<PostController>/5
-        [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        [HttpPut("toggle-deleted/{id}")]
+        public async Task<IActionResult> TogglePostDeleteStatus(int id)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-            _postRepository.DeletePost(id);
-            return Ok();
+            var updatedPost = await _postRepository.ToggleIsDeleted(id);
+            if (updatedPost == null)
+            {
+                return StatusCode(500, "Failed to update post status.");
+            }
+            return Ok(updatedPost);
         }
     }
 }
