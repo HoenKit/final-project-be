@@ -11,14 +11,14 @@ namespace final_project_be.Data.Models
         public Guid UserId { get; set; }
         [ForeignKey("ParentPost")]
         public int? ParentPostId { get; set; }
-        [ForeignKey("SubCategory")]
-        public int SubCategoryId { get; set; }
+        [ForeignKey("Category")]
+        public int CategoryId { get; set; }
         public string Title { get; set; }
         public string Content { get; set; }
         public bool? IsDeleted { get; set; } = false;
         public DateTime CreateAt { get; set; } = DateTime.Now;
         public DateTime? UpdateAt { get; set; } = DateTime.Now;
-        public SubCategory? SubCategory { get; set; }
+        public Category? Category { get; set; }
         public User? User { get; set; }
         public Post? ParentPost { get; set; }
         public ICollection<PostFile>? PostFiles { get; set; }

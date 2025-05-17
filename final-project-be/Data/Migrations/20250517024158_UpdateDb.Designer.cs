@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using final_project_be.Data;
 
@@ -11,9 +12,11 @@ using final_project_be.Data;
 namespace final_project_be.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250517024158_UpdateDb")]
+    partial class UpdateDb
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -199,9 +202,6 @@ namespace final_project_be.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PostId"));
 
-                    b.Property<int>("CategoryId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Content")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -213,6 +213,9 @@ namespace final_project_be.Data.Migrations
                         .HasColumnType("bit");
 
                     b.Property<int?>("ParentPostId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SubCategoryId")
                         .HasColumnType("int");
 
                     b.Property<string>("Title")
@@ -227,9 +230,9 @@ namespace final_project_be.Data.Migrations
 
                     b.HasKey("PostId");
 
-                    b.HasIndex("CategoryId");
-
                     b.HasIndex("ParentPostId");
+
+                    b.HasIndex("SubCategoryId");
 
                     b.HasIndex("UserId");
 
@@ -529,15 +532,15 @@ namespace final_project_be.Data.Migrations
 
             modelBuilder.Entity("final_project_be.Data.Models.Post", b =>
                 {
-                    b.HasOne("final_project_be.Data.Models.Category", "Category")
-                        .WithMany("Posts")
-                        .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("final_project_be.Data.Models.Post", "ParentPost")
                         .WithMany()
                         .HasForeignKey("ParentPostId");
+
+                    b.HasOne("final_project_be.Data.Models.Category", "Category")
+                        .WithMany("Posts")
+                        .HasForeignKey("SubCategoryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("final_project_be.Data.Models.User", "User")
                         .WithMany("Posts")
