@@ -247,5 +247,35 @@ namespace final_project_be.Repository
                 return null;
             }
         }
+
+        public async Task<Post> ToggleIsDeleted(int id)
+        {
+            _postDAO.BeginTransaction();
+            try
+            {
+                var post = _postDAO.GetById(id);
+                if (post == null)
+                {
+                    _logger.LogWarning($"Post with ID {id} not found.");
+                    return null;
+                }
+
+                post.IsDeleted = !post.IsDeleted;
+                post.UpdateAt = DateTime.Now;
+
+                _postDAO.Update(post);
+                _postDAO.CommitTransaction();
+
+                _logger.LogInformation($"Post {id} banned status changed to {post.IsDeleted}");
+
+                return post;
+            }
+            catch (Exception ex)
+            {
+                _postDAO.RollbackTransaction();
+                _logger.LogError($"Failed to toggle deleted status for Post {id}: {ex.Message}");
+                return null;
+            }
+        }
     }
 }
