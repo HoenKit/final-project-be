@@ -8,7 +8,7 @@ namespace final_project_be.Dtos.Post
         public int PostId { get; set; }
         public Guid UserId { get; set; }
         public int? ParentPostId { get; set; }
-        public int SubCategoryId { get; set; }
+        public int CategoryId { get; set; }
         public bool? IsDeleted { get; set; }
         public string Title { get; set; }
         public string Content { get; set; }
@@ -23,7 +23,7 @@ namespace final_project_be.Dtos.Post
         public int PostId { get; set; }
         public Guid UserId { get; set; }
         public int? ParentPostId { get; set; }
-        public int SubCategoryId { get; set; }
+        public int CategoryId { get; set; }
         public string Title { get; set; }
         public string Content { get; set; }
         public List<PostFileCreateDto>? PostFileCreate { get; set; }

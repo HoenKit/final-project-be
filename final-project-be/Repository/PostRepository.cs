@@ -114,7 +114,7 @@ namespace final_project_be.Repository
         }
 
         //Update Get All Posts
-        public PageResult<PostDto> GetAllPosts(int page, int pageSize, int? subCategoryId, string? title, Guid? userId)
+        public PageResult<PostDto> GetAllPosts(int page, int pageSize, int? CategoryId, string? title, Guid? userId)
         {
             try
             {
@@ -127,9 +127,9 @@ namespace final_project_be.Repository
 
                 var query = baseQuery.Where(p => p.IsDeleted == false);
 
-                if (subCategoryId != null)
+                if (CategoryId != null)
                 {
-                    query = query.Where(c => c.SubCategoryId == subCategoryId);
+                    query = query.Where(c => c.CategoryId == CategoryId);
                 }
 
                 if (!string.IsNullOrEmpty(title))
@@ -156,7 +156,7 @@ namespace final_project_be.Repository
                     Title = p.Title,
                     UserId = p.UserId,
                     Content = p.Content,
-                    SubCategoryId = p.SubCategoryId,
+                    CategoryId = p.CategoryId,
                     CreateAt = p.CreateAt,
                     PostFiles = p.PostFiles.Select(f => new PostFileDto
                     {

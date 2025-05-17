@@ -52,7 +52,7 @@ namespace final_project_be.Data
             builder.Entity<Post>()
                 .HasOne(p => p.Category)
                 .WithMany(sc => sc.Posts)
-                .HasForeignKey(p => p.SubCategoryId)
+                .HasForeignKey(p => p.CategoryId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             // Configure Post and User relationship
