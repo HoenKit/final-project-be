@@ -18,7 +18,7 @@ namespace final_project_be.Data.Models
         public bool? IsDeleted { get; set; } = false;
         public DateTime CreateAt { get; set; } = DateTime.Now;
         public DateTime? UpdateAt { get; set; } = DateTime.Now;
-        public SubCategory? SubCategory { get; set; }
+        public Category? Category { get; set; }
         public User? User { get; set; }
         public Post? ParentPost { get; set; }
         public ICollection<PostFile>? PostFiles { get; set; }

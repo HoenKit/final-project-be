@@ -7,7 +7,6 @@ namespace final_project_be.Data
     public class ApplicationDbContext : DbContext
     {
         public DbSet<Category> categories {  get; set; }
-        public DbSet<SubCategory> subcategories { get; set; }
         public DbSet<Comment> comments { get; set; }
         public DbSet<PollOption> pollOptions { get; set; }
         public DbSet<PollOptionVote> pollVotes { get; set; }
@@ -42,15 +41,16 @@ namespace final_project_be.Data
                    .HasForeignKey<UserMetadata>(um => um.UserId)
                    .OnDelete(DeleteBehavior.Restrict);
 
-            builder.Entity<SubCategory>()
-                   .HasOne(sc => sc.Category)
-                   .WithMany(c => c.SubCategories)
-                   .HasForeignKey(sc => sc.CategoryId)
-                   .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<Category>()
+                .HasOne(c => c.ParentCategory)
+                .WithMany(c => c.Categories)
+                .HasForeignKey(c => c.ParentCategoryId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             // Configure Post and SubCategory relationship
             builder.Entity<Post>()
-                .HasOne(p => p.SubCategory)
+                .HasOne(p => p.Category)
                 .WithMany(sc => sc.Posts)
                 .HasForeignKey(p => p.SubCategoryId)
                 .OnDelete(DeleteBehavior.Restrict);
