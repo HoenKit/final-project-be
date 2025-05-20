@@ -21,11 +21,11 @@ namespace final_project_be.Controllers
         // GET: api/<PostController>
         //Update GetAllPost
         [HttpGet]
-        public IActionResult GetAll(int? page, int? subCategoryId, string? title, Guid? userId)
+        public IActionResult GetAll(int? page, int? CategoryId, string? title, Guid? userId)
         {
             int currentPage = page ?? 1;
 
-            var pagedPosts = _postRepository.GetAllPosts(currentPage, 5, subCategoryId, title, userId);
+            var pagedPosts = _postRepository.GetAllPosts(currentPage, 5, CategoryId, title, userId);
             return Ok(pagedPosts);
         }
 
@@ -69,6 +69,14 @@ namespace final_project_be.Controllers
                 return StatusCode(500, "Failed to update post status.");
             }
             return Ok(updatedPost);
+        }
+
+
+        [HttpGet("monthly-stats")]
+        public IActionResult GetPostStatisticsByMonth()
+        {
+            var stats = _postRepository.GetPostStatisticsByMonth();
+            return Ok(stats);
         }
     }
 }

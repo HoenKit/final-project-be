@@ -4,6 +4,7 @@ using final_project_be.Data.Models;
 using final_project_be.Dtos;
 using final_project_be.Dtos.Comment;
 using final_project_be.Dtos.Post;
+using final_project_be.Dtos.User;
 using final_project_be.Interface;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
@@ -276,6 +277,25 @@ namespace final_project_be.Repository
                 _logger.LogError($"Failed to toggle deleted status for Post {id}: {ex.Message}");
                 return null;
             }
+        }
+
+        public List<MonthlyStatDto> GetPostStatisticsByMonth()
+        {
+            var allPosts = _postDAO.GetAll()
+                .Where(u => u.CreateAt != null)
+                .ToList();
+
+            var stats = allPosts
+                .GroupBy(u => new { u.CreateAt.Year, u.CreateAt.Month })
+                .Select(g => new MonthlyStatDto
+                {
+                    Month = $"{g.Key.Month:D2}/{g.Key.Year}",
+                    Total = g.Count()
+                })
+                .OrderBy(x => x.Month)
+                .ToList();
+
+            return stats;
         }
     }
 }
