@@ -7,6 +7,7 @@ using final_project_be.Dtos;
 using final_project_be.Dtos.User;
 using final_project_be.Interface;
 using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore;
 
 namespace final_project_be.Repository
 {
@@ -147,6 +148,24 @@ namespace final_project_be.Repository
                 _logger.LogError(ex, "Error when update user");
                 return null;
             }
+        }
+        public List<MonthlyStatDto> GetUserStatisticsByMonth()
+        {
+            var allUsers = _userDAO.GetAll()
+                .Where(u => u.CreateAt != null)
+                .ToList();
+
+            var stats = allUsers
+                .GroupBy(u => new { u.CreateAt.Year, u.CreateAt.Month })
+                .Select(g => new MonthlyStatDto
+                {
+                    Month = $"{g.Key.Month:D2}/{g.Key.Year}",
+                    Total = g.Count()
+                })
+                .OrderBy(x => x.Month)
+                .ToList();
+
+            return stats;
         }
     }
 }

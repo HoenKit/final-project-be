@@ -102,6 +102,7 @@ namespace final_project_be.Controllers
             _userRepository.UpdateUser(usermanagerDto);
             return Ok(usermanagerDto);
         }
+
         [HttpPut("UpdateProfile")]
         public async Task<IActionResult> UpdateProfile([FromBody] UserProfileDto dto)
         {
@@ -118,6 +119,13 @@ namespace final_project_be.Controllers
             }
 
             return Ok(updatedUser);
+        }
+
+        [HttpGet("monthly-stats")]
+        public IActionResult GetUserStatisticsByMonth()
+        {
+            var stats = _userRepository.GetUserStatisticsByMonth();
+            return Ok(stats);
         }
     }
 }

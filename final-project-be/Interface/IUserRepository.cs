@@ -13,5 +13,6 @@ namespace final_project_be.Interface
         public Task<User> UpdateUser(UserManagerDto dto);
         public PageResult<User> GetAllUsers(int page, int pageSize);
         public Task<User> UpdateUserProfileAsync(UserProfileDto dto);
+        public List<MonthlyStatDto> GetUserStatisticsByMonth();
     }
 }
