@@ -15,6 +15,10 @@ namespace final_project_be.Data.Models
         public DateTime? UpdateAt { get; set; } = DateTime.Now;
         public User? User { get; set; }
         [JsonIgnore]
+        public ICollection<ReportEvent>? ReportEvents { get; set; }
+        [JsonIgnore]
+        public ICollection<ReportWorkShop>? ReportWorkShops { get; set; }
+        [JsonIgnore]
         public ICollection<ReportUser>? ReportUsers { get; set; }
         [JsonIgnore]
         public ICollection<ReportPost>? ReportPosts { get; set; }

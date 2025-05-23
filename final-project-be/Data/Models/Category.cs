@@ -16,6 +16,7 @@ namespace final_project_be.Data.Models
         public DateTime? UpdateAt { get; set; } = DateTime.Now;
         public Category? ParentCategory { get; set; }
         public ICollection<Post>? Posts { get; set; }
+        public ICollection<Courses>? Courses { get; set; }
         public ICollection<Category>? Categories { get; set; }
     }
 }
