@@ -41,6 +41,11 @@ namespace final_project_be.Data
                    .HasForeignKey<UserMetadata>(um => um.UserId)
                    .OnDelete(DeleteBehavior.Restrict);
 
+            builder.Entity<User>()
+                   .HasOne(u => u.Mentor)
+                   .WithOne(um => um.User)
+                   .HasForeignKey<Mentor>(um => um.UserId)
+                   .OnDelete(DeleteBehavior.Restrict);
 
             builder.Entity<Category>()
                 .HasOne(c => c.ParentCategory)
@@ -48,7 +53,7 @@ namespace final_project_be.Data
                 .HasForeignKey(c => c.ParentCategoryId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Configure Post and SubCategory relationship
+            // Configure Post and Category relationship
             builder.Entity<Post>()
                 .HasOne(p => p.Category)
                 .WithMany(sc => sc.Posts)
@@ -108,6 +113,171 @@ namespace final_project_be.Data
                 .HasForeignKey(n => n.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            // Configure Review and User relationship
+            builder.Entity<Review>()
+                .Property(r => r.rate)
+                .HasColumnType("decimal(18,4)");
+
+            builder.Entity<Review>()
+                .HasOne(n => n.Courses)
+                .WithMany(u => u.Reviews)
+                .HasForeignKey(n => n.CourseId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<Review>()
+                   .HasOne(r => r.User)
+                   .WithOne(u => u.Review)
+                   .HasForeignKey<Review>(r => r.UserId)
+                   .OnDelete(DeleteBehavior.Restrict);
+
+            // Configure Lesson and Assignment relationship
+            builder.Entity<Assignment>()
+                .HasOne(n => n.Lesson)
+                .WithMany(u => u.Assignments)
+                .HasForeignKey(n => n.LessonId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Configure MentorCertificate and Mentor relationship
+            builder.Entity<MentorCertificate>()
+                .HasOne(n => n.Mentor)
+                .WithMany(u => u.MentorCertificates)
+                .HasForeignKey(n => n.MentorId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Configure Certificate and Mentor relationship
+            builder.Entity<Certificate>()
+                .HasOne(n => n.User)
+                .WithMany(u => u.Certificates)
+                .HasForeignKey(n => n.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Configure Messages and User relationship
+            builder.Entity<Messages>()
+                .HasOne(n => n.User)
+                .WithMany(u => u.Messages)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Configure Messages and Mentors relationship
+            builder.Entity<Messages>()
+                .HasOne(n => n.Mentors)
+                .WithMany(u => u.Messages)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Configure Transaction and User relationship
+            builder.Entity<Transaction>()
+                .HasOne(n => n.Users)
+                .WithMany(u => u.Transactions)
+                .HasForeignKey(n => n.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Configure Module and Lession relationship
+            builder.Entity<Lesson>()
+                .HasOne(n => n.Module)
+                .WithMany(u => u.Lessons)
+                .HasForeignKey(n => n.ModuleId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Configure Course and Cetificate relationship
+            builder.Entity<Courses>()
+                .HasOne(n => n.Certificate)
+                .WithOne(c => c.Course)
+                .HasForeignKey<Certificate>(um => um.CertificateId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Configure Course and Module relationship
+            builder.Entity<Module>()
+                .HasOne(n => n.Courses)
+                .WithMany(u => u.Modules)
+                .HasForeignKey(n => n.CourseId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Configure Schedule and Mentor relationship
+            builder.Entity<Schedule>()
+                .HasOne(n => n.Mentor)
+                .WithMany(u => u.Schedules)
+                .HasForeignKey(n => n.MentorId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Configure PaymentCourse relationship
+            builder.Entity<PaymentCourse>()
+                .HasOne(n => n.Courses)
+                .WithMany(u => u.PaymentCourses)
+                .HasForeignKey(n => n.CourseId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<PaymentCourse>()
+                .HasOne(n => n.Payment)
+                .WithMany(u => u.PaymentCourses)
+                .HasForeignKey(n => n.PaymentId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Configure Payment relationship
+            builder.Entity<Payment>()
+                .HasOne(n => n.User)
+                .WithMany(u => u.Payments)
+                .HasForeignKey(n => n.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+
+            // Configure WorkShop and Mentor relationship
+            builder.Entity<WorkShop>()
+                .HasOne(n => n.Mentor)
+                .WithMany(u => u.WorkShops)
+                .HasForeignKey(n => n.MentorId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Configure PaymentPlan relationship
+            builder.Entity<PaymentPlan>()
+                .HasKey(pc => new { pc.PaymentId, pc.PlanId });
+            builder.Entity<PaymentPlan>()
+                .HasOne(n => n.Payment)
+                .WithMany(u => u.PaymentPlans)
+                .HasForeignKey(n => n.PaymentId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<PaymentPlan>()
+                .HasOne(n => n.MembershipPlan)
+                .WithMany(u => u.PaymentPlans)
+                .HasForeignKey(n => n.PlanId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+
+            // Configure PaymentCourse relationships
+            builder.Entity<PaymentCourse>()
+                .HasKey(pc => new { pc.PaymentId, pc.CourseId });
+
+            builder.Entity<PaymentCourse>()
+                .HasOne(pc => pc.Payment)
+                .WithMany(p => p.PaymentCourses)
+                .HasForeignKey(pc => pc.PaymentId);
+
+            builder.Entity<PaymentCourse>()
+                .HasOne(pc => pc.Courses)
+                .WithMany(c => c.PaymentCourses)
+                .HasForeignKey(pc => pc.CourseId);
+
+            builder.Entity<PaymentCourse>()
+                .HasOne(pc => pc.Coupon)
+                .WithOne(c => c.PaymentCourse)
+                .HasForeignKey<PaymentCourse>(pc => pc.CouponId)
+                .IsRequired(false);
+
+            // Configure CourseCoupon relationships
+            builder.Entity<CourseCoupon>()
+                .HasKey(cp => new { cp.CouponId, cp.CourseId });
+
+            builder.Entity<CourseCoupon>()
+                .HasOne(rc => rc.Courses)
+                .WithMany(r => r.CourseCoupons)
+                .HasForeignKey(rc => rc.CourseId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<CourseCoupon>()
+                .HasOne(rc => rc.Coupons)
+                .WithMany(c => c.CourseCoupon)
+                .HasForeignKey(rc => rc.CouponId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             // Configure Report relationships
             builder.Entity<ReportComment>()
                 .HasKey(rc => new { rc.ReportId, rc.CommentId });
@@ -122,6 +292,21 @@ namespace final_project_be.Data
                 .HasOne(rc => rc.Comment)
                 .WithMany(c => c.ReportComments)
                 .HasForeignKey(rc => rc.CommentId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<ReportWorkShop>()
+                .HasKey(rc => new { rc.ReportId, rc.WorkshopId });
+
+            builder.Entity<ReportWorkShop>()
+                .HasOne(rc => rc.Report)
+                .WithMany(r => r.ReportWorkShops)
+                .HasForeignKey(rc => rc.ReportId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<ReportWorkShop>()
+                .HasOne(rc => rc.WorkShop)
+                .WithMany(c => c.ReportWorkShops)
+                .HasForeignKey(rc => rc.WorkshopId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             builder.Entity<ReportPost>()
@@ -139,6 +324,23 @@ namespace final_project_be.Data
                 .HasForeignKey(rp => rp.PostId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+
+            builder.Entity<ReportEvent>()
+                .HasKey(rp => new { rp.ReportId, rp.EventId });
+
+            builder.Entity<ReportEvent>()
+                .HasOne(rp => rp.Report)
+                .WithMany(r => r.ReportEvents)
+                .HasForeignKey(rp => rp.ReportId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<ReportEvent>()
+                .HasOne(rp => rp.Event)
+                .WithMany(p => p.ReportEvents)
+                .HasForeignKey(rp => rp.EventId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+
             builder.Entity<ReportUser>()
                 .HasKey(ru => new { ru.ReportId, ru.UserId });
 
@@ -153,6 +355,118 @@ namespace final_project_be.Data
                 .WithMany(u => u.ReportUsers)
                 .HasForeignKey(ru => ru.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+
+            // Configure UserCourse relationships
+            builder.Entity<UserAssignment>()
+                .HasKey(ru => new { ru.AssignmentId, ru.UserId });
+
+            builder.Entity<UserAssignment>()
+                .HasOne(ru => ru.User)
+                .WithMany(r => r.UserAssignments)
+                .HasForeignKey(ru => ru.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<UserAssignment>()
+                .HasOne(uc => uc.Assignment)
+                .WithMany(c => c.UserAssignments)
+                .HasForeignKey(ru => ru.AssignmentId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Configure UserCourse relationships
+            builder.Entity<UserCourse>()
+                .HasKey(ru => new { ru.CourseId, ru.UserId });
+
+            builder.Entity<UserCourse>()
+                .HasOne(ru => ru.User)
+                .WithMany(r => r.UserCourses)
+                .HasForeignKey(ru => ru.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<UserCourse>()
+                .HasOne(uc => uc.Courses)
+                .WithMany(c => c.UserCourses)
+                .HasForeignKey(ru => ru.CourseId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Configure UserModule relationships
+            builder.Entity<UserModule>()
+                .HasKey(ru => new { ru.ModuleId, ru.UserId });
+
+            builder.Entity<UserModule>()
+                .HasOne(ru => ru.User)
+                .WithMany(r => r.UserModules)
+                .HasForeignKey(ru => ru.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<UserModule>()
+                .HasOne(uc => uc.Module)
+                .WithMany(c => c.UserModules)
+                .HasForeignKey(ru => ru.ModuleId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Configure UserLesson relationships
+
+            builder.Entity<UserLesson>()
+                .HasOne(ru => ru.User)
+                .WithMany(r => r.UserLessons)
+                .HasForeignKey(ru => ru.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<UserLesson>()
+                .HasOne(uc => uc.Lesson)
+                .WithMany(c => c.UserLesson)
+                .HasForeignKey(ru => ru.LessonId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Configure UserAnswer relationships
+            builder.Entity<UserAnswer>()
+                .HasKey(ru => new { ru.UserLessonId, ru.AnswerId });
+
+            builder.Entity<UserAnswer>()
+                .HasOne(ru => ru.Answer)
+                .WithMany(r => r.UserAnswers)
+                .HasForeignKey(ru => ru.AnswerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<UserAnswer>()
+                .HasOne(uc => uc.UserLesson)
+                .WithMany(c => c.UserAnswer)
+                .HasForeignKey(ru => ru.UserLessonId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Configure UserSchedule relationships
+            builder.Entity<UserSchedule>()
+                .HasKey(ru => new { ru.ScheduleId, ru.UserId });
+
+            builder.Entity<UserSchedule>()
+                .HasOne(ru => ru.Schedule)
+                .WithMany(r => r.UserSchedules)
+                .HasForeignKey(ru => ru.ScheduleId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<UserSchedule>()
+                .HasOne(uc => uc.User)
+                .WithMany(c => c.UserSchedules)
+                .HasForeignKey(ru => ru.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Configure UserWorkShop relationships
+            builder.Entity<UserWorkshop>()
+                .HasKey(ru => new { ru.WorkShopId, ru.UserId });
+
+            builder.Entity<UserWorkshop>()
+                .HasOne(ru => ru.WorkShop)
+                .WithMany(r => r.UserWorkshops)
+                .HasForeignKey(ru => ru.WorkShopId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<UserWorkshop>()
+                .HasOne(uc => uc.User)
+                .WithMany(c => c.UserWorkshops)
+                .HasForeignKey(ru => ru.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
 
             // Configure UserRole relationships
             builder.Entity<UserRole>()
