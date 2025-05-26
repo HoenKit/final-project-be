@@ -12,7 +12,7 @@ namespace final_project_be.Data.Models
         [ForeignKey("User")]
         public Guid UserId { get; set; }
         public string Content { get; set; }
-        public bool IsDeleted { get; set; }
+        public bool IsDeleted { get; set; } = false;
         public decimal rate { get; set; }
         public DateTime CreateAt { get; set; }
         public DateTime UpdateAt { get; set; }

@@ -24,5 +24,6 @@ namespace final_project_be.Data.Models
         public ICollection<Comment>? Comments { get; set; }
         [JsonIgnore]
         public ICollection<ReportComment>? ReportComments { get; set; }
-    }
+		public bool IsDeleted { get; set; } = false;
+	}
 }

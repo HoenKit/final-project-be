@@ -7,6 +7,7 @@ using final_project_be.Dtos.Report;
 using final_project_be.Dtos.User;
 using final_project_be.Dtos.Post;
 using final_project_be.Dtos.Category;
+using final_project_be.Dtos.Courses;
 
 namespace final_project_be.Service.Mapping
 {
@@ -37,6 +38,8 @@ namespace final_project_be.Service.Mapping
             CreateMap<PostFileDto, PostFile>().ReverseMap();
             CreateMap<PostCreateDto, Post>().ReverseMap();
             CreateMap<PostFileCreateDto, Post>().ReverseMap();
-        }
+			CreateMap<Courses, CourseDto>().ReverseMap();
+			CreateMap<Courses, UpdateCourseDto>().ReverseMap();
+		}
     }
 }

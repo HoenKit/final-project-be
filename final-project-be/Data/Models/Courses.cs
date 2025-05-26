@@ -16,7 +16,8 @@ namespace final_project_be.Data.Models
         public string Cost {  get; set;}
         public string SkillLearn {  get; set;}
         public int StudentCount { get; set;}
-        public DateTime? CreateAt { get; set;}
+		public bool IsDeleted { get; set; } = false;
+		public DateTime? CreateAt { get; set;}
         public DateTime? UpdateAt { get; set;}
         public ICollection<CourseCoupon>? CourseCoupons { get; set;}
         public ICollection<PaymentCourse>? PaymentCourses { get; set;}
