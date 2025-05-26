@@ -118,11 +118,17 @@ namespace final_project_be.Data.Migrations
             modelBuilder.Entity("final_project_be.Data.Models.Certificate", b =>
                 {
                     b.Property<int>("CertificateId")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CertificateId"));
 
                     b.Property<string>("CertificateName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("CourseId")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -147,6 +153,9 @@ namespace final_project_be.Data.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("CertificateId");
+
+                    b.HasIndex("CourseId")
+                        .IsUnique();
 
                     b.HasIndex("UserId");
 
@@ -1320,7 +1329,7 @@ namespace final_project_be.Data.Migrations
                 {
                     b.HasOne("final_project_be.Data.Models.Courses", "Course")
                         .WithOne("Certificate")
-                        .HasForeignKey("final_project_be.Data.Models.Certificate", "CertificateId")
+                        .HasForeignKey("final_project_be.Data.Models.Certificate", "CourseId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
