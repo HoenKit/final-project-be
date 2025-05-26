@@ -78,5 +78,14 @@ namespace final_project_be.Controllers
             var stats = _postRepository.GetPostStatisticsByMonth();
             return Ok(stats);
         }
+
+        [HttpGet("GetAllIsDeleted")]
+        public IActionResult GetAllIsDeleted(int? page, int? CategoryId, string? title, Guid? userId)
+        {
+            int currentPage = page ?? 1;
+
+            var pagedPosts = _postRepository.GetAllPostsIsDeleted(currentPage, 5, CategoryId, title, userId);
+            return Ok(pagedPosts);
+        }
     }
 }
