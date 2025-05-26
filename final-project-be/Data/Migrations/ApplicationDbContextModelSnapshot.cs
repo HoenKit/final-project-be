@@ -136,9 +136,6 @@ namespace final_project_be.Data.Migrations
                     b.Property<DateTime>("ExpiredDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool>("IsApproved")
-                        .HasColumnType("bit");
-
                     b.Property<string>("IssuedBy")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -176,6 +173,9 @@ namespace final_project_be.Data.Migrations
 
                     b.Property<DateTime>("CreateAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<int?>("ParentCommentId")
                         .HasColumnType("int");
@@ -264,6 +264,9 @@ namespace final_project_be.Data.Migrations
 
                     b.Property<DateTime?>("CreateAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<int>("MentorId")
                         .HasColumnType("int");

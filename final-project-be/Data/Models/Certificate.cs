@@ -15,7 +15,6 @@ namespace final_project_be.Data.Models
         public string IssuedBy { get; set; }
         public DateTime IssuedDate { get; set; }
         public DateTime ExpiredDate { get; set; }
-        public bool IsApproved { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdateAt { get; set; }
         public Courses? Course { get; set; }
