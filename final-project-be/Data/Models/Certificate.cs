@@ -9,6 +9,8 @@ namespace final_project_be.Data.Models
         public int CertificateId { get; set; }
         [ForeignKey("User")]
         public Guid UserId { get; set; }
+        [ForeignKey("Courses")]
+        public int CourseId { get; set; }
         public string CertificateName { get; set; }
         public string IssuedBy { get; set; }
         public DateTime IssuedDate { get; set; }

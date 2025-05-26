@@ -107,6 +107,7 @@ builder.Services.AddScoped<IPollOptionVoteRepository, PollOptionVoteRepository>(
 builder.Services.AddScoped<IUserAuthRepository, UserAuthRepository>();
 builder.Services.AddScoped<IReportUserRepository, ReportUserRepository>();
 builder.Services.AddScoped<IPostFileRepository, PostFileRepository>();
+builder.Services.AddScoped<ICourseRepository, CourseRepository>();
 
 //config Valid class
 builder.Services.AddScoped<Validate>();

@@ -181,11 +181,11 @@ namespace final_project_be.Data
             builder.Entity<Courses>()
                 .HasOne(n => n.Certificate)
                 .WithOne(c => c.Course)
-                .HasForeignKey<Certificate>(um => um.CertificateId)
+                .HasForeignKey<Certificate>(um => um.CourseId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Configure Course and Module relationship
-            builder.Entity<Module>()
+			// Configure Course and Module relationship
+			builder.Entity<Module>()
                 .HasOne(n => n.Courses)
                 .WithMany(u => u.Modules)
                 .HasForeignKey(n => n.CourseId)
