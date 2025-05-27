@@ -38,6 +38,7 @@
   <ItemGroup>
     <ProjectReference Include="..\final-project-be-Application\final-project-be-Application.csproj" />
     <ProjectReference Include="..\final-project-be-Domain\final-project-be-Domain.csproj" />
+    <ProjectReference Include="..\final-project-be-Infrastructure\final-project-be-Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
