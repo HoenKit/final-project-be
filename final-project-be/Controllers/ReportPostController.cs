@@ -58,5 +58,15 @@ namespace final_project_be.Controllers
             _ReportPostRepository.DeleteReportPost(reportId, PostId);
             return Ok();
         }
+
+        [HttpGet("grouped")]
+        public IActionResult GetGroupedReports(int? page)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            int currentPage = page ?? 1;
+            var pagedReportPosts = _ReportPostRepository.GetGroupedReportPosts(currentPage, 5);
+            return Ok(pagedReportPosts);
+        }
     }
 }

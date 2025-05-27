@@ -10,6 +10,11 @@ namespace final_project_be_Infrastructure.DAO
         {
             _context = context;
         }
+        public List<ReportUser> GetByUserId(Guid userId)
+        {
+            return _context.reportUser
+                .Where(rp => rp.UserId == userId).ToList();
+        }
         public ReportUser GetByReportId(int id) => _context.reportUser.Where(r => r.ReportId == id).FirstOrDefault();
         public void DeleteByReportAndUserId(int reportId, Guid userId)
         {

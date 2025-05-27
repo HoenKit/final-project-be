@@ -11,5 +11,6 @@ namespace final_project_be_Application.Interface
         public Task<ReportPost> GetReportPost(int id);
         public Task<ReportPost> UpdateReportPost(ReportPostDto dto);
         public PageResult<ReportPost> GetAllReportPosts(int page, int pageSize);
+        public PageResult<GroupedReportDto<int, ReportPost>> GetGroupedReportPosts(int page, int pageSize);
     }
 }

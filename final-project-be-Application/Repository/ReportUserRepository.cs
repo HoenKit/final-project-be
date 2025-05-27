@@ -152,5 +152,29 @@ namespace final_project_be_Application.Repository
                 return null;
             }
         }
+
+        public PageResult<GroupedReportDto<Guid, ReportUser>> GetGroupedReportUsers(int page, int pageSize)
+        {
+            var all = _ReportUserDAO.GetAll()
+                .Include(ru => ru.Report)
+                .Include(ru => ru.User)
+                .AsEnumerable();
+
+            var grouped = all
+                .GroupBy(ru => ru.UserId)
+                .Select(group => new GroupedReportDto<Guid, ReportUser>
+                {
+                    Id = group.Key,
+                    ReportCount = group.Count(),
+                    Reports = group.ToList()
+                })
+                .OrderByDescending(g => g.ReportCount)
+                .ToList();
+
+            var totalCount = grouped.Count;
+            var paged = grouped.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+            return new PageResult<GroupedReportDto<Guid, ReportUser>>(paged, totalCount, page, pageSize);
+        }
     }
 }

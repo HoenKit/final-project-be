@@ -10,6 +10,7 @@ namespace final_project_be_Application.Interface
         public bool DeleteReport(int id);
         public Task<Report> GetReport(int id);
         public Task<Report> UpdateReport(ReportDto dto);
-        public PageResult<Report> GetAllReports(int page, int pageSize);
+        public List<ReportPostDto> GetReportsByPost(int postId);
+        public List<ReportUserDto> GetReportsByUser(Guid userId);
     }
 }
