@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using final_project_be.Data;
 
@@ -11,9 +12,11 @@ using final_project_be.Data;
 namespace final_project_be.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250527022549_UpdateDB5")]
+    partial class UpdateDB5
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -69,8 +72,9 @@ namespace final_project_be.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<float>("Percentage")
-                        .HasColumnType("real");
+                    b.Property<string>("Percentage")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("AssignmentId");
 
@@ -167,8 +171,9 @@ namespace final_project_be.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<float>("Discount")
-                        .HasColumnType("real");
+                    b.Property<string>("Discount")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("CouponId");
 
@@ -204,15 +209,16 @@ namespace final_project_be.Data.Migrations
                     b.Property<int>("CategoryId")
                         .HasColumnType("int");
 
-                    b.Property<decimal>("Cost")
-                        .HasColumnType("decimal(18,4)");
+                    b.Property<string>("Cost")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("CourseContent")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<double?>("CourseLength")
-                        .HasColumnType("float");
+                    b.Property<string>("CourseLength")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("CourseName")
                         .IsRequired()
@@ -317,8 +323,9 @@ namespace final_project_be.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal>("Price")
-                        .HasColumnType("decimal(18,4)");
+                    b.Property<string>("Price")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("PlanId");
 
@@ -507,8 +514,9 @@ namespace final_project_be.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PaymentId"));
 
-                    b.Property<float>("Amount")
-                        .HasColumnType("real");
+                    b.Property<string>("Amount")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -949,11 +957,11 @@ namespace final_project_be.Data.Migrations
                     b.Property<DateTime>("ExpiredAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<decimal?>("PointChange")
-                        .HasColumnType("decimal(18,4)");
+                    b.Property<string>("PointChange")
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal?>("PointCost")
-                        .HasColumnType("decimal(18,4)");
+                    b.Property<string>("PointCost")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Status")
                         .HasColumnType("nvarchar(max)");
@@ -995,8 +1003,8 @@ namespace final_project_be.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal?>("Point")
-                        .HasColumnType("decimal(18,4)");
+                    b.Property<int>("Point")
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdateAt")
                         .HasColumnType("datetime2");
@@ -1059,8 +1067,9 @@ namespace final_project_be.Data.Migrations
                     b.Property<DateTime>("CompletedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<float?>("Percentage")
-                        .HasColumnType("real");
+                    b.Property<string>("Percentage")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -1087,11 +1096,12 @@ namespace final_project_be.Data.Migrations
                     b.Property<int>("LessonId")
                         .HasColumnType("int");
 
-                    b.Property<float?>("Mark")
-                        .HasColumnType("real");
+                    b.Property<string>("Mark")
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<float?>("Percentage")
-                        .HasColumnType("real");
+                    b.Property<string>("Percentage")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -1162,8 +1172,9 @@ namespace final_project_be.Data.Migrations
                     b.Property<DateTime?>("CompletedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<float?>("Percentage")
-                        .HasColumnType("real");
+                    b.Property<string>("Percentage")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Status")
                         .IsRequired()

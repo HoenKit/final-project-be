@@ -9,7 +9,7 @@ namespace final_project_be.Data.Models
         public int PaymentId { get; set; }
         [ForeignKey("User")]
         public Guid UserId { get; set; }
-        public string Amount { get; set; }
+        public float Amount { get; set; }
         public string Status { get; set; }
         public string ServiceType { get; set; }
         public DateTime CreatedAt { get; set; }

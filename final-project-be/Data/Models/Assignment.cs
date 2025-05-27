@@ -10,7 +10,7 @@ namespace final_project_be.Data.Models
         [ForeignKey("Lesson")]
         public int LessonId { get; set; }
         public string Content { get; set; }
-        public string Percentage { get; set; }
+        public float Percentage { get; set; }
         public string MeetLink { get; set; }
         public DateTime CreateAt {  set; get; }
         public Lesson? Lesson { get; set; }

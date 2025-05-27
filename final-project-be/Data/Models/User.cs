@@ -10,7 +10,7 @@ namespace final_project_be.Data.Models
         public string Email { get; set; }
         public string Phone { get; set; }
         public string Password { get; set; }
-        public int Point { get; set; }
+        public decimal? Point { get; set; }
         public bool IsBanned { get; set; } = false;
         public DateTime CreateAt { get; set; } = DateTime.Now;
         public DateTime? UpdateAt { get; set; } = DateTime.Now;
@@ -32,7 +32,6 @@ namespace final_project_be.Data.Models
         public ICollection<UserLesson>? UserLessons { get; set; }
         public ICollection<UserWorkshop>? UserWorkshops { get; set; }
         public ICollection<Payment>? Payments { get; set; }
-        public ICollection<Certificate>? Certificates { get; set; }
         public ICollection<Messages>? Messages { get; set; }
     }
 }

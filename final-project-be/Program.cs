@@ -68,7 +68,6 @@ builder.Services.AddScoped<ReportUserDAO>();
 builder.Services.AddScoped<PostFileDAO>();
 builder.Services.AddScoped<AnswerDAO>();
 builder.Services.AddScoped<AssignmentDAO>();
-builder.Services.AddScoped<CertificateDAO>();
 builder.Services.AddScoped<CouponDAO>();
 builder.Services.AddScoped<CourseCouponDAO>();
 builder.Services.AddScoped<CourseDAO>();
