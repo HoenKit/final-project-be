@@ -147,6 +147,11 @@ namespace final_project_be.Data
                 .Property(r => r.Price)
                 .HasColumnType("decimal(18,4)");
 
+            // Configure Payment
+            builder.Entity<Payment>()
+                .Property(r => r.Amount)
+                .HasColumnType("decimal(18,4)");
+
             // Configure Courses
             builder.Entity<Courses>()
                 .Property(r => r.Cost)
