@@ -13,10 +13,12 @@ namespace final_project_be.Data.Models
         public int CategoryId { get; set;}
         public string CourseName { get; set;}
         public string CourseContent { get; set;}
-        public string Cost {  get; set;}
+        public decimal Cost {  get; set;}
         public string SkillLearn {  get; set;}
         public int StudentCount { get; set;}
-		public bool IsDeleted { get; set; } = false;
+        public string? CoursesImage { get; set;}    
+        public double? CourseLength { get; set;}
+        public bool IsDeleted { get; set; } = false;
 		public DateTime? CreateAt { get; set;}
         public DateTime? UpdateAt { get; set;}
         public ICollection<CourseCoupon>? CourseCoupons { get; set;}
@@ -24,7 +26,6 @@ namespace final_project_be.Data.Models
         public ICollection<Review>? Reviews { get; set;}
         public ICollection<UserCourse> UserCourses { get; set;}
         public ICollection<Module> Modules { get; set;}
-        public Certificate? Certificate { get; set; }
         public Mentor? Mentor { get; set;}
         public Category?  Category { get; set;}
 

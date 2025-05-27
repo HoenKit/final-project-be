@@ -6,7 +6,7 @@ namespace final_project_be.Data.Models
     {
         [Key]
         public int CouponId { get; set; }
-        public string Discount { get; set; }
+        public float Discount { get; set; }
         public string CouponName { get; set; }
         public ICollection<CourseCoupon>? CourseCoupon { get; set; }
         public PaymentCourse? PaymentCourse { get; set; }

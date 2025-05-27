@@ -7,7 +7,7 @@
 		public int CategoryId { get; set; }
 		public string CourseName { get; set; }
 		public string CourseContent { get; set; }
-		public string Cost { get; set; }
+		public decimal? Cost { get; set; }
 		public string SkillLearn { get; set; }
 	}
 }

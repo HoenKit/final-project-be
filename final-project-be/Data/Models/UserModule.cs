@@ -10,7 +10,7 @@ namespace final_project_be.Data.Models
         [ForeignKey("User")]
         public Guid UserId {  get; set; }
         public string Status { get; set; }
-        public string Percentage { get; set; }
+        public float? Percentage { get; set; }
         public DateTime? CompletedAt { get; set; }
         public Module? Module { get; set; }
         public User? User { get; set; }

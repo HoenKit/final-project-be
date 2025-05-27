@@ -6,6 +6,34 @@ namespace final_project_be.Data
 {
     public class ApplicationDbContext : DbContext
     {
+        public DbSet<UserWorkshop> UserWorkshop { get; set; }
+        public DbSet<Review> Reviews { get; set; }
+        public DbSet<Answer> Answers { get; set; }
+        public DbSet<Assignment> Assignment { get; set; }
+        public DbSet<Coupon> Coupon { get; set; }
+        public DbSet<CourseCoupon> courseCoupons { get; set; }
+        public DbSet<Courses> Courses { get; set; }
+        public DbSet<Event> Events { get; set; }
+        public DbSet<Lesson> Lessons { get; set; }
+        public DbSet<MembershipPlan> MembershipPlans { get; set; }
+        public DbSet<Mentor> Mentors { get; set; }
+        public DbSet<MentorCertificate> MentorCertificates { get; set; }
+        public DbSet<Messages> Messages { get; set; }
+        public DbSet<Module> Modules { get; set; }
+        public DbSet<Payment> Payment { get; set; }
+        public DbSet<PaymentCourse> PaymentCourse { get; set; }
+        public DbSet<PaymentPlan> PaymentPlans { get; set; }
+        public DbSet<Question> Question { get; set; }
+        public DbSet<ReportEvent> ReportEvents { get; set; }
+        public DbSet<Schedule> Schedules { get; set; }
+        public DbSet<Transaction> Transaction { get; set; }
+        public DbSet<UserAnswer> UserAnswers { get; set; }
+        public DbSet<UserAssignment> UserAssignments { get; set; }
+        public DbSet<UserCourse> UserCourses { get; set; }
+        public DbSet<UserLesson> UserLessons { get; set; }
+        public DbSet<UserModule> UserModules { get; set; }
+        public DbSet<UserSchedule> UserSchedules { get; set; }
+        public DbSet<WorkShop> WorkShop { get; set; }
         public DbSet<Category> categories {  get; set; }
         public DbSet<Comment> comments { get; set; }
         public DbSet<PollOption> pollOptions { get; set; }
@@ -113,6 +141,36 @@ namespace final_project_be.Data
                 .HasForeignKey(n => n.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+
+            // Configure MembershipPlan
+            builder.Entity<MembershipPlan>()
+                .Property(r => r.Price)
+                .HasColumnType("decimal(18,4)");
+
+            // Configure Payment
+            builder.Entity<Payment>()
+                .Property(r => r.Amount)
+                .HasColumnType("decimal(18,4)");
+
+            // Configure Courses
+            builder.Entity<Courses>()
+                .Property(r => r.Cost)
+                .HasColumnType("decimal(18,4)");
+
+            // Configure Transaction
+            builder.Entity<Transaction>()
+                .Property(r => r.PointChange)
+                .HasColumnType("decimal(18,4)");
+
+            builder.Entity<Transaction>()
+                .Property(r => r.PointCost)
+                .HasColumnType("decimal(18,4)");
+
+            // Configure User Point
+            builder.Entity<User>()
+                .Property(r => r.Point)
+                .HasColumnType("decimal(18,4)");
+
             // Configure Review and User relationship
             builder.Entity<Review>()
                 .Property(r => r.rate)
@@ -144,12 +202,6 @@ namespace final_project_be.Data
                 .HasForeignKey(n => n.MentorId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Configure Certificate and Mentor relationship
-            builder.Entity<Certificate>()
-                .HasOne(n => n.User)
-                .WithMany(u => u.Certificates)
-                .HasForeignKey(n => n.UserId)
-                .OnDelete(DeleteBehavior.Restrict);
 
             // Configure Messages and User relationship
             builder.Entity<Messages>()
@@ -177,12 +229,7 @@ namespace final_project_be.Data
                 .HasForeignKey(n => n.ModuleId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Configure Course and Cetificate relationship
-            builder.Entity<Courses>()
-                .HasOne(n => n.Certificate)
-                .WithOne(c => c.Course)
-                .HasForeignKey<Certificate>(um => um.CourseId)
-                .OnDelete(DeleteBehavior.Restrict);
+
 
 			// Configure Course and Module relationship
 			builder.Entity<Module>()

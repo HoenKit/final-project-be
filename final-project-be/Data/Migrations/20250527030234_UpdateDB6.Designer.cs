@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using final_project_be.Data;
 
@@ -11,9 +12,11 @@ using final_project_be.Data;
 namespace final_project_be.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250527030234_UpdateDB6")]
+    partial class UpdateDB6
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -507,8 +510,8 @@ namespace final_project_be.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PaymentId"));
 
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("decimal(18,4)");
+                    b.Property<float>("Amount")
+                        .HasColumnType("real");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
