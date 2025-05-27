@@ -1,8 +1,8 @@
-﻿using final_project_be.Data.Models;
-using final_project_be.Dtos;
-using final_project_be.Dtos.Comment;
-using final_project_be.Interface;
-using final_project_be.Ultils;
+﻿using final_project_be_Domain.Models;
+using final_project_be_Domain.DTOs;
+using final_project_be_Domain.DTOs.Comment;
+using final_project_be_Application.Interface;
+using final_project_be_Application.Ultils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;

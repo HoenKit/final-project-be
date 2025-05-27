@@ -1,0 +1,11 @@
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace final_project_be_Domain.DTOs.PollOption
+{
+	public class PollOptionDto
+	{
+		public int PollOptionId { get; set; }
+		public int PostId { get; set; }
+		public string Title { get; set; }
+	}
+}

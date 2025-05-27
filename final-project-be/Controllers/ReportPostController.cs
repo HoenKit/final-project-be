@@ -1,5 +1,5 @@
-﻿using final_project_be.Dtos.Report;
-using final_project_be.Interface;
+﻿using final_project_be_Domain.DTOs.Report;
+using final_project_be_Application.Interface;
 using Microsoft.AspNetCore.Mvc;
 
 namespace final_project_be.Controllers

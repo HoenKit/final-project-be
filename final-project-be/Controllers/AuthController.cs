@@ -1,8 +1,8 @@
-﻿using final_project_be.Data.Models;
-using final_project_be.Dtos.User;
-using final_project_be.Interface;
-using final_project_be.Repository;
-using final_project_be.Ultils;
+﻿using final_project_be_Domain.Models;
+using final_project_be_Domain.DTOs.User;
+using final_project_be_Application.Interface;
+using final_project_be_Application.Repository;
+using final_project_be_Application.Ultils;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using NuGet.Common;
