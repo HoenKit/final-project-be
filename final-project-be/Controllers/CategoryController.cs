@@ -1,13 +1,13 @@
-﻿using final_project_be.Dtos.Category;
-using final_project_be.Interface;
+﻿using final_project_be_Domain.DTOs.Category;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using final_project_be_Application.Interface;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace final_project_be.Controllers
 {
-    [Route("api/[controller]")]
+	[Route("api/[controller]")]
     [ApiController]
     public class CategoryController : ControllerBase
     {

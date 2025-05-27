@@ -1,7 +1,7 @@
-﻿using final_project_be.Dtos.Comment;
-using final_project_be.Dtos.User;
-using final_project_be.Interface;
-using final_project_be.Repository;
+﻿using final_project_be_Domain.DTOs.Comment;
+using final_project_be_Domain.DTOs.User;
+using final_project_be_Application.Interface;
+using final_project_be_Application.Repository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

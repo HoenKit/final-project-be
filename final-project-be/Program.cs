@@ -1,17 +1,17 @@
 ﻿
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using final_project_be.DAO;
-using final_project_be.Data;
-using final_project_be.Interface;
-using final_project_be.Repository;
-using final_project_be.Service.Mapping;
+using final_project_be_Infrastructure.DAO;
+using final_project_be_Infrastructure.Data;
+using final_project_be_Application.Interface;
+using final_project_be_Application.Repository;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Formatting.Json;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using final_project_be.Ultils;
+using final_project_be_Application.Ultils;
 using Microsoft.Extensions.Azure;
+using final_project_be_Application.Service.Mapping;
 
 var builder = WebApplication.CreateBuilder(args);
 

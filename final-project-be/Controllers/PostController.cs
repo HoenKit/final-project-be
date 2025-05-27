@@ -1,7 +1,7 @@
-﻿using final_project_be.Dtos.Post;
-using final_project_be.Interface;
-using final_project_be.Repository;
-using final_project_be.Ultils;
+﻿using final_project_be_Domain.DTOs.Post;
+using final_project_be_Application.Interface;
+using final_project_be_Application.Repository;
+using final_project_be_Application.Ultils;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 
