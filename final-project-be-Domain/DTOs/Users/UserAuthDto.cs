@@ -1,6 +1,6 @@
 ﻿using final_project_be_Domain.Models;
 
-namespace final_project_be_Domain.DTOs.User
+namespace final_project_be_Domain.DTOs.Users
 {
 	public class UserRegisterDto
 	{

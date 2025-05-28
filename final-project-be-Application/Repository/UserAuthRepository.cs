@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using final_project_be_Infrastructure.DAO;
 using final_project_be_Domain.Models;
-using final_project_be_Domain.DTOs.User;
+using final_project_be_Domain.DTOs.Users;
 using final_project_be_Application.Interface;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;

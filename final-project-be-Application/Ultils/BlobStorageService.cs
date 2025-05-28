@@ -1,6 +1,7 @@
 ﻿
 using Azure.Storage.Blobs.Models;
 using Azure.Storage.Blobs;
+using Microsoft.Extensions.Configuration;
 
 namespace final_project_be_Application.Ultils
 {
@@ -19,8 +20,15 @@ namespace final_project_be_Application.Ultils
 		{ ".pdf", "application/pdf" }
 	};
 
-		public BlobStorageService(string connectionString)
+		public BlobStorageService(IConfiguration configuration)
 		{
+			var connectionString = configuration["AzureStorage:MyConnection"];
+
+			if (string.IsNullOrEmpty(connectionString))
+			{
+				throw new InvalidOperationException("Azure Blob Storage connection string is missing.");
+			}
+
 			_blobServiceClient = new BlobServiceClient(connectionString);
 		}
 
