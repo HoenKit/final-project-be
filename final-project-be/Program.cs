@@ -107,6 +107,8 @@ builder.Services.AddScoped<IUserAuthRepository, UserAuthRepository>();
 builder.Services.AddScoped<IReportUserRepository, ReportUserRepository>();
 builder.Services.AddScoped<IPostFileRepository, PostFileRepository>();
 builder.Services.AddScoped<ICourseRepository, CourseRepository>();
+//Config Service
+builder.Services.AddScoped<BlobStorageService>();
 
 //config Valid class
 builder.Services.AddScoped<Validate>();

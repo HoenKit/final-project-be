@@ -1,7 +1,7 @@
 ﻿using final_project_be_Domain.Models;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace final_project_be_Domain.DTOs.User
+namespace final_project_be_Domain.DTOs.Users
 {
 	public class UserManagerDto
 	{

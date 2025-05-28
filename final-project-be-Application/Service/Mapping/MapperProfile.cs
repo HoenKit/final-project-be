@@ -4,7 +4,7 @@ using final_project_be_Domain.DTOs.Comment;
 using final_project_be_Domain.DTOs.Notification;
 using final_project_be_Domain.DTOs.PollOption;
 using final_project_be_Domain.DTOs.Report;
-using final_project_be_Domain.DTOs.User;
+using final_project_be_Domain.DTOs.Users;
 using final_project_be_Domain.DTOs.Post;
 using final_project_be_Domain.DTOs.Category;
 using final_project_be_Domain.DTOs.Courses;
