@@ -12,6 +12,8 @@ using System.Text;
 using final_project_be_Application.Ultils;
 using Microsoft.Extensions.Azure;
 using final_project_be_Application.Service.Mapping;
+using final_project_be_Application.Service.EmailService;
+using NuGet.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -48,6 +50,9 @@ builder.Services.AddControllersWithViews();
 
 builder.Services.AddControllers();
 
+
+// Config URL
+builder.Services.Configure<ClientSettings>(builder.Configuration.GetSection("ClientSettings"));
 // Config SignalR
 
 builder.Services.AddSignalR();
@@ -107,7 +112,7 @@ builder.Services.AddScoped<IUserAuthRepository, UserAuthRepository>();
 builder.Services.AddScoped<IReportUserRepository, ReportUserRepository>();
 builder.Services.AddScoped<IPostFileRepository, PostFileRepository>();
 builder.Services.AddScoped<ICourseRepository, CourseRepository>();
-
+builder.Services.AddScoped<IEmailService, EmailService>();
 //config Valid class
 builder.Services.AddScoped<Validate>();
 
@@ -134,6 +139,8 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("UserPolicy", policy => policy.RequireRole("User"));
 });
 
+//Config Email:
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 
 //Config Cookie
 builder.Services.AddHttpContextAccessor();

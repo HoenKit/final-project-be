@@ -12,6 +12,11 @@ using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using final_project_be_Application.Service.EmailService;
+using Newtonsoft.Json.Linq;
+using Org.BouncyCastle.Crypto.Generators;
+using final_project_be_Application.Ultils;
+using Microsoft.Extensions.Options;
 
 namespace final_project_be_Application.Repository
 {
@@ -22,13 +27,17 @@ namespace final_project_be_Application.Repository
         private readonly ILogger<UserAuthRepository> _logger;
         private readonly IConfiguration _configuration;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        public UserAuthRepository(UserDAO userDAO, IMapper mapper, ILogger<UserAuthRepository> logger, IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
+        private readonly IEmailService _emailService;
+        private readonly ClientSettings _clientSettings;
+        public UserAuthRepository(UserDAO userDAO, IMapper mapper, ILogger<UserAuthRepository> logger, IConfiguration configuration, IHttpContextAccessor httpContextAccessor,IEmailService emailService, IOptions<ClientSettings> clientSettings)
         {
             _userDAO = userDAO;
             _mapper = mapper;
             _logger = logger;
             _configuration = configuration;
             _httpContextAccessor = httpContextAccessor;
+            _emailService = emailService;
+            _clientSettings = clientSettings.Value;
         }
 
         public async Task<string> LoginAsync(UserLoginDto dto)
@@ -95,6 +104,10 @@ namespace final_project_be_Application.Repository
             }
         }
 
+
+
+
+
         public async Task<UsercurrentDto> GetCurrentUserAsync()
         {
             var token = _httpContextAccessor.HttpContext.Request.Cookies["AccessToken"];
@@ -102,7 +115,6 @@ namespace final_project_be_Application.Repository
             {
                 throw new UnauthorizedAccessException("No token found");
             }
-
             try
             {
 
@@ -235,16 +247,86 @@ namespace final_project_be_Application.Repository
 
             return new JwtSecurityTokenHandler().WriteToken(tokenDescriptor);
         }
-
-        private string GenerateRefreshToken()
+        private string GenerateResetPasswordToken(string email)
         {
-            var randomNumber = new byte[32];
-            using var rng = RandomNumberGenerator.Create();
-            rng.GetBytes(randomNumber);
-            return Convert.ToBase64String(randomNumber);
+            var claims = new List<Claim>
+            {
+        new Claim(ClaimTypes.Email, email)
+            };
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:SecretKey"]));
+            var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var token = new JwtSecurityToken(
+                issuer: _configuration["Jwt:Issuer"],
+                audience: _configuration["Jwt:Audience"],
+                claims: claims,
+                expires: DateTime.UtcNow.AddMinutes(15), // thời hạn 15 phút
+                signingCredentials: credentials
+            );
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
 
+        public async Task ForgotPasswordAsync(ForgotpasswordDto dto)
+        {
+            var user = _userDAO.GetUserbyEmail(dto.Email);
+            if (user == null)
+                throw new Exception("Email Not Found");
+            var token = GenerateResetPasswordToken(dto.Email);
+            var resetLink = $"{_clientSettings.BaseUrl}ResetPassword?Token={token}";
+            string body = $@"
+            <div style='font-family: Arial, sans-serif; padding: 20px; background-color: #f4f8fb; color: #333;'>
+                <div style='max-width: 600px; margin: auto; background-color: #ffffff; padding: 30px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);'>
+                    <h2 style='color: #007bff;'>Reset Your Password</h2>
+                    <p>Hello,</p>
+                    <p>You requested to reset your password. Please click the button below to proceed. This link will expire in <strong>15 minutes</strong>.</p>
+                    <div style='text-align: center; margin: 30px 0;'>
+                        <a href='{resetLink}' style='display: inline-block; background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-size: 16px;'>Reset Password</a>
+                    </div>
+                    <p>If you did not request a password reset, please ignore this email.</p>
+                    <p>Thank you,<br>Your Support Team</p>
+                </div>
+            </div>";
+
+            await _emailService.SendEmailAsync(dto.Email, "Password reset request", body);
+        }
+
+        public async Task ResetPasswordAsync(string Token,ResetPasswordDto Request)
+        {
+            var email = ValidateResetToken(Token);
+            var user = _userDAO.GetUserbyEmail(email);
+            if (user == null)
+                throw new Exception("User not found");
+
+            user.Password = new PasswordHasher<User>().HashPassword(user, Request.NewPassword); // or your own method
+            _userDAO.Update(user);
+        }
+
+        public string ValidateResetToken(string token)
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.UTF8.GetBytes(_configuration["Jwt:SecretKey"]);
+
+            var principal = tokenHandler.ValidateToken(token, new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = _configuration["Jwt:Issuer"],
+                ValidAudience = _configuration["Jwt:Audience"],
+                IssuerSigningKey = new SymmetricSecurityKey(key),
+                ClockSkew = TimeSpan.Zero
+            }, out SecurityToken validatedToken);
+
+            var email = principal.FindFirst(ClaimTypes.Email)?.Value;
+            if (string.IsNullOrEmpty(email))
+                throw new Exception("Invalid token");
+
+            return email;
+        }
 
     }
 }

@@ -10,7 +10,8 @@ namespace final_project_be_Domain.DTOs.User
 		public string Phone { get; set; }
 		public UserMetadataDto userMetadataDto { get; set; }
 	}
-	public class UserMetadataDto
+
+    public class UserMetadataDto
 	{
 		public string FirstName { get; set; }
 		public string LastName { get; set; }
@@ -24,7 +25,16 @@ namespace final_project_be_Domain.DTOs.User
 		public string Password { get; set; }
 	}
 
-	public class UsercurrentDto
+	public class ForgotpasswordDto
+	{
+        public string Email { get; set; }
+    }
+	public class ResetPasswordDto
+    {
+        public string NewPassword { get; set; }
+    }
+
+    public class UsercurrentDto
 	{
 		public Guid UserId { get; set; }
 		public string Email { get; set; }
