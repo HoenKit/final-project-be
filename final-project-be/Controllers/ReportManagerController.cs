@@ -1,5 +1,6 @@
 ﻿using final_project_be_Application.Interface;
 using final_project_be_Application.Repository;
+using final_project_be_Domain.DTOs.Report;
 using Microsoft.AspNetCore.Mvc;
 
 namespace final_project_be.Controllers
@@ -8,44 +9,59 @@ namespace final_project_be.Controllers
     [ApiController]
     public class ReportManagerController : Controller
     {
-        private readonly IReportPostRepository _reportPostRepository;
-        private readonly IReportCommentRepository _reportCommentRepository;
-        private readonly IReportUserRepository _reportUserRepository;
-        public ReportManagerController(IReportPostRepository reportPostRepository, IReportCommentRepository reportCommentRepository, IReportUserRepository reportUserRepository)
+        private readonly IReportRepository _reportRepository;
+        public ReportManagerController(IReportRepository reportRepository)
         {
-            _reportPostRepository = reportPostRepository;
-            _reportCommentRepository = reportCommentRepository;
-            _reportUserRepository = reportUserRepository;
+            _reportRepository = reportRepository;
         }
 
-        [HttpGet("ReportComment")]
-        public IActionResult GetAllReportComment(int? page)
+        [HttpGet("by-post/{postId}")]
+        public IActionResult GetReportsByPost(int postId)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-
-            int currentPage = page ?? 1;
-            var pagedReportComments = _reportCommentRepository.GetAllReportComments(currentPage, 5);
-            return Ok(pagedReportComments);
+            var data = _reportRepository.GetReportsByPost(postId);
+            return Ok(data);
         }
 
-        [HttpGet("ReportPost")]
-        public IActionResult GetAll(int? page)
+        [HttpGet("by-user/{userId}")]
+        public IActionResult GetReportsByUser(Guid userId)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-
-            int currentPage = page ?? 1;
-            var pagedReportPosts = _reportPostRepository.GetAllReportPosts(currentPage, 5);
-            return Ok(pagedReportPosts);
+            var data = _reportRepository.GetReportsByUser(userId);
+            return Ok(data);
         }
 
-        [HttpGet("ReportUser")]
-        public IActionResult GetAllReportUser(int? page)
+        // GET api/<ReportPostController>/5
+        [HttpGet("{id}")]
+        public IActionResult Get(int id)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
+            return Ok(_reportRepository.GetReport(id));
+        }
 
-            int currentPage = page ?? 1;
-            var pagedReportPosts = _reportUserRepository.GetAllReportUsers(currentPage, 5);
-            return Ok(pagedReportPosts);
+        // POST api/<ReportPostController>
+        [HttpPost]
+        public IActionResult Post([FromBody] ReportDto dto)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            _reportRepository.CreateReport(dto);
+            return Ok(dto);
+        }
+
+        // PUT api/<ReportPostController>/5
+        [HttpPut]
+        public IActionResult Put(ReportDto dto)
+        {
+            if (!ModelState.IsValid) { return BadRequest(ModelState); }
+            _reportRepository.UpdateReport(dto);
+            return Ok(dto);
+        }
+
+        // DELETE api/<ReportPostController>/5
+        [HttpDelete]
+        public IActionResult Delete(int Id)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            _reportRepository.DeleteReport(Id);
+            return Ok();
         }
     }
 }
