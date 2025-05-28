@@ -1,5 +1,4 @@
-﻿
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using final_project_be_Infrastructure.DAO;
 using final_project_be_Infrastructure.Data;
 using final_project_be_Application.Interface;
@@ -113,6 +112,9 @@ builder.Services.AddScoped<IReportUserRepository, ReportUserRepository>();
 builder.Services.AddScoped<IPostFileRepository, PostFileRepository>();
 builder.Services.AddScoped<ICourseRepository, CourseRepository>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+//Config Service
+builder.Services.AddScoped<BlobStorageService>();
+
 //config Valid class
 builder.Services.AddScoped<Validate>();
 

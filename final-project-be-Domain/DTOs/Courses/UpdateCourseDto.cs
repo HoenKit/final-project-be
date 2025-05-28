@@ -1,4 +1,6 @@
-﻿namespace final_project_be_Domain.DTOs.Courses
+﻿using Microsoft.AspNetCore.Http;
+
+namespace final_project_be_Domain.DTOs.Courses
 {
 	public class UpdateCourseDto
 	{
@@ -7,7 +9,10 @@
 		public int CategoryId { get; set; }
 		public string CourseName { get; set; }
 		public string CourseContent { get; set; }
-		public decimal? Cost { get; set; }
+		public decimal Cost { get; set; }
 		public string SkillLearn { get; set; }
+		public int StudentCount { get; set; }
+		public IFormFile? CoursesImage { get; set; }
+		public double? CourseLength { get; set; }
 	}
 }

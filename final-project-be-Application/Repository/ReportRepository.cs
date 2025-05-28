@@ -11,14 +11,18 @@ namespace final_project_be_Application.Repository
     public class ReportRepository : Repository<Report>, IReportRepository
     {
         private readonly ReportDAO _ReportDAO;
+        private readonly ReportPostDAO _ReportPostDAO;
+        private readonly ReportUserDAO _ReportUserDAO;
         private readonly IMapper _mapper;
         private readonly ILogger<ReportRepository> _logger;
 
-        public ReportRepository(ReportDAO ReportDAO, IMapper mapper, ILogger<ReportRepository> logger) : base(ReportDAO)
+        public ReportRepository(ReportDAO ReportDAO, ReportPostDAO ReportPostDAO, ReportUserDAO ReportUserDAO, IMapper mapper, ILogger<ReportRepository> logger) : base(ReportDAO)
         {
             _mapper = mapper;
             _logger = logger;
             _ReportDAO = ReportDAO;
+            _ReportPostDAO = ReportPostDAO;
+            _ReportUserDAO = ReportUserDAO;
         }
 
         public Report CreateReport(ReportDto dto)
@@ -61,25 +65,48 @@ namespace final_project_be_Application.Repository
             }
         }
 
-        public PageResult<Report> GetAllReports(int page, int pageSize)
+        public List<ReportPostDto> GetReportsByPost(int postId)
         {
-            try
-            {
-                var totalCount = _ReportDAO.GetAll().Count();
-                var Reports = _ReportDAO.GetAll()
-                    .Skip((page - 1) * pageSize)
-                    .Take(pageSize)
-                    .ToList();
+            var reportPosts = _ReportPostDAO.GetByPostId(postId);
 
-                _logger.LogInformation("Get Reports success");
+            // Nếu cần truy vấn Report hoặc Post, có thể lấy ở đây
+            var reportIds = reportPosts.Select(x => x.ReportId).ToList();
+            var reports = _ReportDAO.GetAll().Where(r => reportIds.Contains(r.ReportId)).ToList();
 
-                return new PageResult<Report>(Reports, totalCount, page, pageSize);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error when getting Reports");
-                return new PageResult<Report>(new List<Report>(), 0, page, pageSize);
-            }
+            // Mapping và kết hợp logic (tuỳ theo bạn cần ReportDto hay PostDto gì nữa)
+            var reportDtos = (from rp in reportPosts
+                              join r in reports on rp.ReportId equals r.ReportId
+                              select new ReportPostDto
+                              {
+                                  ReportId = r.ReportId,
+                                  PostId = rp.PostId,
+                                  UserId = r.UserId,
+                                  Content = r.Content
+                              }).ToList();
+
+            return reportDtos;
+        }
+
+        public List<ReportUserDto> GetReportsByUser(Guid userId)
+        {
+            var reportUsers = _ReportUserDAO.GetByUserId(userId);
+
+            // Nếu cần truy vấn Report hoặc User, có thể lấy ở đây
+            var reportIds = reportUsers.Select(x => x.ReportId).ToList();
+            var reports = _ReportDAO.GetAll().Where(r => reportIds.Contains(r.ReportId)).ToList();
+
+            // Mapping và kết hợp logic (tuỳ theo bạn cần ReportDto hay UserDto gì nữa)
+            var reportDtos = (from rp in reportUsers
+                              join r in reports on rp.ReportId equals r.ReportId
+                              select new ReportUserDto
+                              {
+                                  ReportId = r.ReportId,
+                                  UserId = rp.UserId,
+                                  UserreportedId = r.UserId,
+                                  Content = r.Content
+                              }).ToList();
+
+            return reportDtos;
         }
 
         public async Task<Report> GetReport(int id)

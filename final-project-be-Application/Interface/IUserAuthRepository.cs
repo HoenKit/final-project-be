@@ -1,6 +1,7 @@
 ﻿using final_project_be_Domain.Models;
-using final_project_be_Domain.DTOs.User;
+using final_project_be_Domain.DTOs.Users;
 using System.Threading.Tasks;
+
 
 namespace final_project_be_Application.Interface
 {
