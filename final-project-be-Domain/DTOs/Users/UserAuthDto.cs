@@ -30,4 +30,14 @@ namespace final_project_be_Domain.DTOs.Users
 		public string Email { get; set; }
 		public List<string> Roles { get; set; }
 	}
+
+	public class ForgotpasswordDto
+	{
+        public string Email { get; set; }
+    }
+
+	public class ResetPasswordDto
+    {
+        public string NewPassword { get; set; }
+	}
 }

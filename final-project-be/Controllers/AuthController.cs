@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using NuGet.Common;
 using System.IdentityModel.Tokens.Jwt;
+using Microsoft.AspNetCore.Identity.Data;
 
 namespace final_project_be.Controllers
 {
@@ -57,6 +58,34 @@ namespace final_project_be.Controllers
 
             return Ok(userDto);
 
+        }
+
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword(ForgotpasswordDto forgotpasswordDto)
+        {
+            try
+            {
+                await _userAuthRepository.ForgotPasswordAsync(forgotpasswordDto);
+                return Ok("Reset password email sent.");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword(string Token, [FromBody] ResetPasswordDto request)
+        {
+            try
+            {
+                await _userAuthRepository.ResetPasswordAsync(Token, request);
+                return Ok("Password reset successfully.");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpPost("logout")]
