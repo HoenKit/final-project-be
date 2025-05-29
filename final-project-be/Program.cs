@@ -13,6 +13,7 @@ using Microsoft.Extensions.Azure;
 using final_project_be_Application.Service.Mapping;
 using final_project_be_Application.Service.EmailService;
 using NuGet.Configuration;
+using final_project_be_Application.Service.CloudinaryService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -114,6 +115,9 @@ builder.Services.AddScoped<ICourseRepository, CourseRepository>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 //Config Service
 builder.Services.AddScoped<BlobStorageService>();
+builder.Services.AddSingleton<CloudinaryService>();
+builder.Services.Configure<CloudinarySettings>(
+	builder.Configuration.GetSection("Cloudinary"));
 
 //config Valid class
 builder.Services.AddScoped<Validate>();
