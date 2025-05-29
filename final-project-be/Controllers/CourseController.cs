@@ -1,5 +1,6 @@
 ﻿using final_project_be_Application.Interface;
 using final_project_be_Application.Repository;
+using final_project_be_Application.Service.CloudinaryService;
 using final_project_be_Domain.DTOs.Courses;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,14 +8,16 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace final_project_be.Controllers
 {
-	[Route("api/[controller]")]
+    [Route("api/[controller]")]
 	[ApiController]
 	public class CourseController : ControllerBase
 	{
 		private readonly ICourseRepository _courseRepository;
-		public CourseController(ICourseRepository courseRepository)
+		private readonly CloudinaryService _cloudinaryService;
+		public CourseController(ICourseRepository courseRepository, CloudinaryService cloudinaryService)
 		{
 			_courseRepository = courseRepository;
+			_cloudinaryService = cloudinaryService;
 		}
 		// GET: api/<CourseController>
 		[HttpGet]
@@ -79,5 +82,32 @@ namespace final_project_be.Controllers
 			}
 			return Ok(updatedCourse);
 		}
+
+		[HttpPost("upload")]
+		public async Task<IActionResult> UploadVideo(IFormFile videoFile)
+		{
+			if (videoFile == null || videoFile.Length == 0)
+				return BadRequest("No file uploaded.");
+
+			// Chuyển IFormFile sang Stream
+			using var stream = videoFile.OpenReadStream();
+
+			// Gọi service upload video lên Cloudinary
+			var uploadResult = await _cloudinaryService.UploadVideoStreamAsync(stream, videoFile.FileName);
+
+			if (uploadResult.StatusCode == System.Net.HttpStatusCode.OK)
+			{
+				return Ok(new
+				{
+					PublicId = uploadResult.PublicId,
+					Url = uploadResult.SecureUrl.ToString()
+				});
+			}
+			else
+			{
+				return StatusCode((int)uploadResult.StatusCode, "Upload failed");
+			}
+		}
+
 	}
 }

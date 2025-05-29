@@ -11,7 +11,6 @@ namespace final_project_be_Domain.DTOs.Courses
 		public string CourseContent { get; set; }
 		public decimal Cost { get; set; }
 		public string SkillLearn { get; set; }
-		public int StudentCount { get; set; }
 		public IFormFile? CoursesImage { get; set; }
 		public double? CourseLength { get; set; }
 	}
