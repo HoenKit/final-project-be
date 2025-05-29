@@ -86,27 +86,35 @@ namespace final_project_be.Controllers
 		[HttpPost("upload")]
 		public async Task<IActionResult> UploadVideo(IFormFile videoFile)
 		{
-			if (videoFile == null || videoFile.Length == 0)
-				return BadRequest("No file uploaded.");
-
-			// Chuyển IFormFile sang Stream
-			using var stream = videoFile.OpenReadStream();
-
-			// Gọi service upload video lên Cloudinary
-			var uploadResult = await _cloudinaryService.UploadVideoStreamAsync(stream, videoFile.FileName);
-
-			if (uploadResult.StatusCode == System.Net.HttpStatusCode.OK)
+			try
 			{
+				var videoUrl = await _cloudinaryService.UploadVideoAndGetUrlAsync(videoFile);
+
 				return Ok(new
 				{
-					PublicId = uploadResult.PublicId,
-					Url = uploadResult.SecureUrl.ToString()
+					Url = videoUrl
 				});
+			}
+			catch (Exception ex)
+			{
+				return BadRequest(new { Message = ex.Message });
+			}
+		}
+
+		[HttpPost("delete-video")]
+		public async Task<IActionResult> DeleteVideo(string url)
+		{
+			var deleted = await _cloudinaryService.DeleteVideoByUrlAsync(url);
+
+			if (deleted)
+			{
+				return Ok();
 			}
 			else
 			{
-				return StatusCode((int)uploadResult.StatusCode, "Upload failed");
+				return NotFound();
 			}
+
 		}
 
 	}
