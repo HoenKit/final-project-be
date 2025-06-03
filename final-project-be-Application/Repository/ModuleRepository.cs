@@ -50,16 +50,9 @@ namespace final_project_be_Application.Repository
 			try
 			{
 				await _moduleDAO.BeginTransactionAsync();
-				var module = _moduleDAO.GetByIdAsync(id);
-				if (module == null)
-				{
-					_logger.LogWarning("Module not found with ID: {Id}", id);
-					await _moduleDAO.RollbackTransactionAsync();
-					return false;
-				}
-				await _moduleDAO.DeleteAsync(module);
+				await _moduleDAO.DeleteAsync(id);
 				await _moduleDAO.CommitTransactionAsync();
-				_logger.LogInformation("DeleteAsync Module success");
+				_logger.LogInformation("Delete Module success");
 				return true;
 			}
 			catch (Exception ex)
@@ -69,7 +62,7 @@ namespace final_project_be_Application.Repository
 				return false;
 			}
 		}
-		public async Task<ICollection<ModuleDto>> GetAllModulesByCourseId(int courseId)
+		public async Task<ICollection<UpdateModuleDto>> GetAllModulesByCourseId(int courseId)
 		{
 			try
 			{
@@ -79,7 +72,7 @@ namespace final_project_be_Application.Repository
 					.Where(m => m.CourseId == courseId)
 					.ToList();
 
-				var moduleDtos = _mapper.Map<List<ModuleDto>>(modules);
+				var moduleDtos = _mapper.Map<List<UpdateModuleDto>>(modules);
 
 				await _moduleDAO.CommitTransactionAsync();
 
@@ -90,7 +83,7 @@ namespace final_project_be_Application.Repository
 			{
 				await _moduleDAO.RollbackTransactionAsync();
 				_logger.LogError(ex, "Error while retrieving modules for course ID {CourseId}", courseId);
-				return new List<ModuleDto>();
+				return new List<UpdateModuleDto>();
 			}
 		}
 
