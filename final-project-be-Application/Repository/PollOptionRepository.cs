@@ -25,36 +25,36 @@ namespace final_project_be_Application.Repository
         {
             try
             {
-                _PollOptionDAO.BeginTransaction();
+                await _PollOptionDAO.BeginTransactionAsync();
                 var PollOption = _mapper.Map<PollOption>(dto);
-                _PollOptionDAO.Add(PollOption);
-                _PollOptionDAO.CommitTransaction();
+                await _PollOptionDAO.AddAsync(PollOption);
+                await _PollOptionDAO.CommitTransactionAsync();
 
-                _logger.LogInformation("Add PollOption success");
+                _logger.LogInformation("AddAsync PollOption success");
                 return PollOption;
             }
             catch (Exception ex)
             {
-                _PollOptionDAO.RollbackTransaction();
+                await _PollOptionDAO.RollbackTransactionAsync();
                 _logger.LogError(ex, "Error when adding PollOption");
                 return null;
             }
         }
 
-        public bool DeletePollOption(int id)
+        public async Task<bool> DeletePollOption(int id)
         {
             try
             {
-                _PollOptionDAO.BeginTransaction();
-                _PollOptionDAO.Delete(id);
-                _PollOptionDAO.CommitTransaction();
+                await _PollOptionDAO.BeginTransactionAsync();
+                await _PollOptionDAO.DeleteAsync(id);
+                await _PollOptionDAO.CommitTransactionAsync();
 
-                _logger.LogInformation("Delete PollOption success");
+                _logger.LogInformation("DeleteAsync PollOption success");
                 return true;
             }
             catch (Exception ex)
             {
-                _PollOptionDAO.RollbackTransaction();
+                await _PollOptionDAO.RollbackTransactionAsync();
                 _logger.LogError(ex, "Error when delete PollOption");
                 return false;
             }
@@ -85,16 +85,16 @@ namespace final_project_be_Application.Repository
         {
             try
             {
-                _PollOptionDAO.BeginTransaction();
-                var PollOption = _PollOptionDAO.GetById(id);
-                _PollOptionDAO.CommitTransaction();
+                await _PollOptionDAO.BeginTransactionAsync();
+                var PollOption = await _PollOptionDAO.GetByIdAsync(id);
+                await _PollOptionDAO.CommitTransactionAsync();
 
                 _logger.LogInformation("Get PollOption success");
                 return PollOption;
             }
             catch (Exception ex)
             {
-                _PollOptionDAO.RollbackTransaction();
+                await _PollOptionDAO.RollbackTransactionAsync();
                 _logger.LogError(ex, "Error when get PollOption");
                 return null;
             }
@@ -105,18 +105,18 @@ namespace final_project_be_Application.Repository
         {
             try
             {
-                _PollOptionDAO.BeginTransaction();
+                await _PollOptionDAO.BeginTransactionAsync();
                 var PollOption = _mapper.Map<PollOption>(dto);
-                _PollOptionDAO.Update(PollOption);
-                _PollOptionDAO.CommitTransaction();
+                await _PollOptionDAO.UpdateAsync(PollOption);
+                await _PollOptionDAO.CommitTransactionAsync();
 
-                _logger.LogInformation("Update PollOption success");
+                _logger.LogInformation("UpdateAsync PollOption success");
                 return PollOption;
             }
             catch (Exception ex)
             {
-                _PollOptionDAO.RollbackTransaction();
-                _logger.LogError(ex, "Error when update PollOption");
+                await _PollOptionDAO.RollbackTransactionAsync();
+                _logger.LogError(ex, "Error when UpdateAsync PollOption");
                 return null;
             }
         }

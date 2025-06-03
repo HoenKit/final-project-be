@@ -26,19 +26,19 @@ namespace final_project_be_Application.Repository
             _postFileDAO = postFileDAO;
             _commentDAO = commentDAO;
         }
-        //Update Creat Post
+        //UpdateAsync Creat Post
         public async Task<Post> CreatePost(PostCreateDto dto)
         {
             try
             {
-                _postDAO.BeginTransaction();
+                await _postDAO.BeginTransactionAsync();
                 if (dto.ParentPostId == 0)
                 {
                     dto.ParentPostId = null;
                 }
                 var Post = _mapper.Map<Post>(dto);
                 Post.PostFiles = null;
-                _postDAO.Add(Post);
+                await _postDAO.AddAsync(Post);
 
                 if (dto.PostFileCreate != null && dto.PostFileCreate.Count > 0)
                 {
@@ -52,35 +52,35 @@ namespace final_project_be_Application.Repository
 
                     foreach (var file in Post.PostFiles)
                     {
-                        _postFileDAO.Add(file);
+                        await _postFileDAO.AddAsync(file);
                     }
                 }
 
-                _postDAO.CommitTransaction();
+				await _postDAO.CommitTransactionAsync();
 
-                _logger.LogInformation("Add Post success");
+                _logger.LogInformation("AddAsync Post success");
                 return Post;
             }
             catch (Exception ex)
             {
-                _postDAO.RollbackTransaction();
+                await _postDAO.RollbackTransactionAsync();
                 _logger.LogError(ex, "Error when adding Post");
                 return null;
             }
         }
 
-        //Update Delete Post
-        public bool DeletePost(int id)
+        //UpdateAsync DeleteAsync Post
+        public async Task<bool> DeletePost(int id)
         {
             try
             {
-                _postDAO.BeginTransaction();
+                await _postDAO.BeginTransactionAsync();
 
                 var post = _postDAO.GetPostWithFilesAndComments(id);
                 if (post == null)
                 {
                     _logger.LogWarning("Post does not exist.");
-                    _postDAO.RollbackTransaction();
+                    await _postDAO.RollbackTransactionAsync();
                     return false;
                 }
 
@@ -88,7 +88,7 @@ namespace final_project_be_Application.Repository
                 {
                     foreach (var file in post.PostFiles.ToList())
                     {
-                        _postFileDAO.Delete(file.PostFileId);
+						await _postFileDAO.DeleteAsync(file.PostFileId);
                     }
                 }
 
@@ -96,25 +96,25 @@ namespace final_project_be_Application.Repository
                 {
                     foreach (var comment in post.Comments.ToList())
                     {
-                        _commentDAO.Delete(comment.CommentId);
+                        await _commentDAO.DeleteAsync(comment.CommentId);
                     }
                 }
 
-                _postDAO.Delete(id);
-                _postDAO.CommitTransaction();
+                await _postDAO.DeleteAsync(id);
+				await _postDAO.CommitTransactionAsync();
 
-                _logger.LogInformation("Delete Post success.");
+                _logger.LogInformation("DeleteAsync Post success.");
                 return true;
             }
             catch (Exception ex)
             {
-                _postDAO.RollbackTransaction();
+                await _postDAO.RollbackTransactionAsync();
                 _logger.LogError(ex, "Error when deleting Post.");
                 return false;
             }
         }
 
-        //Update Get All Posts
+        //UpdateAsync Get All Posts
         public PageResult<PostDto> GetAllPosts(int page, int pageSize, int? CategoryId, string? title, Guid? userId)
         {
             try
@@ -190,16 +190,16 @@ namespace final_project_be_Application.Repository
         {
             try
             {
-                _postDAO.BeginTransaction();
+                await _postDAO.BeginTransactionAsync();
                 var Post = _postDAO.GetPostandUser(id);
-                _postDAO.CommitTransaction();
+                await _postDAO.CommitTransactionAsync();
 
                 _logger.LogInformation("Get Post success");
                 return Post;
             }
             catch (Exception ex)
             {
-                _postDAO.RollbackTransaction();
+                await _postDAO.RollbackTransactionAsync();
                 _logger.LogError(ex, "Error when get Post");
                 return null;
             }
@@ -208,53 +208,53 @@ namespace final_project_be_Application.Repository
         {
             try
             {
-                _postDAO.BeginTransaction();
-                var Post = _postDAO.GetById(id);
-                _postDAO.CommitTransaction();
+                await _postDAO.BeginTransactionAsync();
+                var Post = await _postDAO.GetByIdAsync(id);
+                await _postDAO.CommitTransactionAsync();
 
                 _logger.LogInformation("Get Post success");
                 return Post;
             }
             catch (Exception ex)
             {
-                _postDAO.RollbackTransaction();
+                await _postDAO.RollbackTransactionAsync();
                 _logger.LogError(ex, "Error when get Post");
                 return null;
             }
 
         }
 
-        //Update UpdatePost
+        //UpdateAsync UpdatePost
         public async Task<Post> UpdatePost(PostCreateDto dto)
         {
             try
             {
-                _postDAO.BeginTransaction();
+                await _postDAO.BeginTransactionAsync();
                 if (dto.ParentPostId == 0)
                 {
                     dto.ParentPostId = null;
                 }
                 var Post = _mapper.Map<Post>(dto);
-                _postDAO.Update(Post);
-                _postDAO.CommitTransaction();
+                await _postDAO.UpdateAsync(Post);
+                await _postDAO.CommitTransactionAsync();
 
-                _logger.LogInformation("Update Post success");
+                _logger.LogInformation("UpdateAsync Post success");
                 return Post;
             }
             catch (Exception ex)
             {
-                _postDAO.RollbackTransaction();
-                _logger.LogError(ex, "Error when update Post");
+                await _postDAO.RollbackTransactionAsync();
+                _logger.LogError(ex, "Error when UpdateAsync Post");
                 return null;
             }
         }
 
         public async Task<Post> ToggleIsDeleted(int id)
         {
-            _postDAO.BeginTransaction();
+            await _postDAO.BeginTransactionAsync();
             try
             {
-                var post = _postDAO.GetById(id);
+                var post = await _postDAO.GetByIdAsync(id);
                 if (post == null)
                 {
                     _logger.LogWarning($"Post with ID {id} not found.");
@@ -264,8 +264,8 @@ namespace final_project_be_Application.Repository
                 post.IsDeleted = !post.IsDeleted;
                 post.UpdateAt = DateTime.Now;
 
-                _postDAO.Update(post);
-                _postDAO.CommitTransaction();
+                await _postDAO.UpdateAsync(post);
+                await _postDAO.CommitTransactionAsync();
 
                 _logger.LogInformation($"Post {id} banned status changed to {post.IsDeleted}");
 
@@ -273,7 +273,7 @@ namespace final_project_be_Application.Repository
             }
             catch (Exception ex)
             {
-                _postDAO.RollbackTransaction();
+                await _postDAO.RollbackTransactionAsync();
                 _logger.LogError($"Failed to toggle deleted status for Post {id}: {ex.Message}");
                 return null;
             }

@@ -61,9 +61,9 @@ namespace final_project_be.Controllers
             return Ok(commentDto);
         }
 
-        // DELETE api/<CommentController>/5
+        // DeleteAsync api/<CommentController>/5
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        public IActionResult DeleteAsync(int id)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             _commentRepository.DeleteComment(id);

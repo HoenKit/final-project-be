@@ -24,36 +24,36 @@ namespace final_project_be_Application.Repository
         {
             try
             {
-                _pollOptionVoteDAO.BeginTransaction();
+                await _pollOptionVoteDAO.BeginTransactionAsync();
                 var pollOptionVote = _mapper.Map<PollOptionVote>(dto);
-                _pollOptionVoteDAO.Add(pollOptionVote);
-                _pollOptionVoteDAO.CommitTransaction();
+                await _pollOptionVoteDAO.AddAsync(pollOptionVote);
+				await _pollOptionVoteDAO.CommitTransactionAsync();
 
-                _logger.LogInformation("Add Poll Option Vote success");
+                _logger.LogInformation("AddAsync Poll Option Vote success");
                 return pollOptionVote;
             }
             catch (Exception ex)
             {
-                _pollOptionVoteDAO.RollbackTransaction();
+                await _pollOptionVoteDAO.RollbackTransactionAsync();
                 _logger.LogError(ex, "Error when adding Poll Option Vote");
                 return null;
             }
         }
 
-        public bool DeletePollOptionVote(int id)
+        public async Task<bool> DeletePollOptionVote(int id)
         {
             try
             {
-                _pollOptionVoteDAO.BeginTransaction();
-                _pollOptionVoteDAO.Delete(id);
-                _pollOptionVoteDAO.CommitTransaction();
+                await _pollOptionVoteDAO.BeginTransactionAsync();
+                await _pollOptionVoteDAO.DeleteAsync(id);
+				await _pollOptionVoteDAO.CommitTransactionAsync();
 
-                _logger.LogInformation("Delete Poll Option Vote success");
+                _logger.LogInformation("DeleteAsync Poll Option Vote success");
                 return true;
             }
             catch (Exception ex)
             {
-                _pollOptionVoteDAO.RollbackTransaction();
+                await _pollOptionVoteDAO.RollbackTransactionAsync();
                 _logger.LogError(ex, "Error when delete Poll Option Vote");
                 return false;
             }
@@ -85,16 +85,16 @@ namespace final_project_be_Application.Repository
 
             try
             {
-                _pollOptionVoteDAO.BeginTransaction();
-                var polloptionvote = _pollOptionVoteDAO.GetById(id);
-                _pollOptionVoteDAO.CommitTransaction();
+                await _pollOptionVoteDAO.BeginTransactionAsync();
+                var polloptionvote = await _pollOptionVoteDAO.GetByIdAsync(id);
+                await _pollOptionVoteDAO.CommitTransactionAsync();
 
                 _logger.LogInformation("Get Poll Option Votes success");
                 return polloptionvote;
             }
             catch (Exception ex)
             {
-                _pollOptionVoteDAO.RollbackTransaction();
+                await _pollOptionVoteDAO.RollbackTransactionAsync();
                 _logger.LogError(ex, "Error when get Poll Option Vote");
                 return null;
             }
@@ -104,18 +104,18 @@ namespace final_project_be_Application.Repository
         {
             try
             {
-                _pollOptionVoteDAO.BeginTransaction();
+                await _pollOptionVoteDAO.BeginTransactionAsync();
                 var pollOptionvote = _mapper.Map<PollOptionVote>(dto);
-                _pollOptionVoteDAO.Update(pollOptionvote);
-                _pollOptionVoteDAO.CommitTransaction();
+                await _pollOptionVoteDAO.UpdateAsync(pollOptionvote);
+				await _pollOptionVoteDAO.CommitTransactionAsync();
 
-                _logger.LogInformation("Update Poll Option Votes success");
+                _logger.LogInformation("UpdateAsync Poll Option Votes success");
                 return pollOptionvote;
             }
             catch (Exception ex)
             {
-                _pollOptionVoteDAO.RollbackTransaction();
-                _logger.LogError(ex, "Error when update Poll Option Votes");
+                await _pollOptionVoteDAO.RollbackTransactionAsync();
+                _logger.LogError(ex, "Error when UpdateAsync Poll Option Votes");
                 return null;
             }
         }

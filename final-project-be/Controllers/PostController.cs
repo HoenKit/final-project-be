@@ -19,7 +19,7 @@ namespace final_project_be.Controllers
             _hubContext = hubContext;
         }
         // GET: api/<PostController>
-        //Update GetAllPost
+        //UpdateAsync GetAllPost
         [HttpGet]
         public IActionResult GetAll(int? page, int? CategoryId, string? title, Guid? userId)
         {
@@ -66,7 +66,7 @@ namespace final_project_be.Controllers
             var updatedPost = await _postRepository.ToggleIsDeleted(id);
             if (updatedPost == null)
             {
-                return StatusCode(500, "Failed to update post status.");
+                return StatusCode(500, "Failed to UpdateAsync post status.");
             }
             return Ok(updatedPost);
         }

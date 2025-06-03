@@ -28,47 +28,47 @@ namespace final_project_be_Application.Repository
         {
             try
             {
-                _ReportCommentDAO.BeginTransaction();
+				await _ReportCommentDAO.BeginTransactionAsync();
                 var report = _mapper.Map<Report>(dto);
-                _reportDAO.Add(report);
+                await _reportDAO.AddAsync(report);
 
                 if (report == null || report.ReportId <= 0)
                 {
                     _logger.LogError("Failed to create Report, cannot proceed with ReportComment.");
-                    _ReportCommentDAO.RollbackTransaction();
+                    await _ReportCommentDAO.RollbackTransactionAsync();
                     return null;
                 }
 
                 dto.ReportId = report.ReportId;
                 var ReportComment = _mapper.Map<ReportComment>(dto);
-                _ReportCommentDAO.Add(ReportComment);
-                _ReportCommentDAO.CommitTransaction();
+				await _ReportCommentDAO.AddAsync(ReportComment);
+                await _ReportCommentDAO.CommitTransactionAsync();
 
-                _logger.LogInformation("Add ReportComment success");
+                _logger.LogInformation("AddAsync ReportComment success");
                 return ReportComment;
             }
             catch (Exception ex)
             {
-                _ReportCommentDAO.RollbackTransaction();
+                await _ReportCommentDAO.RollbackTransactionAsync();
                 _logger.LogError(ex, "Error when adding ReportComment");
                 return null;
             }
         }
 
-        public bool DeleteReportComment(int reportId, int commentId)
+        public async Task<bool> DeleteReportComment(int reportId, int commentId)
         {
             try
             {
-                _ReportCommentDAO.BeginTransaction();
-                _ReportCommentDAO.DeleteByReportAndCommentId(reportId, commentId);
-                _ReportCommentDAO.CommitTransaction();
+				await _ReportCommentDAO.BeginTransactionAsync();
+				_ReportCommentDAO.DeleteByReportAndCommentId(reportId, commentId);
+				await _ReportCommentDAO.CommitTransactionAsync();
 
-                _logger.LogInformation("Delete ReportComment success");
+                _logger.LogInformation("DeleteAsync ReportComment success");
                 return true;
             }
             catch (Exception ex)
             {
-                _ReportCommentDAO.RollbackTransaction();
+				await _ReportCommentDAO.RollbackTransactionAsync();
                 _logger.LogError(ex, "Error when delete ReportComment");
                 return false;
             }
@@ -101,16 +101,16 @@ namespace final_project_be_Application.Repository
         {
             try
             {
-                _ReportCommentDAO.BeginTransaction();
+                await _ReportCommentDAO.BeginTransactionAsync();
                 var ReportComment = _ReportCommentDAO.GetByReportId(id);
-                _ReportCommentDAO.CommitTransaction();
+				await _ReportCommentDAO.CommitTransactionAsync();
 
                 _logger.LogInformation("Get ReportComment success");
                 return ReportComment;
             }
             catch (Exception ex)
             {
-                _ReportCommentDAO.RollbackTransaction();
+                await _ReportCommentDAO.RollbackTransactionAsync();
                 _logger.LogError(ex, "Error when get ReportComment");
                 return null;
             }
@@ -121,29 +121,29 @@ namespace final_project_be_Application.Repository
         {
             try
             {
-                _ReportCommentDAO.BeginTransaction();
+				await _ReportCommentDAO.BeginTransactionAsync();
                 var report = _mapper.Map<Report>(dto);
-                _reportDAO.Update(report);
+                await _reportDAO.UpdateAsync(report);
 
                 if (report == null || report.ReportId <= 0)
                 {
                     _logger.LogError("Failed to create Report, cannot proceed with ReportComment.");
-                    _ReportCommentDAO.RollbackTransaction();
+                    await _ReportCommentDAO.RollbackTransactionAsync();
                     return null;
                 }
 
                 dto.ReportId = report.ReportId;
                 var ReportComment = _mapper.Map<ReportComment>(dto);
-                _ReportCommentDAO.Update(ReportComment);
-                _ReportCommentDAO.CommitTransaction();
+				await _ReportCommentDAO.UpdateAsync(ReportComment);
+                await _ReportCommentDAO.CommitTransactionAsync();
 
-                _logger.LogInformation("Update ReportComment success");
+                _logger.LogInformation("UpdateAsync ReportComment success");
                 return ReportComment;
             }
             catch (Exception ex)
             {
-                _ReportCommentDAO.RollbackTransaction();
-                _logger.LogError(ex, "Error when update ReportComment");
+                await _ReportCommentDAO.RollbackTransactionAsync();
+                _logger.LogError(ex, "Error when UpdateAsync ReportComment");
                 return null;
             }
         }

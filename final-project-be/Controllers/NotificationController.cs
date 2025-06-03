@@ -54,9 +54,9 @@ namespace final_project_be.Controllers
             return Ok(NotificationDto);
         }
 
-        // DELETE api/<NotificationController>/5
+        // DeleteAsync api/<NotificationController>/5
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        public IActionResult DeleteAsync(int id)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             _NotificationRepository.DeleteNotification(id);

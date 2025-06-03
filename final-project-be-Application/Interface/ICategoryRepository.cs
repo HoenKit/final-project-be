@@ -7,7 +7,7 @@ namespace final_project_be_Application.Interface
 	public interface ICategoryRepository : IRepository<Category>
 	{
 		public Task<Category> CreateCategory(CategoryDto dto);
-		public bool DeleteCategory(int id);
+		public Task<bool> DeleteCategory(int id);
 		public Task<Category> GetCategory(int id);
 		public Task<Category> UpdateCategory(CategoryDto dto);
 		public PageResult<Category> GetAllCategory(int page, int pageSize);

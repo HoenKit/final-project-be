@@ -25,41 +25,41 @@ namespace final_project_be_Application.Repository
             _ReportUserDAO = ReportUserDAO;
         }
 
-        public Report CreateReport(ReportDto dto)
+        public async Task<Report> CreateReport(ReportDto dto)
         {
             try
             {
-                _ReportDAO.BeginTransaction();
+				await _ReportDAO.BeginTransactionAsync();
                 var Report = _mapper.Map<Report>(dto);
-                _ReportDAO.Add(Report);
-                _ReportDAO.SaveChanges();
-                _ReportDAO.CommitTransaction();
+                await _ReportDAO.AddAsync(Report);
+                await _ReportDAO.SaveChangesAsync();
+				await _ReportDAO.CommitTransactionAsync();
 
-                _logger.LogInformation("Add Report success");
+                _logger.LogInformation("AddAsync Report success");
                 return Report;
             }
             catch (Exception ex)
             {
-                _ReportDAO.RollbackTransaction();
+                await _ReportDAO.RollbackTransactionAsync();
                 _logger.LogError(ex, "Error when adding Report");
                 return null;
             }
         }
 
-        public bool DeleteReport(int id)
+        public async Task<bool> DeleteReport(int id)
         {
             try
             {
-                _ReportDAO.BeginTransaction();
-                _ReportDAO.Delete(id);
-                _ReportDAO.CommitTransaction();
+                await _ReportDAO.BeginTransactionAsync();
+                await _ReportDAO.DeleteAsync(id);
+				await _ReportDAO.CommitTransactionAsync();
 
-                _logger.LogInformation("Delete Report success");
+                _logger.LogInformation("DeleteAsync Report success");
                 return true;
             }
             catch (Exception ex)
             {
-                _ReportDAO.RollbackTransaction();
+                await _ReportDAO.RollbackTransactionAsync();
                 _logger.LogError(ex, "Error when delete Report");
                 return false;
             }
@@ -113,16 +113,16 @@ namespace final_project_be_Application.Repository
         {
             try
             {
-                _ReportDAO.BeginTransaction();
-                var Report = _ReportDAO.GetById(id);
-                _ReportDAO.CommitTransaction();
+                await _ReportDAO.BeginTransactionAsync();
+                var Report = await _ReportDAO.GetByIdAsync(id);
+                await _ReportDAO.CommitTransactionAsync();
 
                 _logger.LogInformation("Get Report success");
                 return Report;
             }
             catch (Exception ex)
             {
-                _ReportDAO.RollbackTransaction();
+                await _ReportDAO.RollbackTransactionAsync();
                 _logger.LogError(ex, "Error when get Report");
                 return null;
             }
@@ -133,18 +133,18 @@ namespace final_project_be_Application.Repository
         {
             try
             {
-                _ReportDAO.BeginTransaction();
+                await _ReportDAO.BeginTransactionAsync();
                 var Report = _mapper.Map<Report>(dto);
-                _ReportDAO.Update(Report);
-                _ReportDAO.CommitTransaction();
+                await _ReportDAO.UpdateAsync(Report);
+				await _ReportDAO.CommitTransactionAsync();
 
-                _logger.LogInformation("Update Report success");
+                _logger.LogInformation("UpdateAsync Report success");
                 return Report;
             }
             catch (Exception ex)
             {
-                _ReportDAO.RollbackTransaction();
-                _logger.LogError(ex, "Error when update Report");
+                await _ReportDAO.RollbackTransactionAsync();
+                _logger.LogError(ex, "Error when UpdateAsync Report");
                 return null;
             }
         }

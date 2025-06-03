@@ -78,7 +78,7 @@ namespace final_project_be.Controllers
 			var updatedCourse = await _courseRepository.ToggleIsDeleted(id);
 			if (updatedCourse == null)
 			{
-				return StatusCode(500, "Failed to update course status.");
+				return StatusCode(500, "Failed to UpdateAsync course status.");
 			}
 			return Ok(updatedCourse);
 		}

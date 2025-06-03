@@ -55,9 +55,9 @@ namespace final_project_be.Controllers
             return Ok(ReportCommentDto);
         }
 
-        // DELETE api/<ReportCommentController>/5
+        // DeleteAsync api/<ReportCommentController>/5
         [HttpDelete]
-        public IActionResult Delete(int reportId, int commentId)
+        public IActionResult DeleteAsync(int reportId, int commentId)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             _ReportCommentRepository.DeleteReportComment(reportId, commentId);

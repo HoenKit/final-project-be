@@ -6,8 +6,8 @@ namespace final_project_be_Application.Interface
 {
     public interface IReportRepository : IRepository<Report>
     {
-        public Report CreateReport(ReportDto dto);
-        public bool DeleteReport(int id);
+        public Task<Report> CreateReport(ReportDto dto);
+        public Task<bool> DeleteReport(int id);
         public Task<Report> GetReport(int id);
         public Task<Report> UpdateReport(ReportDto dto);
         public List<ReportPostDto> GetReportsByPost(int postId);

@@ -7,7 +7,7 @@ namespace final_project_be_Application.Interface
     public interface IReportCommentRepository : IRepository<ReportComment>
     {
         public Task<ReportComment> CreateReportComment(ReportCommentDto dto);
-        public bool DeleteReportComment(int reportId, int commentId);
+        public Task<bool> DeleteReportComment(int reportId, int commentId);
         public Task<ReportComment> GetReportComment(int id);
         public Task<ReportComment> UpdateReportComment(ReportCommentDto dto);
         public PageResult<ReportComment> GetAllReportComments(int page, int pageSize);

@@ -26,36 +26,36 @@ namespace final_project_be_Application.Repository
 		{
 			try
 			{
-				_categoryDAO.BeginTransaction();
+				await _categoryDAO.BeginTransactionAsync();
 				var category = _mapper.Map<Category>(dto);
-				_categoryDAO.Add(category);
-				_categoryDAO.CommitTransaction();
+				await _categoryDAO.AddAsync(category);
+				await _categoryDAO.CommitTransactionAsync();
 
-				_logger.LogInformation("Add category success");
+				_logger.LogInformation("AddAsync category success");
 				return category;
 			}
 			catch (Exception ex)
 			{
-				_categoryDAO.RollbackTransaction();
+				await _categoryDAO.RollbackTransactionAsync();
 				_logger.LogError(ex, "Error when adding category");
 				return null;
 			}
 		}
 
-		public bool DeleteCategory(int id)
+		public async Task<bool> DeleteCategory(int id)
 		{
 			try
 			{
-				_categoryDAO.BeginTransaction();
-				_categoryDAO.Delete(id);
-				_categoryDAO.CommitTransaction();
+				await _categoryDAO.BeginTransactionAsync();
+				await _categoryDAO.DeleteAsync(id);
+				await _categoryDAO.CommitTransactionAsync();
 
-				_logger.LogInformation("Delete category success");
+				_logger.LogInformation("DeleteAsync category success");
 				return true;
 			}
 			catch (Exception ex)
 			{
-				_categoryDAO.RollbackTransaction();
+				await _categoryDAO.RollbackTransactionAsync();
 				_logger.LogError(ex, "Error when delete category");
 				return false;
 			}
@@ -87,16 +87,16 @@ namespace final_project_be_Application.Repository
 		{
 			try
 			{
-				_categoryDAO.BeginTransaction();
-				var category = _categoryDAO.GetById(id);
-				_categoryDAO.CommitTransaction();
+				await _categoryDAO.BeginTransactionAsync();
+				var category = await _categoryDAO.GetByIdAsync(id);
+				await _categoryDAO.CommitTransactionAsync();
 
 				_logger.LogInformation("Get category success");
 				return category;
 			}
 			catch (Exception ex)
 			{
-				_categoryDAO.RollbackTransaction();
+				await _categoryDAO.RollbackTransactionAsync();
 				_logger.LogError(ex, "Error when get category");
 				return null;
 			}
@@ -106,18 +106,18 @@ namespace final_project_be_Application.Repository
 		{
 			try
 			{
-				_categoryDAO.BeginTransaction();
+				await _categoryDAO.BeginTransactionAsync();
 				var category = _mapper.Map<Category>(dto);
-				_categoryDAO.Update(category);
-				_categoryDAO.CommitTransaction();
+				await _categoryDAO.UpdateAsync(category);
+				await _categoryDAO.CommitTransactionAsync();
 
-				_logger.LogInformation("Update category success");
+				_logger.LogInformation("UpdateAsync category success");
 				return category;
 			}
 			catch (Exception ex)
 			{
-				_categoryDAO.RollbackTransaction();
-				_logger.LogError(ex, "Error when update category");
+				await _categoryDAO.RollbackTransactionAsync();
+				_logger.LogError(ex, "Error when UpdateAsync category");
 				return null;
 			}
 		}

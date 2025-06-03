@@ -15,15 +15,15 @@ namespace final_project_be_Application.Repository
 
         public IEnumerable<T> GetAll() => _dao.GetAll();
 
-        public T? GetById(object id) => _dao.GetById(id);
+        public async Task<T?> GetByIdAsync(object id) => await _dao.GetByIdAsync(id);
 
-        public IEnumerable<T> Find(Expression<Func<T, bool>> predicate) => _dao.Find(predicate);
+        public IEnumerable<T> Find(Expression<Func<T, bool>> predicate) => (IEnumerable<T>)_dao.FindAsync(predicate);
 
-        public void Add(T entity) => _dao.Add(entity);
+        public async void AddAsync(T entity) => await _dao.AddAsync(entity);
 
-        public void Update(T entity) => _dao.Update(entity);
+        public async void UpdateAsync(T entity) => await _dao.UpdateAsync(entity);
 
-        public void Delete(object id) => _dao.Delete(id);
+        public async void DeleteAsync(object id) => await _dao.DeleteAsync(id);
     }
 
 }

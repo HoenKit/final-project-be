@@ -52,9 +52,9 @@ namespace final_project_be.Controllers
 		//	return Ok(PostFileDto);
 		//}
 
-		// DELETE api/<PostFileController>/5
+		// DeleteAsync api/<PostFileController>/5
 		[HttpDelete("{id}")]
-		public IActionResult Delete(int id)
+		public IActionResult DeleteAsync(int id)
 		{
 			if (!ModelState.IsValid) return BadRequest(ModelState);
 			_PostFileRepository.DeletePostFile(id);

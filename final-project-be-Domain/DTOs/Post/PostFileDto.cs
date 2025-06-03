@@ -9,7 +9,7 @@
 		public bool? IsDeleted { get; set; }
 	}
 
-	//Add PostFileCreateDto
+	//AddAsync PostFileCreateDto
 	public class PostFileCreateDto
 	{
 		public int PostFileId { get; set; }

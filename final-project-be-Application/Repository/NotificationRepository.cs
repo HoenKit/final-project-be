@@ -25,36 +25,36 @@ namespace final_project_be_Application.Repository
         {
             try
             {
-                _NotificationDAO.BeginTransaction();
+                await _NotificationDAO.BeginTransactionAsync();
                 var Notification = _mapper.Map<Notification>(dto);
-                _NotificationDAO.Add(Notification);
-                _NotificationDAO.CommitTransaction();
+                await _NotificationDAO.AddAsync(Notification);
+                await _NotificationDAO.CommitTransactionAsync();
 
-                _logger.LogInformation("Add Notification success");
+                _logger.LogInformation("AddAsync Notification success");
                 return Notification;
             }
             catch (Exception ex)
             {
-                _NotificationDAO.RollbackTransaction();
+                await _NotificationDAO.RollbackTransactionAsync();
                 _logger.LogError(ex, "Error when adding Notification");
                 return null;
             }
         }
 
-        public bool DeleteNotification(int id)
+        public async Task<bool> DeleteNotification(int id)
         {
             try
             {
-                _NotificationDAO.BeginTransaction();
-                _NotificationDAO.Delete(id);
-                _NotificationDAO.CommitTransaction();
+                await _NotificationDAO.BeginTransactionAsync();
+                await _NotificationDAO.DeleteAsync(id);
+                await _NotificationDAO.CommitTransactionAsync();
 
-                _logger.LogInformation("Delete Notification success");
+                _logger.LogInformation("DeleteAsync Notification success");
                 return true;
             }
             catch (Exception ex)
             {
-                _NotificationDAO.RollbackTransaction();
+                await _NotificationDAO.RollbackTransactionAsync();
                 _logger.LogError(ex, "Error when delete Notification");
                 return false;
             }
@@ -85,16 +85,16 @@ namespace final_project_be_Application.Repository
         {
             try
             {
-                _NotificationDAO.BeginTransaction();
-                var Notification = _NotificationDAO.GetById(id);
-                _NotificationDAO.CommitTransaction();
+                await _NotificationDAO.BeginTransactionAsync();
+                var Notification = await _NotificationDAO.GetByIdAsync(id);
+                await _NotificationDAO.CommitTransactionAsync();
 
                 _logger.LogInformation("Get Notification success");
                 return Notification;
             }
             catch (Exception ex)
             {
-                _NotificationDAO.RollbackTransaction();
+                await _NotificationDAO.RollbackTransactionAsync();
                 _logger.LogError(ex, "Error when get Notification");
                 return null;
             }
@@ -105,18 +105,18 @@ namespace final_project_be_Application.Repository
         {
             try
             {
-                _NotificationDAO.BeginTransaction();
+                await _NotificationDAO.BeginTransactionAsync();
                 var Notification = _mapper.Map<Notification>(dto);
-                _NotificationDAO.Update(Notification);
-                _NotificationDAO.CommitTransaction();
+                await _NotificationDAO.UpdateAsync(Notification);
+                await _NotificationDAO.CommitTransactionAsync();
 
-                _logger.LogInformation("Update Notification success");
+                _logger.LogInformation("UpdateAsync Notification success");
                 return Notification;
             }
             catch (Exception ex)
             {
-                _NotificationDAO.RollbackTransaction();
-                _logger.LogError(ex, "Error when update Notification");
+                await _NotificationDAO.RollbackTransactionAsync();
+                _logger.LogError(ex, "Error when UpdateAsync Notification");
                 return null;
             }
         }

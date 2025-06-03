@@ -8,7 +8,7 @@ namespace final_project_be_Application.Interface
 	{
 		public IEnumerable<PostFile> GetAllPostFilesByPostId(int postId);
 		public Task<PostFile> CreatePostFile(PostFileDto dto);
-		public bool DeletePostFile(int id);
+		public Task<bool> DeletePostFile(int id);
 		public Task<PostFile> GetPostFile(int id);
 	}
 }

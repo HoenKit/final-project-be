@@ -7,7 +7,7 @@ namespace final_project_be_Application.Interface
     public interface IPollOptionVoteRepository : IRepository<PollOptionVote>
     {
         public Task<PollOptionVote> CreatePollOptionVote(PollOptionVoteDto dto);
-        public bool DeletePollOptionVote(int id);
+        public Task<bool> DeletePollOptionVote(int id);
         public Task<PollOptionVote> GetPollOptionVote(int id);
         public Task<PollOptionVote> UpdatePollOptionVote(PollOptionVoteDto dto);
         public PageResult<PollOptionVote> GetAllPollOptionVotes(int page, int pageSize);

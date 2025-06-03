@@ -54,9 +54,9 @@ namespace final_project_be.Controllers
             return Ok(PollOptionDto);
         }
 
-        // DELETE api/<PollOptionController>/5
+        // DeleteAsync api/<PollOptionController>/5
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        public IActionResult DeleteAsync(int id)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             _PollOptionRepository.DeletePollOption(id);

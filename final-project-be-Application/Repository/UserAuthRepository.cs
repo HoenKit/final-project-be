@@ -13,7 +13,6 @@ using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using final_project_be_Domain.DTOs.Users;
 using final_project_be_Application.Service.EmailService;
 using final_project_be_Application.Ultils;
 using Microsoft.Extensions.Options;
@@ -124,7 +123,7 @@ namespace final_project_be_Application.Repository
                     throw new UnauthorizedAccessException("Invalid token");
                 }
 
-                var user = _UserDAO.GetById(userId);
+                var user = _UserDAO.GetByIdAsync(userId);
                 if (user == null)
                 {
                     throw new KeyNotFoundException("User not found");
@@ -159,7 +158,7 @@ namespace final_project_be_Application.Repository
 
         public async Task<User> RegisterAsync(UserRegisterDto dto)
         {
-            _UserDAO.BeginTransaction();
+            await _UserDAO.BeginTransactionAsync();
             try
             {
                 var userExists = _UserDAO.UserRegisterExist(dto);
@@ -174,8 +173,8 @@ namespace final_project_be_Application.Repository
                 user.Email = dto.Email;
                 user.Password = hashedPassword;
 
-                _UserDAO.Add(user);
-                _UserDAO.SaveChanges();
+                await _UserDAO.AddAsync(user);
+                await _UserDAO.SaveChangesAsync();
 
                 var userMeta = new UserMetadata
                 {
@@ -188,7 +187,7 @@ namespace final_project_be_Application.Repository
                 };
 
                 _UserDAO.AddUserMetaData(userMeta);
-                _UserDAO.SaveChanges();
+                await _UserDAO.SaveChangesAsync();
 
                 var defaultRole = _UserDAO.GetRoleByName("User");
                 if (defaultRole != null)
@@ -200,16 +199,16 @@ namespace final_project_be_Application.Repository
                     };
 
                     _UserDAO.AddUserRole(userRole);
-                    _UserDAO.SaveChanges(); 
+                    await _UserDAO.SaveChangesAsync(); 
                 }
 
-                _UserDAO.CommitTransaction();
+                await _UserDAO.CommitTransactionAsync();
                 _logger.LogInformation("User registered successfully with email: {Email}", dto.Email);
                 return user;
             }
             catch (Exception ex)
             {
-                _UserDAO.RollbackTransaction();
+                await _UserDAO.RollbackTransactionAsync();
                 _logger.LogError(ex, "Failed to register user with email: {Email}", dto.Email);
                 return null;
             }
@@ -331,7 +330,7 @@ namespace final_project_be_Application.Repository
                 throw new Exception("User not found");
 
             user.Password = new PasswordHasher<User>().HashPassword(user, Request.NewPassword); // or your own method
-            _UserDAO.Update(user);
+            await _UserDAO.UpdateAsync(user);
         }
 
     }

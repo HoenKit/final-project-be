@@ -54,9 +54,9 @@ namespace final_project_be.Controllers
             return Ok(categoryDto);
         }
 
-        // DELETE api/<CategoryController>/5
+        // DeleteAsync api/<CategoryController>/5
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        public IActionResult DeleteAsync(int id)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             _categoryRepository.DeleteCategory(id);

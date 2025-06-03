@@ -46,7 +46,7 @@ builder.Services.AddAutoMapper(typeof(MapperProfile));
 builder.Host.UseSerilog();
 
 builder.Services.AddControllersWithViews();
-// Add services to the container.
+// AddAsync services to the container.
 
 builder.Services.AddControllers();
 
@@ -112,9 +112,10 @@ builder.Services.AddScoped<IUserAuthRepository, UserAuthRepository>();
 builder.Services.AddScoped<IReportUserRepository, ReportUserRepository>();
 builder.Services.AddScoped<IPostFileRepository, PostFileRepository>();
 builder.Services.AddScoped<ICourseRepository, CourseRepository>();
-builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IModuleRepository, ModuleRepository>();
 //Config Service
 builder.Services.AddScoped<BlobStorageService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddSingleton<CloudinaryService>();
 builder.Services.Configure<CloudinarySettings>(
 	builder.Configuration.GetSection("Cloudinary"));
