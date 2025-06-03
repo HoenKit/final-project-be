@@ -96,10 +96,10 @@ namespace final_project_be.Controllers
         }
 
         [HttpPut]
-        public IActionResult Put(UserManagerDto usermanagerDto)
+        public async Task<IActionResult> Put(UserManagerDto usermanagerDto)
         {
             if (!ModelState.IsValid) { return BadRequest(ModelState); }
-            _userRepository.UpdateUser(usermanagerDto);
+            await _userRepository.UpdateUser(usermanagerDto);
             return Ok(usermanagerDto);
         }
 

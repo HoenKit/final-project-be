@@ -24,38 +24,44 @@ namespace final_project_be_Application.Repository
             _reportDAO = reportDAO;
         }
 
-        public async Task<ReportPost> CreateReportPost(ReportPostDto dto)
-        {
-            try
-            {
+		public async Task<ReportPost> CreateReportPost(ReportPostDto dto)
+		{
+			try
+			{
 				await _ReportPostDAO.BeginTransactionAsync();
-                var report = _mapper.Map<Report>(dto);
-                await _reportDAO.AddAsync(report);
 
-                if (report == null || report.ReportId <= 0)
-                {
-                    _logger.LogError("Failed to create Report, cannot proceed with ReportPost.");
-                    await _ReportPostDAO.RollbackTransactionAsync();
-                    return null;
-                }
+				// Tạo Report trước
+				var report = _mapper.Map<Report>(dto);
+				await _reportDAO.AddAsync(report);
 
-                dto.ReportId = report.ReportId;
-                var ReportPost = _mapper.Map<ReportPost>(dto);
-                await _ReportPostDAO.AddAsync(ReportPost);
-                await _ReportPostDAO.CommitTransactionAsync();
+				if (report == null || report.ReportId <= 0)
+				{
+					_logger.LogError("Failed to create Report, cannot proceed with ReportPost.");
+					await _ReportPostDAO.RollbackTransactionAsync();
+					return null;
+				}
 
-                _logger.LogInformation("AddAsync ReportPost success");
-                return ReportPost;
-            }
-            catch (Exception ex)
-            {
-                await _ReportPostDAO.RollbackTransactionAsync();
-                _logger.LogError(ex, "Error when adding ReportPost");
-                return null;
-            }
-        }
+				// Gán ReportId vừa tạo vào dto để map sang ReportPost
+				dto.ReportId = report.ReportId;
 
-        public async Task<bool> DeleteReportPost(int reportId, int PostId)
+				var reportPost = _mapper.Map<ReportPost>(dto);
+				await _ReportPostDAO.AddAsync(reportPost);
+
+				await _ReportPostDAO.CommitTransactionAsync();
+
+				_logger.LogInformation("Successfully added ReportPost with ID: {Id}", reportPost.ReportId);
+				return reportPost;
+			}
+			catch (Exception ex)
+			{
+				await _ReportPostDAO.RollbackTransactionAsync();
+				_logger.LogError(ex, "Error when adding ReportPost");
+				return null;
+			}
+		}
+
+
+		public async Task<bool> DeleteReportPost(int reportId, int PostId)
         {
             try
             {

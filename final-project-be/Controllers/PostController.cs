@@ -31,10 +31,10 @@ namespace final_project_be.Controllers
 
         // GET api/<PostController>/5
         [HttpGet("{id}")]
-        public IActionResult Get(int id)
+        public async Task<IActionResult> Get(int id)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            return Ok(_postRepository.GetPost(id));
+            return Ok(await _postRepository.GetPost(id));
         }
 
 
@@ -52,10 +52,10 @@ namespace final_project_be.Controllers
 
         // PUT api/<PostController>/5
         [HttpPut]
-        public IActionResult Put(PostCreateDto postDto)//Change PostDto to PostCreateDto
+        public async Task<IActionResult> Put(PostCreateDto postDto)//Change PostDto to PostCreateDto
         {
             if (!ModelState.IsValid) { return BadRequest(ModelState); }
-            _postRepository.UpdatePost(postDto);
+            await _postRepository.UpdatePost(postDto);
             return Ok(postDto);
         }
 
