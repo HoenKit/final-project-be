@@ -31,36 +31,36 @@ namespace final_project_be.Controllers
 
         // GET api/<ReportPostController>/5
         [HttpGet("{id}")]
-        public IActionResult Get(int id)
+        public async Task<IActionResult> Get(int id)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            return Ok(_reportRepository.GetReport(id));
+            return Ok(await _reportRepository.GetReport(id));
         }
 
         // POST api/<ReportPostController>
         [HttpPost]
-        public IActionResult Post([FromBody] ReportDto dto)
+        public async Task<IActionResult> Post([FromBody] ReportDto dto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            _reportRepository.CreateReport(dto);
+            await _reportRepository.CreateReport(dto);
             return Ok(dto);
         }
 
         // PUT api/<ReportPostController>/5
         [HttpPut]
-        public IActionResult Put(ReportDto dto)
+        public async Task<IActionResult> Put(ReportDto dto)
         {
             if (!ModelState.IsValid) { return BadRequest(ModelState); }
-            _reportRepository.UpdateReport(dto);
+            await _reportRepository.UpdateReport(dto);
             return Ok(dto);
         }
 
-        // DELETE api/<ReportPostController>/5
+        // DeleteAsync api/<ReportPostController>/5
         [HttpDelete]
-        public IActionResult Delete(int Id)
+        public async Task<IActionResult> DeleteAsync(int Id)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            _reportRepository.DeleteReport(Id);
+            await _reportRepository.DeleteReport(Id);
             return Ok();
         }
     }

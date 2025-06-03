@@ -28,18 +28,18 @@ namespace final_project_be.Controllers
 
 		// GET api/<PostFileController>/5
 		[HttpGet("{id}")]
-		public IActionResult Get(int id)
+		public async Task<IActionResult> Get(int id)
 		{
 			if (!ModelState.IsValid) return BadRequest(ModelState);
-			return Ok(_PostFileRepository.GetPostFile(id));
+			return Ok(await _PostFileRepository.GetPostFile(id));
 		}
 
 		// POST api/<PostFileController>
 		[HttpPost]
-		public IActionResult Post([FromBody] PostFileDto PostFileDto)
+		public async Task<IActionResult> Post([FromBody] PostFileDto PostFileDto)
 		{
 			if (!ModelState.IsValid) return BadRequest(ModelState);
-			_PostFileRepository.CreatePostFile(PostFileDto);
+			await _PostFileRepository.CreatePostFile(PostFileDto);
 			return Ok(PostFileDto);
 		}
 
@@ -52,12 +52,12 @@ namespace final_project_be.Controllers
 		//	return Ok(PostFileDto);
 		//}
 
-		// DELETE api/<PostFileController>/5
+		// DeleteAsync api/<PostFileController>/5
 		[HttpDelete("{id}")]
-		public IActionResult Delete(int id)
+		public async Task<IActionResult> DeleteAsync(int id)
 		{
 			if (!ModelState.IsValid) return BadRequest(ModelState);
-			_PostFileRepository.DeletePostFile(id);
+			await _PostFileRepository.DeletePostFile(id);
 			return Ok();
 		}
 	}

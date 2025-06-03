@@ -53,7 +53,7 @@ namespace final_project_be_Application.Ultils
 			return downloadInfo.Value.Content;
 		}
 
-		//Delete file if exists
+		//DeleteAsync file if exists
 		public async Task DeleteFileIfExistsAsync(string fileName)
 		{
 			var containerClient = _blobServiceClient.GetBlobContainerClient(_containerName);
@@ -63,7 +63,7 @@ namespace final_project_be_Application.Ultils
 			var exists = await blobClient.ExistsAsync();
 			if (exists)
 			{
-				// Delete the blob if it exists
+				// DeleteAsync the blob if it exists
 				await blobClient.DeleteAsync();
 			}
 		}

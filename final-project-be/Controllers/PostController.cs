@@ -19,7 +19,7 @@ namespace final_project_be.Controllers
             _hubContext = hubContext;
         }
         // GET: api/<PostController>
-        //Update GetAllPost
+        //UpdateAsync GetAllPost
         [HttpGet]
         public IActionResult GetAll(int? page, int? CategoryId, string? title, Guid? userId)
         {
@@ -31,10 +31,10 @@ namespace final_project_be.Controllers
 
         // GET api/<PostController>/5
         [HttpGet("{id}")]
-        public IActionResult Get(int id)
+        public async Task<IActionResult> Get(int id)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            return Ok(_postRepository.GetPost(id));
+            return Ok(await _postRepository.GetPost(id));
         }
 
 
@@ -52,10 +52,10 @@ namespace final_project_be.Controllers
 
         // PUT api/<PostController>/5
         [HttpPut]
-        public IActionResult Put(PostCreateDto postDto)//Change PostDto to PostCreateDto
+        public async Task<IActionResult> Put(PostCreateDto postDto)//Change PostDto to PostCreateDto
         {
             if (!ModelState.IsValid) { return BadRequest(ModelState); }
-            _postRepository.UpdatePost(postDto);
+            await _postRepository.UpdatePost(postDto);
             return Ok(postDto);
         }
 
@@ -66,7 +66,7 @@ namespace final_project_be.Controllers
             var updatedPost = await _postRepository.ToggleIsDeleted(id);
             if (updatedPost == null)
             {
-                return StatusCode(500, "Failed to update post status.");
+                return StatusCode(500, "Failed to UpdateAsync post status.");
             }
             return Ok(updatedPost);
         }

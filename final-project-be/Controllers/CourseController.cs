@@ -31,9 +31,9 @@ namespace final_project_be.Controllers
 
 		// GET api/<CourseController>/5
 		[HttpGet("{id}")]
-		public IActionResult Get(int id)
+		public async Task<IActionResult> Get(int id)
 		{
-			var course = _courseRepository.GetCourse(id);
+			var course = await _courseRepository.GetCourse(id);
 			return Ok(course);
 		}
 
@@ -78,7 +78,7 @@ namespace final_project_be.Controllers
 			var updatedCourse = await _courseRepository.ToggleIsDeleted(id);
 			if (updatedCourse == null)
 			{
-				return StatusCode(500, "Failed to update course status.");
+				return StatusCode(500, "Failed to UpdateAsync course status.");
 			}
 			return Ok(updatedCourse);
 		}

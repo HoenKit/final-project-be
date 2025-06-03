@@ -24,51 +24,57 @@ namespace final_project_be_Application.Repository
             _reportDAO = reportDAO;
         }
 
-        public async Task<ReportPost> CreateReportPost(ReportPostDto dto)
+		public async Task<ReportPost> CreateReportPost(ReportPostDto dto)
+		{
+			try
+			{
+				await _ReportPostDAO.BeginTransactionAsync();
+
+				// Tạo Report trước
+				var report = _mapper.Map<Report>(dto);
+				await _reportDAO.AddAsync(report);
+
+				if (report == null || report.ReportId <= 0)
+				{
+					_logger.LogError("Failed to create Report, cannot proceed with ReportPost.");
+					await _ReportPostDAO.RollbackTransactionAsync();
+					return null;
+				}
+
+				// Gán ReportId vừa tạo vào dto để map sang ReportPost
+				dto.ReportId = report.ReportId;
+
+				var reportPost = _mapper.Map<ReportPost>(dto);
+				await _ReportPostDAO.AddAsync(reportPost);
+
+				await _ReportPostDAO.CommitTransactionAsync();
+
+				_logger.LogInformation("Successfully added ReportPost with ID: {Id}", reportPost.ReportId);
+				return reportPost;
+			}
+			catch (Exception ex)
+			{
+				await _ReportPostDAO.RollbackTransactionAsync();
+				_logger.LogError(ex, "Error when adding ReportPost");
+				return null;
+			}
+		}
+
+
+		public async Task<bool> DeleteReportPost(int reportId, int PostId)
         {
             try
             {
-                _ReportPostDAO.BeginTransaction();
-                var report = _mapper.Map<Report>(dto);
-                _reportDAO.Add(report);
-
-                if (report == null || report.ReportId <= 0)
-                {
-                    _logger.LogError("Failed to create Report, cannot proceed with ReportPost.");
-                    _ReportPostDAO.RollbackTransaction();
-                    return null;
-                }
-
-                dto.ReportId = report.ReportId;
-                var ReportPost = _mapper.Map<ReportPost>(dto);
-                _ReportPostDAO.Add(ReportPost);
-                _ReportPostDAO.CommitTransaction();
-
-                _logger.LogInformation("Add ReportPost success");
-                return ReportPost;
-            }
-            catch (Exception ex)
-            {
-                _ReportPostDAO.RollbackTransaction();
-                _logger.LogError(ex, "Error when adding ReportPost");
-                return null;
-            }
-        }
-
-        public bool DeleteReportPost(int reportId, int PostId)
-        {
-            try
-            {
-                _ReportPostDAO.BeginTransaction();
+                await _ReportPostDAO.BeginTransactionAsync();
                 _ReportPostDAO.DeleteByReportAndPostId(reportId, PostId);
-                _ReportPostDAO.CommitTransaction();
+                await _ReportPostDAO.CommitTransactionAsync();
 
-                _logger.LogInformation("Delete ReportPost success");
+                _logger.LogInformation("DeleteAsync ReportPost success");
                 return true;
             }
             catch (Exception ex)
             {
-                _ReportPostDAO.RollbackTransaction();
+				await _ReportPostDAO.RollbackTransactionAsync();
                 _logger.LogError(ex, "Error when delete ReportPost");
                 return false;
             }
@@ -101,16 +107,16 @@ namespace final_project_be_Application.Repository
         {
             try
             {
-                _ReportPostDAO.BeginTransaction();
+                await _ReportPostDAO.BeginTransactionAsync();
                 var ReportPost = _ReportPostDAO.GetByReportId(id);
-                _ReportPostDAO.CommitTransaction();
+				await _ReportPostDAO.CommitTransactionAsync();
 
                 _logger.LogInformation("Get ReportPost success");
                 return ReportPost;
             }
             catch (Exception ex)
             {
-                _ReportPostDAO.RollbackTransaction();
+                await _ReportPostDAO.RollbackTransactionAsync();
                 _logger.LogError(ex, "Error when get ReportPost");
                 return null;
             }
@@ -120,29 +126,29 @@ namespace final_project_be_Application.Repository
         {
             try
             {
-                _ReportPostDAO.BeginTransaction();
+				await _ReportPostDAO.BeginTransactionAsync();
                 var report = _mapper.Map<Report>(dto);
-                _reportDAO.Update(report);
+				await _reportDAO.UpdateAsync(report);
 
                 if (report == null || report.ReportId <= 0)
                 {
                     _logger.LogError("Failed to create Report, cannot proceed with ReportPost.");
-                    _ReportPostDAO.RollbackTransaction();
+                    await _ReportPostDAO.RollbackTransactionAsync();
                     return null;
                 }
 
                 dto.ReportId = report.ReportId;
                 var ReportPost = _mapper.Map<ReportPost>(dto);
-                _ReportPostDAO.Update(ReportPost);
-                _ReportPostDAO.CommitTransaction();
+                await _ReportPostDAO.UpdateAsync(ReportPost);
+                await _ReportPostDAO.CommitTransactionAsync();
 
-                _logger.LogInformation("Update ReportPost success");
+                _logger.LogInformation("UpdateAsync ReportPost success");
                 return ReportPost;
             }
             catch (Exception ex)
             {
-                _ReportPostDAO.RollbackTransaction();
-                _logger.LogError(ex, "Error when update ReportPost");
+                await _ReportPostDAO.RollbackTransactionAsync();
+                _logger.LogError(ex, "Error when UpdateAsync ReportPost");
                 return null;
             }
         }

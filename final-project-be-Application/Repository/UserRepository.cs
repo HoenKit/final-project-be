@@ -28,10 +28,10 @@ namespace final_project_be_Application.Repository
 
         public async Task<User> ToggleIsBanned(Guid userId)
         {
-            _userDAO.BeginTransaction();
+			await _userDAO.BeginTransactionAsync();
             try
             {
-                var user = _userDAO.GetById(userId);
+                var user = _userDAO.GetByIdAsync(userId);
                 if (user == null)
                 {
                     _logger.LogWarning($"User with ID {userId} not found.");
@@ -41,8 +41,8 @@ namespace final_project_be_Application.Repository
                 user.IsBanned = !user.IsBanned;
                 user.UpdateAt = DateTime.Now;
 
-                _userDAO.Update(user);
-                _userDAO.CommitTransaction();
+                await _userDAO.UpdateAsync(user);
+				await _userDAO.CommitTransactionAsync();
 
                 _logger.LogInformation($"User {userId} banned status changed to {user.IsBanned}");
 
@@ -50,7 +50,7 @@ namespace final_project_be_Application.Repository
             }
             catch (Exception ex)
             {
-                _userDAO.RollbackTransaction();
+                await _userDAO.RollbackTransactionAsync();
                 _logger.LogError($"Failed to toggle ban status for User {userId}: {ex.Message}");
                 return null;
             }
@@ -81,16 +81,16 @@ namespace final_project_be_Application.Repository
         {
             try
             {
-                _userDAO.BeginTransaction();
+                await _userDAO.BeginTransactionAsync();
                 var user = _userDAO.GetUserandUserMetadata(userId);
-                _userDAO.CommitTransaction();
+				await _userDAO.CommitTransactionAsync();
 
                 _logger.LogInformation("Get user success");
                 return user;
             }
             catch (Exception ex)
             {
-                _userDAO.RollbackTransaction();
+                await _userDAO.RollbackTransactionAsync();
                 _logger.LogError(ex, "Error when get user");
                 return null;
             }
@@ -101,18 +101,18 @@ namespace final_project_be_Application.Repository
         {
             try
             {
-                _userDAO.BeginTransaction();
+				await _userDAO.BeginTransactionAsync();
                 var user = _mapper.Map<User>(dto);
-                _userDAO.Update(user);
-                _userDAO.CommitTransaction();
+                await _userDAO.UpdateAsync(user);
+				await _userDAO.CommitTransactionAsync();
 
-                _logger.LogInformation("Update user success");
+                _logger.LogInformation("UpdateAsync user success");
                 return user;
             }
             catch (Exception ex)
             {
-                _userDAO.RollbackTransaction();
-                _logger.LogError(ex, "Error when update user");
+                await _userDAO.RollbackTransactionAsync();
+                _logger.LogError(ex, "Error when UpdateAsync user");
                 return null;
             }
         }
@@ -135,17 +135,17 @@ namespace final_project_be_Application.Repository
 
             _mapper.Map(dto, user.UserMetaData);
 
-                _userDAO.Update(user);
+                await _userDAO.UpdateAsync(user);
 
-                _userDAO.SaveChanges();
+                await _userDAO.SaveChangesAsync();
 
             _logger.LogInformation("User profile and metadata updated successfully for UserId: {UserId}", dto.UserId);
 
             return user;}
             catch (Exception ex)
             {
-                _userDAO.RollbackTransaction();
-                _logger.LogError(ex, "Error when update user");
+                await _userDAO.RollbackTransactionAsync();
+                _logger.LogError(ex, "Error when UpdateAsync user");
                 return null;
             }
         }

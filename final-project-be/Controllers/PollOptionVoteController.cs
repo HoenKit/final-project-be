@@ -29,36 +29,36 @@ namespace final_project_be.Controllers
 
         // GET api/<PollOptionVoteController>/5
         [HttpGet("{id}")]
-        public IActionResult Get(int id)
+        public async Task<IActionResult> Get(int id)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            return Ok(_polloptionvoteRepository.GetPollOptionVote(id));
+            return Ok(await _polloptionvoteRepository.GetPollOptionVote(id));
         }
 
         // POST api/<PollOptionVoteController>
         [HttpPost]
-        public IActionResult Post([FromBody] PollOptionVoteDto pollOptionVoteDto)
+        public async Task<IActionResult> Post([FromBody] PollOptionVoteDto pollOptionVoteDto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            _polloptionvoteRepository.CreatePollOptionVote(pollOptionVoteDto);
+            await _polloptionvoteRepository.CreatePollOptionVote(pollOptionVoteDto);
             return Ok(pollOptionVoteDto);
         }
 
         // PUT api/<PollOptionVoteController>/5
         [HttpPut]
-        public IActionResult Put(PollOptionVoteDto pollOptionVoteDto)
+        public async Task<IActionResult> Put(PollOptionVoteDto pollOptionVoteDto)
         {
             if (!ModelState.IsValid) { return BadRequest(ModelState); }
-            _polloptionvoteRepository.UpdatePollOptionVote(pollOptionVoteDto);
+            await _polloptionvoteRepository.UpdatePollOptionVote(pollOptionVoteDto);
             return Ok(pollOptionVoteDto);
         }
 
-        // DELETE api/<PollOptionVoteController>/5
+        // DeleteAsync api/<PollOptionVoteController>/5
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> DeleteAsync(int id)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            _polloptionvoteRepository.DeletePollOptionVote(id);
+            await _polloptionvoteRepository.DeletePollOptionVote(id);
             return Ok();
         }
     }

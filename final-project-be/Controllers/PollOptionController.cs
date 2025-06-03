@@ -30,36 +30,36 @@ namespace final_project_be.Controllers
 
         // GET api/<PollOptionController>/5
         [HttpGet("{id}")]
-        public IActionResult Get(int id)
+        public async Task<IActionResult> Get(int id)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            return Ok(_PollOptionRepository.GetPollOption(id));
+            return Ok(await _PollOptionRepository.GetPollOption(id));
         }
 
         // POST api/<PollOptionController>
         [HttpPost]
-        public IActionResult Post([FromBody] PollOptionDto PollOptionDto)
+        public async Task<IActionResult> Post([FromBody] PollOptionDto PollOptionDto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            _PollOptionRepository.CreatePollOption(PollOptionDto);
+            await _PollOptionRepository.CreatePollOption(PollOptionDto);
             return Ok(PollOptionDto);
         }
 
         // PUT api/<PollOptionController>/5
         [HttpPut]
-        public IActionResult Put(PollOptionDto PollOptionDto)
+        public async Task<IActionResult> Put(PollOptionDto PollOptionDto)
         {
             if (!ModelState.IsValid) { return BadRequest(ModelState); }
-            _PollOptionRepository.UpdatePollOption(PollOptionDto);
+            await _PollOptionRepository.UpdatePollOption(PollOptionDto);
             return Ok(PollOptionDto);
         }
 
-        // DELETE api/<PollOptionController>/5
+        // DeleteAsync api/<PollOptionController>/5
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> DeleteAsync(int id)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            _PollOptionRepository.DeletePollOption(id);
+            await _PollOptionRepository.DeletePollOption(id);
             return Ok();
         }
     }

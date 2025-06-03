@@ -18,7 +18,7 @@ namespace final_project_be_Domain.DTOs.Post
         public List<CommentDto>? Comments { get; set; }
     }
 
-    //Update CreatePost
+    //UpdateAsync CreatePost
     public class PostCreateDto
     {
         public int PostId { get; set; }

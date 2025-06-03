@@ -27,36 +27,36 @@ namespace final_project_be_Application.Repository
 		{
 			try
 			{
-				_commentDAO.BeginTransaction();
+				await _commentDAO.BeginTransactionAsync();
 				var comment = _mapper.Map<Comment>(dto);
-				_commentDAO.Add(comment);
-				_commentDAO.CommitTransaction();
+				await _commentDAO.AddAsync(comment);
+				await _commentDAO.CommitTransactionAsync();
 
-				_logger.LogInformation("Add comment success");
+				_logger.LogInformation("AddAsync comment success");
 				return comment;
 			}
 			catch (Exception ex)
 			{
-				_commentDAO.RollbackTransaction();
+				await _commentDAO.RollbackTransactionAsync();
 				_logger.LogError(ex, "Error when adding comment");
 				return null;
 			}
 		}
 
-		public bool DeleteComment(int id)
+		public async Task<bool> DeleteComment(int id)
 		{
 			try
 			{
-				_commentDAO.BeginTransaction();
-				_commentDAO.Delete(id);
-				_commentDAO.CommitTransaction();
+				await _commentDAO.BeginTransactionAsync();
+				await _commentDAO.DeleteAsync(id);
+				await _commentDAO.CommitTransactionAsync();
 
-				_logger.LogInformation("Delete comment success");
+				_logger.LogInformation("DeleteAsync comment success");
 				return true;
 			}
 			catch (Exception ex)
 			{
-				_commentDAO.RollbackTransaction();
+				await _commentDAO.RollbackTransactionAsync();
 				_logger.LogError(ex, "Error when delete comment");
 				return false;
 			}
@@ -88,16 +88,16 @@ namespace final_project_be_Application.Repository
 		{
 			try
 			{
-				_commentDAO.BeginTransaction();
-				var comment = _commentDAO.GetById(id);
-				_commentDAO.CommitTransaction();
+				await _commentDAO.BeginTransactionAsync();
+				var comment = await _commentDAO.GetByIdAsync(id);
+				await _commentDAO.CommitTransactionAsync();
 
 				_logger.LogInformation("Get comment success");
 				return comment;
 			}
 			catch (Exception ex)
 			{
-				_commentDAO.RollbackTransaction();
+				await _commentDAO.RollbackTransactionAsync();
 				_logger.LogError(ex, "Error when get comment");
 				return null;
 			}
@@ -108,18 +108,18 @@ namespace final_project_be_Application.Repository
 		{
 			try
 			{
-				_commentDAO.BeginTransaction();
+				await _commentDAO.BeginTransactionAsync();
 				var comment = _mapper.Map<Comment>(dto);
-				_commentDAO.Update(comment);
-				_commentDAO.CommitTransaction();
+				await _commentDAO.UpdateAsync(comment);
+				await _commentDAO.CommitTransactionAsync();
 
-				_logger.LogInformation("Update comment success");
+				_logger.LogInformation("UpdateAsync comment success");
 				return comment;
 			}
 			catch (Exception ex)
 			{
-				_commentDAO.RollbackTransaction();
-				_logger.LogError(ex, "Error when update comment");
+				await _commentDAO.RollbackTransactionAsync();
+				_logger.LogError(ex, "Error when UpdateAsync comment");
 				return null;
 			}
 		}

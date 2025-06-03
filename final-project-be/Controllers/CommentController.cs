@@ -36,10 +36,10 @@ namespace final_project_be.Controllers
 
         // GET api/<CommentController>/5
         [HttpGet("{id}")]
-        public IActionResult Get(int id)
+        public async Task<IActionResult> Get(int id)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            return Ok(_commentRepository.GetComment(id));
+            return Ok(await _commentRepository.GetComment(id));
         }
 
         // POST api/<CommentController>
@@ -54,19 +54,19 @@ namespace final_project_be.Controllers
 
         // PUT api/<CommentController>/5
         [HttpPut]
-        public IActionResult Put(CommentDto commentDto)
+        public async Task<IActionResult> Put(CommentDto commentDto)
         {
             if (!ModelState.IsValid) { return BadRequest(ModelState); }
-            _commentRepository.UpdateComment(commentDto);
+            await _commentRepository.UpdateComment(commentDto);
             return Ok(commentDto);
         }
 
-        // DELETE api/<CommentController>/5
+        // DeleteAsync api/<CommentController>/5
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> DeleteAsync(int id)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            _commentRepository.DeleteComment(id);
+            await _commentRepository.DeleteComment(id);
             return Ok();
         }
     }

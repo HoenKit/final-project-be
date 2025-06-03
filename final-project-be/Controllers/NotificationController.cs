@@ -30,36 +30,36 @@ namespace final_project_be.Controllers
 
         // GET api/<NotificationController>/5
         [HttpGet("{id}")]
-        public IActionResult Get(int id)
+        public async Task<IActionResult> Get(int id)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            return Ok(_NotificationRepository.GetNotification(id));
+            return Ok(await _NotificationRepository.GetNotification(id));
         }
 
         // POST api/<NotificationController>
         [HttpPost]
-        public IActionResult Post([FromBody] NotificationDto NotificationDto)
+        public async Task<IActionResult> Post([FromBody] NotificationDto NotificationDto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            _NotificationRepository.CreateNotification(NotificationDto);
+            await _NotificationRepository.CreateNotification(NotificationDto);
             return Ok(NotificationDto);
         }
 
         // PUT api/<NotificationController>/5
         [HttpPut]
-        public IActionResult Put(NotificationDto NotificationDto)
+        public async Task<IActionResult> Put(NotificationDto NotificationDto)
         {
             if (!ModelState.IsValid) { return BadRequest(ModelState); }
-            _NotificationRepository.UpdateNotification(NotificationDto);
+            await _NotificationRepository.UpdateNotification(NotificationDto);
             return Ok(NotificationDto);
         }
 
-        // DELETE api/<NotificationController>/5
+        // DeleteAsync api/<NotificationController>/5
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> DeleteAsync(int id)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            _NotificationRepository.DeleteNotification(id);
+            await _NotificationRepository.DeleteNotification(id);
             return Ok();
         }
     }

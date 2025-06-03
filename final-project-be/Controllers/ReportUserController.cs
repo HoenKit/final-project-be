@@ -30,36 +30,36 @@ namespace final_project_be.Controllers
 
         // GET api/<ReportUserController>/5
         [HttpGet("{id}")]
-        public IActionResult Get(int id)
+        public async Task<IActionResult> Get(int id)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            return Ok(_ReportUserRepository.GetReportUser(id));
+            return Ok(await _ReportUserRepository.GetReportUser(id));
         }
 
         // POST api/<ReportUserController>
         [HttpPost]
-        public IActionResult Post([FromBody] ReportUserDto ReportuserDto)
+        public async Task<IActionResult> Post([FromBody] ReportUserDto ReportuserDto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            _ReportUserRepository.CreateReportUser(ReportuserDto);
+            await _ReportUserRepository.CreateReportUser(ReportuserDto);
             return Ok(ReportuserDto);
         }
 
         // PUT api/<ReportUserController>/5
         [HttpPut]
-        public IActionResult Put(ReportUserDto ReportuserDto)
+        public async Task<IActionResult> Put(ReportUserDto ReportuserDto)
         {
             if (!ModelState.IsValid) { return BadRequest(ModelState); }
-            _ReportUserRepository.UpdateReportUser(ReportuserDto);
+            await _ReportUserRepository.UpdateReportUser(ReportuserDto);
             return Ok(ReportuserDto);
         }
 
         // DELETE api/<ReportUserController>/5
         [HttpDelete]
-        public IActionResult Delete(int reportId, Guid userid)
+        public async Task<IActionResult> Delete(int reportId, Guid userid)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            _ReportUserRepository.DeleteReportUser(reportId, userid);
+            await _ReportUserRepository.DeleteReportUser(reportId, userid);
             return Ok();
         }
 

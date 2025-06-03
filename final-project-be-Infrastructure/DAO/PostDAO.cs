@@ -13,7 +13,7 @@ namespace final_project_be_Infrastructure.DAO
            _context = context;
         }
 
-        //Add to Delete Post
+        //AddAsync to Delete Post
         public Post? GetPostWithFilesAndComments(int id)
         {
             return GetAll()

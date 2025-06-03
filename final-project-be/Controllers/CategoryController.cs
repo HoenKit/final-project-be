@@ -30,36 +30,36 @@ namespace final_project_be.Controllers
 
         // GET api/<CategoryController>/5
         [HttpGet("{id}")]
-        public IActionResult Get(int id)
+        public async Task<IActionResult> Get(int id)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            return Ok(_categoryRepository.GetCategory(id));
+            return Ok(await _categoryRepository.GetCategory(id));
         }
 
         // POST api/<CategoryController>
         [HttpPost]
-        public IActionResult Post([FromBody] CategoryDto categoryDto)
+        public async Task<IActionResult> Post([FromBody] CategoryDto categoryDto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            _categoryRepository.CreateCategory(categoryDto);
+            await _categoryRepository.CreateCategory(categoryDto);
             return Ok(categoryDto);
         }
 
         // PUT api/<CategoryController>/5
         [HttpPut]
-        public IActionResult Put(CategoryDto categoryDto)
+        public async Task<IActionResult> Put(CategoryDto categoryDto)
         {
             if (!ModelState.IsValid) { return BadRequest(ModelState); }
-            _categoryRepository.UpdateCategory(categoryDto);
+            await _categoryRepository.UpdateCategory(categoryDto);
             return Ok(categoryDto);
         }
 
-        // DELETE api/<CategoryController>/5
+        // DeleteAsync api/<CategoryController>/5
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> DeleteAsync(int id)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            _categoryRepository.DeleteCategory(id);
+            await _categoryRepository.DeleteCategory(id);
             return Ok();
         }
     }

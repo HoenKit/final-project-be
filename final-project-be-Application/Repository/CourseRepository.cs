@@ -32,7 +32,7 @@ namespace final_project_be_Application.Repository
 		{
 			try
 			{
-				_courseDAO.BeginTransaction();
+				await _courseDAO.BeginTransactionAsync();
 				var course = _mapper.Map<Courses>(dto);
 				if (dto.CoursesImage != null && dto.CoursesImage.Length > 0)
 				{
@@ -46,29 +46,24 @@ namespace final_project_be_Application.Repository
 						await _blobStorageService.UploadFileAsync(uniqueFileName, stream);
 					}
 
-					// Store the full URL in the database (update the blob URL with your storage account name)
+					// Store the full URL in the database (UpdateAsync the blob URL with your storage account name)
 					course.CoursesImage = $"https://finalprojectbestorage.blob.core.windows.net/phronesisfiles/{uniqueFileName}";
 				}
 				course.CreateAt = DateTime.Now;
 				course.UpdateAt = DateTime.Now;
 				course.StudentCount = 0;
-				_courseDAO.Add(course);
-				_courseDAO.CommitTransaction();
-				_logger.LogInformation("Add Course success");
+				await _courseDAO.AddAsync(course);
+				await _courseDAO.CommitTransactionAsync();
+				_logger.LogInformation("AddAsync Course success");
 				return course;
 
 			}
 			catch (Exception ex)
 			{
-				_courseDAO.RollbackTransaction();
+				await _courseDAO.RollbackTransactionAsync();
 				_logger.LogError(ex, "Error when adding Course");
 				return null;
 			}
-		}
-
-		public bool DeleteCourse(int id)
-		{
-			throw new NotImplementedException();
 		}
 
 		public PageResult<GetCourseDto> GetAllCourses(int page, int pageSize, int? CategoryId, string? title, Guid? userId)
@@ -137,16 +132,16 @@ namespace final_project_be_Application.Repository
 		public async Task<Courses> GetCourse(int id)
 		{
 			try{
-				_courseDAO.BeginTransaction();
-				var course = _courseDAO.GetById(id);
-				_courseDAO.CommitTransaction();
+				await _courseDAO.BeginTransactionAsync();
+				var course = await _courseDAO.GetByIdAsync(id);
+				await _courseDAO.CommitTransactionAsync();
 
 				_logger.LogInformation("Get course success");
 				return course;
 			}
 			catch (Exception ex)
 			{
-				_courseDAO.RollbackTransaction();
+				await _courseDAO.RollbackTransactionAsync();
 				_logger.LogError(ex, "Error when getting course");
 				return null;
 			}
@@ -156,26 +151,29 @@ namespace final_project_be_Application.Repository
 		{
 			try
 			{
-				_courseDAO.BeginTransaction();
+				await _courseDAO.BeginTransactionAsync();
 
-				var course = _courseDAO.GetById(id);
+				var course = await _courseDAO.GetByIdAsync(id);
 				if (course == null)
 				{
 					_logger.LogWarning("Course not found with ID: {Id}", id);
-					_courseDAO.RollbackTransaction();
+					await _courseDAO.RollbackTransactionAsync();
 					return null;
 				}
+
 				course.IsDeleted = !course.IsDeleted;
 				course.UpdateAt = DateTime.Now;
-				_courseDAO.Update(course);
-				_courseDAO.CommitTransaction();
-				_logger.LogInformation("Update Course success");
+
+				await _courseDAO.UpdateAsync(course);
+				await _courseDAO.CommitTransactionAsync();
+
+				_logger.LogInformation("Toggle IsDeleted success for course ID: {Id}", id);
 				return course;
 			}
 			catch (Exception ex)
 			{
-				_courseDAO.RollbackTransaction();
-				_logger.LogError(ex, "Error when updating Course");
+				await _courseDAO.RollbackTransactionAsync();
+				_logger.LogError(ex, "Error when toggling IsDeleted for course ID: {Id}", id);
 				return null;
 			}
 		}
@@ -184,18 +182,18 @@ namespace final_project_be_Application.Repository
 		{
 			try
 			{
-				_courseDAO.BeginTransaction();
+				await _courseDAO.BeginTransactionAsync();
 
-				var course = _courseDAO.GetById(dto.CourseId);
+				var course = await _courseDAO.GetByIdAsync(dto.CourseId);
 				if (course == null)
 				{
 					_logger.LogWarning("Course not found with ID: {Id}", dto.CourseId);
-					_courseDAO.RollbackTransaction();
+					await _courseDAO.RollbackTransactionAsync();
 					return null;
 				}
 
 				string oldImage = course.CoursesImage;
-				_mapper.Map(dto, course);
+				 _mapper.Map(dto, course);
 
 				if (dto.CoursesImage != null && dto.CoursesImage.Length > 0)
 				{
@@ -217,14 +215,14 @@ namespace final_project_be_Application.Repository
 				}
 
 				course.UpdateAt = DateTime.Now;
-				_courseDAO.Update(course);
-				_courseDAO.CommitTransaction();
-				_logger.LogInformation("Update Course success");
+				await _courseDAO.UpdateAsync(course);
+				await _courseDAO.CommitTransactionAsync();
+				_logger.LogInformation("UpdateAsync Course success");
 				return course;
 			}
 			catch (Exception ex)
 			{
-				_courseDAO.RollbackTransaction();
+				await _courseDAO.RollbackTransactionAsync();
 				_logger.LogError(ex, "Error when updating Course");
 				return null;
 			}

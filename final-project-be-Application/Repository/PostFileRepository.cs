@@ -43,36 +43,36 @@ namespace final_project_be_Application.Repository
 		{
 			try
 			{
-				_postFileDAO.BeginTransaction();
+				await _postFileDAO.BeginTransactionAsync();
 				var PostFile = _mapper.Map<PostFile>(dto);
-				_postFileDAO.Add(PostFile);
-				_postFileDAO.CommitTransaction();
+				await _postFileDAO.AddAsync(PostFile);
+				await _postFileDAO.CommitTransactionAsync();
 
-				_logger.LogInformation("Add PostFile success");
+				_logger.LogInformation("AddAsync PostFile success");
 				return PostFile;
 			}
 			catch (Exception ex)
 			{
-				_postFileDAO.RollbackTransaction();
+				await _postFileDAO.RollbackTransactionAsync();
 				_logger.LogError(ex, "Error when adding PostFile");
 				return null;
 			}
 		}
 
-		public bool DeletePostFile(int id)
+		public async Task<bool> DeletePostFile(int id)
 		{
 			try
 			{
-				_postFileDAO.BeginTransaction();
-				_postFileDAO.Delete(id);
-				_postFileDAO.CommitTransaction();
+				await _postFileDAO.BeginTransactionAsync();
+				await _postFileDAO.DeleteAsync(id);
+				await _postFileDAO.CommitTransactionAsync();
 
-				_logger.LogInformation("Delete PostFile success");
+				_logger.LogInformation("DeleteAsync PostFile success");
 				return true;
 			}
 			catch (Exception ex)
 			{
-				_postFileDAO.RollbackTransaction();
+				await _postFileDAO.RollbackTransactionAsync();
 				_logger.LogError(ex, "Error when delete PostFile");
 				return false;
 			}
@@ -82,16 +82,16 @@ namespace final_project_be_Application.Repository
 		{
 			try
 			{
-				_postFileDAO.BeginTransaction();
-				var postFile = _postFileDAO.GetById(id);
-				_postFileDAO.CommitTransaction();
+				await _postFileDAO.BeginTransactionAsync();
+				var postFile = await _postFileDAO.GetByIdAsync(id);
+				await _postFileDAO.CommitTransactionAsync();
 
 				_logger.LogInformation("Get postFile success");
 				return postFile;
 			}
 			catch (Exception ex)
 			{
-				_postFileDAO.RollbackTransaction();
+				await _postFileDAO.RollbackTransactionAsync();
 				_logger.LogError(ex, "Error when get postFile");
 				return null;
 			}

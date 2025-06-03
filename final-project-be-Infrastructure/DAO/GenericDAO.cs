@@ -6,77 +6,82 @@ using System.Linq.Expressions;
 
 namespace final_project_be_Infrastructure.DAO
 {
-    public class GenericDAO<T> where T : class
-    {
-        private readonly ApplicationDbContext _context;
-        private readonly DbSet<T> _dbSet;
-        private IDbContextTransaction? _transaction;
+	public class GenericDAO<T> where T : class
+	{
+		private readonly ApplicationDbContext _context;
+		private readonly DbSet<T> _dbSet;
+		private IDbContextTransaction? _transaction;
 
-        public GenericDAO(ApplicationDbContext context)
-        {
-            _context = context;
-            _dbSet = _context.Set<T>();
-        }
+		public GenericDAO(ApplicationDbContext context)
+		{
+			_context = context;
+			_dbSet = _context.Set<T>();
+		}
 
-        public IQueryable<T> GetAll()
-        {
-            return _dbSet.AsQueryable();
-        }
+		public IQueryable<T> GetAll()
+		{
+			return _dbSet.AsQueryable();
+		}
 
-        public T? GetById(object id)
-        {
-            return _dbSet.Find(id);
-        }
+		public async Task<T?> GetByIdAsync(object id)
+		{
+			return await _dbSet.FindAsync(id);
+		}
 
-        public IEnumerable<T> Find(Expression<Func<T, bool>> predicate)
-        {
-            return _dbSet.Where(predicate).ToList();
-        }
+		public async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate)
+		{
+			return await _dbSet.Where(predicate).ToListAsync();
+		}
 
-        public void Add(T entity)
-        {
-            _dbSet.Add(entity);
-            _context.SaveChanges();
-        }
+		public async Task AddAsync(T entity)
+		{
+			await _dbSet.AddAsync(entity);
+			await _context.SaveChangesAsync();
+		}
 
-        public void SaveChanges()
-        {
-            _context.SaveChanges();
-        }
+		public async Task SaveChangesAsync()
+		{
+			await _context.SaveChangesAsync();
+		}
 
-        public void Update(T entity)
-        {
-            _dbSet.Attach(entity);
-            _context.Entry(entity).State = EntityState.Modified;
-            _context.SaveChanges();
-        }
+		public async Task UpdateAsync(T entity)
+		{
+			_dbSet.Attach(entity);
+			_context.Entry(entity).State = EntityState.Modified;
+			await _context.SaveChangesAsync();
+		}
 
-        public void Delete(object id)
-        {
-            var entity = GetById(id);
-            if (entity != null)
-            {
-                _dbSet.Remove(entity);
-                _context.SaveChanges();
-            }
-        }
+		public async Task DeleteAsync(object id)
+		{
+			var entity = await GetByIdAsync(id);
+			if (entity != null)
+			{
+				_dbSet.Remove(entity);
+				await _context.SaveChangesAsync();
+			}
+		}
 
-        // Transaction handling without async
-        public void BeginTransaction()
-        {
-            _transaction = _context.Database.BeginTransaction();
-        }
+		public async Task BeginTransactionAsync()
+		{
+			_transaction = await _context.Database.BeginTransactionAsync();
+		}
 
-        public void CommitTransaction()
-        {
-            _transaction?.Commit();
-            _transaction?.Dispose();
-        }
+		public async Task CommitTransactionAsync()
+		{
+			if (_transaction != null)
+			{
+				await _transaction.CommitAsync();
+				await _transaction.DisposeAsync();
+			}
+		}
 
-        public void RollbackTransaction()
-        {
-            _transaction?.Rollback();
-            _transaction?.Dispose();
-        }
-    }
+		public async Task RollbackTransactionAsync()
+		{
+			if (_transaction != null)
+			{
+				await _transaction.RollbackAsync();
+				await _transaction.DisposeAsync();
+			}
+		}
+	}
 }

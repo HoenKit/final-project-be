@@ -8,6 +8,7 @@ using final_project_be_Domain.DTOs.Users;
 using final_project_be_Domain.DTOs.Post;
 using final_project_be_Domain.DTOs.Category;
 using final_project_be_Domain.DTOs.Courses;
+using final_project_be_Domain.DTOs.Module;
 
 namespace final_project_be_Application.Service.Mapping
 {
@@ -40,6 +41,8 @@ namespace final_project_be_Application.Service.Mapping
 			CreateMap<PostFileCreateDto, Post>().ReverseMap();
 			CreateMap<Courses, CourseDto>().ReverseMap();
 			CreateMap<Courses, UpdateCourseDto>().ReverseMap();
+			CreateMap<Module, ModuleDto>().ReverseMap();
+			CreateMap<Module, UpdateModuleDto>().ReverseMap();
 		}
 	}
 }

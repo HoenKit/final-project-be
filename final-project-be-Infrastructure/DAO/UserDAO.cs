@@ -12,7 +12,7 @@ namespace final_project_be_Infrastructure.DAO
         {
             _context = context;
         }
-		public User GetById(Guid userId)
+		public User GetByIdAsync(Guid userId)
 		{
 			return _context.users
 				.Include(u => u.UserMetaData)
@@ -23,9 +23,9 @@ namespace final_project_be_Infrastructure.DAO
         public User GetUserbyEmail(string email) => _context.users.FirstOrDefault(u => u.Email == email);
         public IEnumerable<string> GetRolesByUserId(Guid userId) => _context.userRoles.Where(ur => ur.UserId == userId).Select(ur => ur.Role.RoleName).ToList();
         public  Role GetRoleByName(string roleName)  => _context.roles.FirstOrDefault(r => r.RoleName == roleName);
-        public  void AddUserRole(UserRole userRole) => _context.userRoles.Add(userRole);
-        public  void AddRole(Role role) => _context.roles.Add(role);
-        public void AddUserMetaData(UserMetadata userMetadata) => _context.UserMetadata.Add(userMetadata);
+        public  void AddUserRole(UserRole userRole) => _context.userRoles.AddAsync(userRole);
+        public  void AddRole(Role role) => _context.roles.AddAsync(role);
+        public void AddUserMetaData(UserMetadata userMetadata) => _context.UserMetadata.AddAsync(userMetadata);
         public UserMetadata GetUserMetadatabyId(Guid UserId) => _context.UserMetadata.FirstOrDefault(u => u.UserId == UserId);
         public User GetUserandUserMetadata(Guid UserId) => _context.users.Include(u => u.UserMetaData).FirstOrDefault(u => u.UserId == UserId);
     }
