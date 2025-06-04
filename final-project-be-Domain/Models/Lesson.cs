@@ -11,7 +11,8 @@ namespace final_project_be_Domain.Models
         [ForeignKey("Module")]
         public int ModuleId { get; set; }
         public string Title { get; set; }
-        public string Description { get; set; }
+        public string? Description { get; set; }
+        public string? VideoLink { get; set; }
         public ICollection<UserLesson>? UserLesson { get; set; }
         public ICollection<Assignment>? Assignments { get; set; }
         public ICollection<Question>? Questions { get; set; }
