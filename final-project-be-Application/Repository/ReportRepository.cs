@@ -13,16 +13,18 @@ namespace final_project_be_Application.Repository
         private readonly ReportDAO _ReportDAO;
         private readonly ReportPostDAO _ReportPostDAO;
         private readonly ReportUserDAO _ReportUserDAO;
+        private readonly ReportCommentDAO _ReportCommentDAO;
         private readonly IMapper _mapper;
         private readonly ILogger<ReportRepository> _logger;
 
-        public ReportRepository(ReportDAO ReportDAO, ReportPostDAO ReportPostDAO, ReportUserDAO ReportUserDAO, IMapper mapper, ILogger<ReportRepository> logger) : base(ReportDAO)
+        public ReportRepository(ReportDAO ReportDAO, ReportPostDAO ReportPostDAO, ReportUserDAO ReportUserDAO, ReportCommentDAO ReportCommentDAO, IMapper mapper, ILogger<ReportRepository> logger) : base(ReportDAO)
         {
             _mapper = mapper;
             _logger = logger;
             _ReportDAO = ReportDAO;
             _ReportPostDAO = ReportPostDAO;
             _ReportUserDAO = ReportUserDAO;
+            _ReportCommentDAO = ReportCommentDAO;
         }
 
         public async Task<Report> CreateReport(ReportDto dto)
@@ -103,6 +105,28 @@ namespace final_project_be_Application.Repository
                                   ReportId = r.ReportId,
                                   UserId = rp.UserId,
                                   UserreportedId = r.UserId,
+                                  Content = r.Content
+                              }).ToList();
+
+            return reportDtos;
+        }
+
+        public List<ReportCommentDto> GetReportsByComment(int commentId)
+        {
+            var reportComments = _ReportCommentDAO.GetByCommentId(commentId);
+
+            // Truy vấn Report hoặc Comment
+            var reportIds = reportComments.Select(x => x.ReportId).ToList();
+            var reports = _ReportDAO.GetAll().Where(r => reportIds.Contains(r.ReportId)).ToList();
+
+            // Mapping và kết hợp logic
+            var reportDtos = (from rp in reportComments
+                              join r in reports on rp.ReportId equals r.ReportId
+                              select new ReportCommentDto
+                              {
+                                  ReportId = r.ReportId,
+                                  CommentId = rp.CommentId,
+                                  UserId = r.UserId,
                                   Content = r.Content
                               }).ToList();
 

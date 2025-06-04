@@ -1,6 +1,7 @@
 ﻿using final_project_be_Domain.DTOs.Report;
 using final_project_be_Application.Interface;
 using Microsoft.AspNetCore.Mvc;
+using final_project_be_Domain.Models;
 
 namespace final_project_be.Controllers
 {
@@ -67,6 +68,14 @@ namespace final_project_be.Controllers
             int currentPage = page ?? 1;
             var pagedReportPosts = _ReportPostRepository.GetGroupedReportPosts(currentPage, 5);
             return Ok(pagedReportPosts);
+        }
+
+        [HttpDelete("DeleteReportsByPostId/{postId}")]
+        public async Task<IActionResult> DeleteReportsByPostId(int postId)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            await _ReportPostRepository.DeleteReportsByPostId(postId);
+            return Ok();
         }
     }
 }

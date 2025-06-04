@@ -12,5 +12,6 @@ namespace final_project_be_Application.Interface
         public Task<Report> UpdateReport(ReportDto dto);
         public List<ReportPostDto> GetReportsByPost(int postId);
         public List<ReportUserDto> GetReportsByUser(Guid userId);
+        public List<ReportCommentDto> GetReportsByComment(int commentId);
     }
 }

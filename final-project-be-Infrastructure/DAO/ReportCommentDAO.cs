@@ -10,6 +10,11 @@ namespace final_project_be_Infrastructure.DAO
         {
             _context = context;
         }
+        public List<ReportComment> GetByCommentId(int commentId)
+        {
+            return _context.reportComments
+                .Where(rp => rp.CommentId == commentId).ToList();
+        }
         public ReportComment GetByReportId(int id) => _context.reportComments.Where(r => r.ReportId == id).FirstOrDefault();
         public void DeleteByReportAndCommentId(int reportId, int commentId)
         {

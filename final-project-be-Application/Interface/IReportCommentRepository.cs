@@ -11,5 +11,6 @@ namespace final_project_be_Application.Interface
         public Task<ReportComment> GetReportComment(int id);
         public Task<ReportComment> UpdateReportComment(ReportCommentDto dto);
         public PageResult<ReportComment> GetAllReportComments(int page, int pageSize);
+        public PageResult<GroupedReportDto<int, ReportComment>> GetGroupedReportComments(int page, int pageSize);
     }
 }

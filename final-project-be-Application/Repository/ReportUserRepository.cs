@@ -176,5 +176,48 @@ namespace final_project_be_Application.Repository
 
             return new PageResult<GroupedReportDto<Guid, ReportUser>>(paged, totalCount, page, pageSize);
         }
+
+        public async Task<bool> DeleteReportsByUserId(Guid userId)
+        {
+            try
+            {
+                await _reportDAO.BeginTransactionAsync();
+
+                var reportUsers = _ReportUserDAO.GetByUserId(userId);
+
+                if (reportUsers == null || !reportUsers.Any())
+                {
+                    _logger.LogWarning($"No reports found for userId: {userId}");
+                    await _reportDAO.CommitTransactionAsync(); // vẫn commit để tránh giữ transaction
+                    return false;
+                }
+
+                // 2. Lấy danh sách reportId
+                var reportIds = reportUsers.Select(rp => rp.ReportId).Distinct().ToList();
+
+                // 3. Xóa các bản ghi ReportUser
+                foreach (var rp in reportUsers)
+                {
+                    _ReportUserDAO.DeleteByReportAndUserId(rp.ReportId, rp.UserId);
+                }
+
+                // 4. Xóa các bản ghi Report
+                foreach (var reportId in reportIds)
+                {
+                    await _reportDAO.DeleteAsync(reportId);
+                }
+
+                await _reportDAO.CommitTransactionAsync();
+
+                _logger.LogInformation($"Successfully deleted all reports for userId: {userId}");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                await _reportDAO.RollbackTransactionAsync();
+                _logger.LogError(ex, $"Error deleting reports for userId: {userId}");
+                return false;
+            }
+        }
     }
 }
