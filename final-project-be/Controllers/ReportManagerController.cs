@@ -29,6 +29,13 @@ namespace final_project_be.Controllers
             return Ok(data);
         }
 
+        [HttpGet("by-comment/{commentId}")]
+        public IActionResult GetReportsByComment(int commentId)
+        {
+            var data = _reportRepository.GetReportsByComment(commentId);
+            return Ok(data);
+        }
+
         // GET api/<ReportPostController>/5
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id)

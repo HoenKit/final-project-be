@@ -12,5 +12,6 @@ namespace final_project_be_Application.Interface
         public Task<ReportUser> UpdateReportUser(ReportUserDto dto);
         public PageResult<ReportUser> GetAllReportUsers(int page, int pageSize);
         public PageResult<GroupedReportDto<Guid, ReportUser>> GetGroupedReportUsers(int page, int pageSize);
+        public Task<bool> DeleteReportsByUserId(Guid userId);
     }
 }

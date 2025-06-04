@@ -147,5 +147,29 @@ namespace final_project_be_Application.Repository
                 return null;
             }
         }
+
+        public PageResult<GroupedReportDto<int, ReportComment>> GetGroupedReportComments(int page, int pageSize)
+        {
+            var allReportPosts = _ReportCommentDAO.GetAll()
+                .Include(rp => rp.Report)
+                .Include(rp => rp.Comment)
+                .AsEnumerable();
+
+            var grouped = allReportPosts
+                .GroupBy(rp => rp.CommentId)
+                .Select(group => new GroupedReportDto<int, ReportComment>
+                {
+                    Id = group.Key,
+                    ReportCount = group.Count(),
+                    Reports = group.ToList()
+                })
+                .OrderByDescending(g => g.ReportCount)
+                .ToList();
+
+            var totalCount = grouped.Count;
+            var paged = grouped.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+            return new PageResult<GroupedReportDto<int, ReportComment>>(paged, totalCount, page, pageSize);
+        }
     }
 }

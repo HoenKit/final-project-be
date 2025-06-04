@@ -2,6 +2,7 @@
 using final_project_be_Domain.DTOs.Report;
 using final_project_be_Application.Interface;
 using Microsoft.AspNetCore.Mvc;
+using final_project_be_Application.Repository;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -62,6 +63,16 @@ namespace final_project_be.Controllers
             if (!ModelState.IsValid) return BadRequest(ModelState);
             await _ReportCommentRepository.DeleteReportComment(reportId, commentId);
             return Ok();
+        }
+
+        [HttpGet("grouped")]
+        public IActionResult GetGroupedReports(int? page)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            int currentPage = page ?? 1;
+            var pagedReportPosts = _ReportCommentRepository.GetGroupedReportComments(currentPage, 5);
+            return Ok(pagedReportPosts);
         }
     }
 }

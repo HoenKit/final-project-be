@@ -1,6 +1,7 @@
 ﻿using final_project_be_Domain.DTOs.Report;
 using final_project_be_Application.Interface;
 using Microsoft.AspNetCore.Mvc;
+using final_project_be_Application.Repository;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -71,6 +72,14 @@ namespace final_project_be.Controllers
             int currentPage = page ?? 1;
             var pagedReportUsers = _ReportUserRepository.GetGroupedReportUsers(currentPage, 5);
             return Ok(pagedReportUsers);
+        }
+
+        [HttpDelete("DeleteReportsByUserId/{userId}")]
+        public async Task<IActionResult> DeleteReportsByPostId(Guid userId)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            await _ReportUserRepository.DeleteReportsByUserId(userId);
+            return Ok();
         }
     }
 }
