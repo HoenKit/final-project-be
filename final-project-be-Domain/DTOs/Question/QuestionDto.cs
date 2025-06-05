@@ -1,0 +1,15 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace final_project_be_Domain.DTOs.Question
+{
+	public class QuestionDto
+	{
+		public int LessonId { get; set; }
+		public string Question_text { get; set; }
+	}
+}

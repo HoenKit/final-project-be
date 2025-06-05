@@ -129,15 +129,20 @@ namespace final_project_be_Application.Repository
 			}
 		}
 
-		public async Task<Courses> GetCourse(int id)
+		public async Task<CourseResponseDto> GetCourse(int id)
 		{
 			try{
 				await _courseDAO.BeginTransactionAsync();
+
 				var course = await _courseDAO.GetByIdAsync(id);
+				var courseDto = _mapper.Map<CourseResponseDto>(course);
+				courseDto.CountModule = course.Modules?.Count ?? 0;
+				courseDto.CountLesson = course.Modules?.Sum(m => m.Lessons?.Count ?? 0) ?? 0;
+
 				await _courseDAO.CommitTransactionAsync();
 
 				_logger.LogInformation("Get course success");
-				return course;
+				return courseDto;
 			}
 			catch (Exception ex)
 			{

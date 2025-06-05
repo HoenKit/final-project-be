@@ -5,6 +5,7 @@ using final_project_be_Domain.DTOs.Courses;
 using final_project_be_Domain.DTOs.Module;
 using final_project_be_Domain.Models;
 using final_project_be_Infrastructure.DAO;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -62,7 +63,7 @@ namespace final_project_be_Application.Repository
 				return false;
 			}
 		}
-		public async Task<ICollection<UpdateModuleDto>> GetAllModulesByCourseId(int courseId)
+		public async Task<ICollection<ModuleResponseDto>> GetAllModulesByCourseId(int courseId)
 		{
 			try
 			{
@@ -70,9 +71,15 @@ namespace final_project_be_Application.Repository
 
 				var modules = _moduleDAO.GetAll()
 					.Where(m => m.CourseId == courseId)
+					.Include(m => m.Lessons)
 					.ToList();
 
-				var moduleDtos = _mapper.Map<List<UpdateModuleDto>>(modules);
+				var moduleDtos = _mapper.Map<List<ModuleResponseDto>>(modules);
+
+				for (int i = 0; i < moduleDtos.Count; i++)
+				{
+					moduleDtos[i].CountLesson = modules[i].Lessons?.Count ?? 0;
+				}
 
 				await _moduleDAO.CommitTransactionAsync();
 
@@ -83,19 +90,21 @@ namespace final_project_be_Application.Repository
 			{
 				await _moduleDAO.RollbackTransactionAsync();
 				_logger.LogError(ex, "Error while retrieving modules for course ID {CourseId}", courseId);
-				return new List<UpdateModuleDto>();
+				return new List<ModuleResponseDto>();
 			}
 		}
 
-		public async Task<Module> GetModule(int id)
+		public async Task<ModuleResponseDto> GetModule(int id)
 		{
 			try
 			{
 				await _moduleDAO.BeginTransactionAsync();
 				var module = await _moduleDAO.GetByIdAsync(id);
+				var moduleDto = _mapper.Map<ModuleResponseDto>(module);
+				moduleDto.CountLesson = module.Lessons?.Count ?? 0;
 				await _moduleDAO.CommitTransactionAsync();
 				_logger.LogInformation("Get Module success");
-				return module;
+				return moduleDto;
 			}
 			catch (Exception ex)
 			{

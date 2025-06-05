@@ -114,6 +114,9 @@ builder.Services.AddScoped<IPostFileRepository, PostFileRepository>();
 builder.Services.AddScoped<ICourseRepository, CourseRepository>();
 builder.Services.AddScoped<IModuleRepository, ModuleRepository>();
 builder.Services.AddScoped<ILessonRepository, LessonRepository>();
+builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
+builder.Services.AddScoped<IAnswerRepository, AnswerRepository>();
+builder.Services.AddScoped<IAssignmentRepository, AssignmentRepository>();
 //Config Service
 builder.Services.AddScoped<BlobStorageService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
