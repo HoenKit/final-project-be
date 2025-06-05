@@ -10,6 +10,9 @@ using final_project_be_Domain.DTOs.Category;
 using final_project_be_Domain.DTOs.Courses;
 using final_project_be_Domain.DTOs.Module;
 using final_project_be_Domain.DTOs.Lesson;
+using final_project_be_Domain.DTOs.Question;
+using final_project_be_Domain.DTOs.Answer;
+using final_project_be_Domain.DTOs.Assignment;
 
 namespace final_project_be_Application.Service.Mapping
 {
@@ -42,11 +45,20 @@ namespace final_project_be_Application.Service.Mapping
 			CreateMap<PostFileCreateDto, Post>().ReverseMap();
 			CreateMap<Courses, CourseDto>().ReverseMap();
 			CreateMap<Courses, UpdateCourseDto>().ReverseMap();
+			CreateMap<Courses, CourseResponseDto>().ReverseMap();
 			CreateMap<Module, ModuleDto>().ReverseMap();
 			CreateMap<Module, UpdateModuleDto>().ReverseMap();
+			CreateMap<Module, ModuleResponseDto>().ReverseMap();
 			CreateMap<Lesson, UpdateLessonDto>().ReverseMap();
 			CreateMap<Lesson, LessonDto>().ReverseMap();
 			CreateMap<Lesson, LessonResponseDto>().ReverseMap();
+			CreateMap<Question, QuestionDto>().ReverseMap();
+			CreateMap<Question, UpdateQuestionDto>().ReverseMap();
+			CreateMap<Answer, AnswerDto>().ReverseMap();
+			CreateMap<Answer, UpdateAnswerDto>().ReverseMap();
+			CreateMap<Assignment, AssignmentDto>().ReverseMap();
+			CreateMap<Assignment, UpdateAssignmentDto>().ReverseMap();
+			CreateMap<Assignment, AssignmentResponseDto>().ReverseMap();
 		}
 	}
 }

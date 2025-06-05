@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace final_project_be_Domain.Models
 {
@@ -13,7 +14,9 @@ namespace final_project_be_Domain.Models
         public string Description { get; set; }
         public bool IsPremium { get; set; }
         public Courses? Courses { get; set; }
+        [JsonIgnore]
         public ICollection<Lesson> Lessons { get; set; }
-        public ICollection<UserModule>? UserModules { get; set; }
+		[JsonIgnore]
+		public ICollection<UserModule>? UserModules { get; set; }
     }
 }

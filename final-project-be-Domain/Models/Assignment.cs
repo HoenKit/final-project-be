@@ -10,9 +10,8 @@ namespace final_project_be_Domain.Models
 		[ForeignKey("Lesson")]
 		public int LessonId { get; set; }
 		public string Content { get; set; }
-		public float Percentage { get; set; }
-		public string MeetLink { get; set; }
-		public DateTime CreateAt { set; get; }
+		public string? MeetLink { get; set; }
+		public DateTime CreateAt { set; get; } = DateTime.Now;
 		public Lesson? Lesson { get; set; }
 		public ICollection<UserAssignment>? UserAssignments { get; set; }
 	}

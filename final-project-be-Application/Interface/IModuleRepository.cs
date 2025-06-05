@@ -14,8 +14,8 @@ namespace final_project_be_Application.Interface
 	{
 		public Task<Module> CreateModule(ModuleDto dto);
 		public Task<bool> DeleteModule(int id);
-		public Task<Module> GetModule(int id);
+		public Task<ModuleResponseDto> GetModule(int id);
 		public Task<Module> UpdateModule(UpdateModuleDto dto);
-		public Task<ICollection<UpdateModuleDto>> GetAllModulesByCourseId(int courseId);
+		public Task<ICollection<ModuleResponseDto>> GetAllModulesByCourseId(int courseId);
 	}
 }
