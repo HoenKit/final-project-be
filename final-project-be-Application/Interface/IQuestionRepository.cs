@@ -1,5 +1,6 @@
 ﻿using final_project_be_Domain.DTOs.Question;
 using final_project_be_Domain.Models;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,5 +16,7 @@ namespace final_project_be_Application.Interface
 		public Task<Question> GetQuestion(int id);
 		public Task<Question> UpdateQuestion(UpdateQuestionDto dto);
 		public Task<ICollection<UpdateQuestionDto>> GetAllQuestionByLessonId(int lessonId);
+		public Task ImportQuestionsFromExcel(IFormFile file, int lessonId);
+		public Task<bool> ImportQuizFromAI(string topic, int lessonId, int number);
 	}
 }
