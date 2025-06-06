@@ -14,6 +14,7 @@ using final_project_be_Application.Service.Mapping;
 using final_project_be_Application.Service.EmailService;
 using NuGet.Configuration;
 using final_project_be_Application.Service.CloudinaryService;
+using final_project_be_Application.Service.AimlService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -119,6 +120,7 @@ builder.Services.AddScoped<IAnswerRepository, AnswerRepository>();
 builder.Services.AddScoped<IAssignmentRepository, AssignmentRepository>();
 //Config Service
 builder.Services.AddScoped<BlobStorageService>();
+builder.Services.AddHttpClient<AimlService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddSingleton<CloudinaryService>();
 builder.Services.Configure<CloudinarySettings>(

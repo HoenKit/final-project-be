@@ -74,5 +74,31 @@ namespace final_project_be.Controllers
 			await _questionRepository.DeleteQuestion(id);
 			return Ok();
 		}
+
+		[HttpPost("upload-excel")]
+		public async Task<IActionResult> UploadExcel(IFormFile file, int lessonId)
+		{
+			if (file == null || file.Length == 0)
+				return BadRequest("Invalid file");
+
+			await _questionRepository.ImportQuestionsFromExcel(file, lessonId);
+			return Ok("Imported successfully");
+		}
+
+		[HttpPost("import-AI")]
+		public async Task<IActionResult> ImportQuizFromAI([FromBody] QuizImportRequest request)
+		{
+			if (string.IsNullOrWhiteSpace(request.Topic) || request.LessonId <= 0)
+			{
+				return BadRequest("Topic must not be empty and LessonId must be positive.");
+			}
+
+			var result = await _questionRepository.ImportQuizFromAI(request.Topic, request.LessonId, request.Number);
+
+			if (result)
+				return Ok(new { message = "Quiz imported successfully." });
+			else
+				return StatusCode(500, new { message = "Failed to import quiz from AI." });
+		}
 	}
 }
