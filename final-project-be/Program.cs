@@ -118,6 +118,8 @@ builder.Services.AddScoped<ILessonRepository, LessonRepository>();
 builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
 builder.Services.AddScoped<IAnswerRepository, AnswerRepository>();
 builder.Services.AddScoped<IAssignmentRepository, AssignmentRepository>();
+builder.Services.AddScoped<IMentorCertificateRepository, MentorCertificateRepository>();
+builder.Services.AddScoped<IMentorRepository, MentorRepository>();
 //Config Service
 builder.Services.AddScoped<BlobStorageService>();
 builder.Services.AddHttpClient<AimlService>();
@@ -172,6 +174,18 @@ builder.Services.AddCors(options =>
               .AllowAnyMethod().
               AllowCredentials();
     });
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            var accessToken = context.Request.Cookies["AccessToken"];
+            if (!string.IsNullOrEmpty(accessToken))
+            {
+                context.Token = accessToken;
+            }
+            return Task.CompletedTask;
+        }
+    };
 });
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

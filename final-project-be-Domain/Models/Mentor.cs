@@ -11,10 +11,7 @@ namespace final_project_be_Domain.Models
         public Guid UserId {  get; set; }
         public string? StudyLevel { get; set; }
         public string? CitizenID { get; set; }
-        public int? MentorCertificateId { get; set; }
         public string? Degree { get; set; }
-        public string? FontUrl { get; set; }
-        public string? BackUrl { get; set; }
         public string? Signature { get; set; }
         public string? IssuePlace { get; set; }
         public DateTime ExpiredDate { get; set; }
