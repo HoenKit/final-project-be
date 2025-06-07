@@ -1,12 +1,17 @@
 ﻿using final_project_be_Infrastructure.Data;
 using final_project_be_Domain.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace final_project_be_Infrastructure.DAO
 {
 	public class MentorDAO : GenericDAO<Mentor>
 	{
-		public MentorDAO(ApplicationDbContext context) : base(context)
-		{
-		}
-	}
+
+        private readonly ApplicationDbContext _context;
+        public MentorDAO(ApplicationDbContext context) : base(context)
+        {
+            _context = context;
+        }
+        public async Task<Mentor> GetMentorandcertificate(int id) => await _context.Mentors.Include(m => m.MentorCertificates).FirstOrDefaultAsync(m => m.MentorId == id);
+    }
 }
