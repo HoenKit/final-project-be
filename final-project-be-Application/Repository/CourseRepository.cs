@@ -66,32 +66,34 @@ namespace final_project_be_Application.Repository
 			}
 		}
 
-		public PageResult<GetCourseDto> GetAllCourses(int page, int pageSize, int? CategoryId, string? title, Guid? userId)
+		public PageResult<GetCourseDto> GetAllCourses(int page, int pageSize, int? CategoryId, string? title, Guid? userId, string? sortOption)
 		{
 			try
 			{
-				var baseQuery = _courseDAO.GetAll()
+				var query = _courseDAO.GetAll()
 					.Include(c => c.Mentor)
 						.ThenInclude(c => c.User)
 							.ThenInclude(c => c.UserMetaData)
 					.Include(c => c.Category)
-					.OrderByDescending(p => p.CreateAt);
+					.Where(p => !p.IsDeleted);
 
-				var query = baseQuery.Where(p => p.IsDeleted == false);
-				if (CategoryId != null)
-				{
+				if (CategoryId.HasValue)
 					query = query.Where(c => c.CategoryId == CategoryId);
-				}
 
 				if (!string.IsNullOrEmpty(title))
-				{
 					query = query.Where(c => c.CourseName.Contains(title));
-				}
 
 				if (userId.HasValue && userId != Guid.Empty)
-				{
 					query = query.Where(p => p.UserCourses.Any(uc => uc.UserId == userId.Value));
-				}
+
+				query = sortOption?.ToLower() switch
+				{
+					"asc_name" => query.OrderBy(c => c.CourseName),
+					"desc_name" => query.OrderByDescending(c => c.CourseName),
+					"asc_date" => query.OrderBy(c => c.CreateAt),
+					"desc_date" => query.OrderByDescending(c => c.CreateAt),
+					_ => query.OrderByDescending(c => c.CreateAt) 
+				};
 
 				var totalCount = query.Count();
 
@@ -99,6 +101,7 @@ namespace final_project_be_Application.Repository
 					.Skip((page - 1) * pageSize)
 					.Take(pageSize)
 					.ToList();
+
 				var coursesDtos = courses.Select(p => new GetCourseDto
 				{
 					CourseId = p.CourseId,
@@ -109,22 +112,20 @@ namespace final_project_be_Application.Repository
 					StudentCount = p.StudentCount,
 					CoursesImage = p.CoursesImage,
 					CourseLength = p.CourseLength,
-
-					Mentor =  new MentorDto
+					Mentor = new MentorDto
 					{
 						FirstName = p.Mentor.User.UserMetaData.FirstName,
 						LastName = p.Mentor.User.UserMetaData.LastName
-					},
-
+					}
 				}).ToList();
+
 				_logger.LogInformation("Get Courses success");
 
 				return new PageResult<GetCourseDto>(coursesDtos, totalCount, page, pageSize);
 			}
-
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, "Error when getting Posts");
+				_logger.LogError(ex, "Error when getting Courses");
 				return new PageResult<GetCourseDto>(new List<GetCourseDto>(), 0, page, pageSize);
 			}
 		}
