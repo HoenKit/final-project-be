@@ -112,6 +112,7 @@ namespace final_project_be_Application.Repository
 					StudentCount = p.StudentCount,
 					CoursesImage = p.CoursesImage,
 					CourseLength = p.CourseLength,
+					CreateAt = p.CreateAt,
 					Mentor = new MentorDto
 					{
 						FirstName = p.Mentor.User.UserMetaData.FirstName,
