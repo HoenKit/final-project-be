@@ -19,6 +19,7 @@ namespace final_project_be_Domain.DTOs.Courses
 		public int StudentCount { get; set; }
 		public string? CoursesImage { get; set; }
 		public double? CourseLength { get; set; }
-		public MentorDto? Mentor { get; set; }
+        public DateTime? CreateAt { get; set; }
+        public MentorDto? Mentor { get; set; }
 	}
 }
