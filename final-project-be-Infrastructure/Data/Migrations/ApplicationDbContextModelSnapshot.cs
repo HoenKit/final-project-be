@@ -718,6 +718,10 @@ namespace final_project_be_Infrastructure.Data.Migrations
                     b.Property<int>("LessonId")
                         .HasColumnType("int");
 
+                    b.Property<string>("QuestionType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Question_text")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");

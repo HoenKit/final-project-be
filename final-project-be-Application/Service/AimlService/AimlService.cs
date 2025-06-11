@@ -26,7 +26,7 @@ namespace final_project_be_Application.Service.AimlService
 			// Dữ liệu gửi lên API
 			var requestData = new
 			{
-				model = "gpt-4o-mini-2024-07-18",
+				model = "meta-llama/Llama-Vision-Free",
 				messages = new[]
 				{
 				new { role = "system", content = "You are a subject matter expert and quiz creator." },

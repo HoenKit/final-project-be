@@ -10,6 +10,7 @@ namespace final_project_be_Domain.DTOs.Question
 	public class QuizQuestion
 	{
 		public string QuestionText { get; set; }
+		public string QuestionType { get; set; }
 		public List<QuizAnswer> Answers { get; set; }
 	}
 }

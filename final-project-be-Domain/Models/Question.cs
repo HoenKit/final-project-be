@@ -14,5 +14,6 @@ namespace final_project_be_Domain.Models
         public Lesson? Lesson { get; set; }
         [JsonIgnore]
         public ICollection<Answer>? Answers { get; set; }
+        public string QuestionType { get; set; }
     }
 }
