@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Azure;
 using ClosedXML.Excel;
+using DocumentFormat.OpenXml.Bibliography;
 using final_project_be_Application.Interface;
 using final_project_be_Application.Service.AimlService;
 using final_project_be_Application.Ultils;
@@ -42,6 +43,12 @@ namespace final_project_be_Application.Repository
 			{
 				await _questionDAO.BeginTransactionAsync();
 				var question = _mapper.Map<Question>(dto);
+				var validTypes = new[] { "SingleChoice", "MultipleChoice" };
+				if (!validTypes.Contains(question.QuestionType))
+				{
+					_logger.LogError($"Invalid QuestionType '{question.QuestionType}' for question: {question.Question_text}");
+					throw new Exception($"Invalid QuestionType '{question.QuestionType}' for question: {question.Question_text}");
+				}
 				await _questionDAO.AddAsync(question);
 				await _questionDAO.CommitTransactionAsync();
 				_logger.LogInformation("AddAsync Question success");
@@ -129,6 +136,12 @@ namespace final_project_be_Application.Repository
 					return null;
 				}
 				_mapper.Map(dto, question);
+				var validTypes = new[] { "SingleChoice", "MultipleChoice" };
+				if (!validTypes.Contains(question.QuestionType))
+				{
+					_logger.LogError($"Invalid QuestionType '{question.QuestionType}' for question: {question.Question_text}");
+					throw new Exception($"Invalid QuestionType '{question.QuestionType}' for question: {question.Question_text}");
+				}
 				await _questionDAO.UpdateAsync(question);
 				await _questionDAO.CommitTransactionAsync();
 				_logger.LogInformation("UpdateAsync Question success");
@@ -148,30 +161,53 @@ namespace final_project_be_Application.Repository
 			await file.CopyToAsync(stream);
 			using var workbook = new XLWorkbook(stream);
 			var worksheet = workbook.Worksheets.First();
-			var rows = worksheet.RangeUsed().RowsUsed().Skip(1); // Skip header
+			var rows = worksheet.RangeUsed().RowsUsed().Skip(1); // Skip header row
 
-			// Group by Question_text
+			// Group answers by QuestionText
 			var grouped = rows
-				.Select(r => new
+				.Select(r =>
 				{
-					QuestionText = r.Cell(1).GetString().Trim(),
-					AnswerText = r.Cell(2).GetString().Trim(),
-					IsCorrect = bool.TryParse(r.Cell(3).GetString().Trim(), out var result) ? result : false
+					string questionText = r.Cell(1).GetString().Trim();
+					string answerText = r.Cell(2).GetString().Trim();
+					string isCorrectStr = r.Cell(3).GetString().Trim();
+					string questionType = r.Cell(4).GetString().Trim();
+
+					bool isCorrect = bool.TryParse(isCorrectStr, out var result) && result;
+
+					return new
+					{
+						QuestionText = questionText,
+						AnswerText = answerText,
+						IsCorrect = isCorrect,
+						QuestionType = questionType
+					};
 				})
 				.GroupBy(x => x.QuestionText);
 
 			foreach (var group in grouped)
 			{
-				// Create Question
+				// Use first item in group to get the question type
+				var first = group.First();
+
+				var validTypes = new[] { "SingleChoice", "MultipleChoice" };
+				if (!validTypes.Contains(first.QuestionType))
+				{
+					_logger.LogError($"Invalid QuestionType '{first.QuestionType}' for question: {first.QuestionText}");
+					throw new Exception($"Invalid QuestionType '{first.QuestionType}' for question: {first.QuestionText}");
+				}
+
+				// Create Question DTO
 				var questionDto = new QuestionDto
 				{
 					LessonId = lessonId,
-					Question_text = group.Key
+					Question_text = first.QuestionText,
+					QuestionType = first.QuestionType
 				};
 
+				// Save Question
 				var question = await CreateQuestion(questionDto);
 
-				// Create Answers
+				// Save Answers
 				foreach (var item in group)
 				{
 					var answerDto = new AnswerDto
@@ -189,14 +225,13 @@ namespace final_project_be_Application.Repository
 		public async Task<bool> ImportQuizFromAI(string topic, int lessonId, int number)
 		{
 			var userPrompt = $@"
-								Please generate exactly {number} multiple-choice questions on the topic {topic}.
-Return ONLY a valid JSON array with the following structure (no explanation, no extra text,no markdown, no comments, no text before/after)
-If the output is too long, return fewer questions but always a complete JSON.
-Do not cut off or break JSON syntax:
-
+Please generate exactly {number} multiple-choice questions on the topic '{topic}'.
+Each question should include a field 'QuestionType' with one of these values: 'SingleChoice' or 'MultipleChoice'.
+Return ONLY a valid JSON array with the following structure (no explanation, no extra text, no markdown):
 [
   {{
     ""QuestionText"": ""..."",
+    ""QuestionType"": ""SingleChoice"",
     ""Answers"": [
       {{ ""Text"": ""..."", ""IsCorrect"": true }},
       {{ ""Text"": ""..."", ""IsCorrect"": false }},
@@ -209,58 +244,52 @@ Do not cut off or break JSON syntax:
 
 			try
 			{
-				// Call API AI to get response JSON
 				string rawResponse = await _aimlService.GetChatResponseAsync(userPrompt);
 
-				// Nếu AI trả về kèm ```json ... ``` hoặc ```
-				// Loại bỏ các dòng ```json, ``` và các phần không phải JSON
+				// Handle wrapped code blocks if any
 				var jsonMatch = Regex.Match(rawResponse, @"```json\s*(.+?)\s*```", RegexOptions.Singleline);
+				string jsonToDeserialize = jsonMatch.Success ? jsonMatch.Groups[1].Value : rawResponse;
 
-				string jsonToDeserialize;
-
-				if (jsonMatch.Success)
-				{
-					jsonToDeserialize = jsonMatch.Groups[1].Value;
-				}
-				else
-				{
-					jsonToDeserialize = rawResponse;
-				}
-
-				// Nếu chuỗi jsonToDeserialize có escape thì bỏ escape:
 				jsonToDeserialize = Regex.Unescape(jsonToDeserialize);
 
-				// Deserialize
 				var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
 				var quizQuestions = JsonSerializer.Deserialize<List<QuizQuestion>>(jsonToDeserialize, options);
 
-
 				if (quizQuestions == null || quizQuestions.Count == 0)
 				{
-					_logger.LogWarning("AI response don't have valid question.");
+					_logger.LogWarning("AI response doesn't contain valid questions.");
 					return false;
 				}
 
 				foreach (var q in quizQuestions)
 				{
+					// Validate QuestionType
+					var validTypes = new[] { "SingleChoice", "MultipleChoice" };
+					if (!validTypes.Contains(q.QuestionType))
+					{
+						_logger.LogWarning($"Invalid QuestionType '{q.QuestionType}' for question: {q.QuestionText}");
+						continue;
+					}
+
 					var questionDto = new QuestionDto
 					{
 						LessonId = lessonId,
-						Question_text = q.QuestionText
+						Question_text = q.QuestionText,
+						QuestionType = q.QuestionType
 					};
 
 					var question = await CreateQuestion(questionDto);
 					if (question == null)
 					{
-						_logger.LogWarning($"Can not create question: {q.QuestionText}");
-						continue; 
+						_logger.LogWarning($"Cannot create question: {q.QuestionText}");
+						continue;
 					}
 
 					foreach (var ans in q.Answers)
 					{
 						var answerDto = new AnswerDto
 						{
-							QuestionId = question.QuestionId, 
+							QuestionId = question.QuestionId,
 							Text = ans.Text,
 							Is_correct = ans.IsCorrect
 						};
@@ -268,7 +297,7 @@ Do not cut off or break JSON syntax:
 						var answer = await _answerRepository.CreateAnswer(answerDto);
 						if (answer == null)
 						{
-							_logger.LogWarning($"Can not create answer: {ans.Text} for question {q.QuestionText}");
+							_logger.LogWarning($"Cannot create answer: {ans.Text} for question {q.QuestionText}");
 						}
 					}
 				}
@@ -278,9 +307,10 @@ Do not cut off or break JSON syntax:
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, "Error while import quiz from AI");
+				_logger.LogError(ex, "Error while importing quiz from AI");
 				return false;
 			}
 		}
+
 	}
 }

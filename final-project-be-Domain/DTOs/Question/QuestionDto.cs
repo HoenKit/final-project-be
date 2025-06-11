@@ -11,5 +11,6 @@ namespace final_project_be_Domain.DTOs.Question
 	{
 		public int LessonId { get; set; }
 		public string Question_text { get; set; }
+		public string QuestionType { get; set; }
 	}
 }
