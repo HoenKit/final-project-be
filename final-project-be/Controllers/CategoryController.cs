@@ -19,12 +19,13 @@ namespace final_project_be.Controllers
         // GET: api/<CategoryController>
         [HttpGet]
         
-        public IActionResult GetAll(int? page)
+        public IActionResult GetAll(int? page, int? pageSize)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
             int currentPage = page ?? 1;
-            var pagedComments = _categoryRepository.GetAllCategory(currentPage, 5);
+            int currentSize = pageSize ?? 5;
+            var pagedComments = _categoryRepository.GetAllCategory(currentPage, currentSize);
             return Ok(pagedComments);
         }
 
