@@ -16,5 +16,7 @@ namespace final_project_be_Application.Interface
         public Task<GetMentorDto> GetMentorandCertificate(int id);
         public Task<Mentor> UpdateMentor(CreateMentorDto dto);
         public PageResult<GetMentorDto> GetAllMentors(int page, int pageSize);
+        public Task<GetMentorDto> GetMentorByUserId(Guid userId);
+
     }
 }

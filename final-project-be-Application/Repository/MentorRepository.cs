@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using DocumentFormat.OpenXml.Office2010.Excel;
 using final_project_be_Application.Interface;
 using final_project_be_Domain.DTOs;
 using final_project_be_Domain.DTOs.Comment;
@@ -124,6 +125,28 @@ namespace final_project_be_Application.Repository
                     return null;
                 var mentorDto = _mapper.Map<GetMentorDto>(mentor);
                     await _mentorDAO.CommitTransactionAsync();
+
+                _logger.LogInformation("Get Mentor success");
+                return mentorDto;
+            }
+            catch (Exception ex)
+            {
+                await _mentorDAO.RollbackTransactionAsync();
+                _logger.LogError(ex, "Error when get Mentor");
+                return null;
+            }
+        }
+
+        public async Task<GetMentorDto> GetMentorByUserId(Guid userId)
+        {
+            try
+            {
+                await _mentorDAO.BeginTransactionAsync();
+                var mentor = await _mentorDAO.GetMentorByUserId(userId);
+                if (mentor == null)
+                    return null;
+                var mentorDto = _mapper.Map<GetMentorDto>(mentor);
+                await _mentorDAO.CommitTransactionAsync();
 
                 _logger.LogInformation("Get Mentor success");
                 return mentorDto;
