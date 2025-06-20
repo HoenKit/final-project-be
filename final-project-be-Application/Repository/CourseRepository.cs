@@ -66,7 +66,7 @@ namespace final_project_be_Application.Repository
 			}
 		}
 
-		public PageResult<GetCourseDto> GetAllCourses(int page, int pageSize, int? CategoryId, string? title, Guid? userId, string? sortOption)
+		public PageResult<GetCourseDto> GetAllCourses(int page, int pageSize, int? CategoryId, string? title, Guid? userId, string? sortOption, int? mentorId)
 		{
 			try
 			{
@@ -80,7 +80,10 @@ namespace final_project_be_Application.Repository
 				if (CategoryId.HasValue)
 					query = query.Where(c => c.CategoryId == CategoryId);
 
-				if (!string.IsNullOrEmpty(title))
+                if (mentorId.HasValue)
+                    query = query.Where(c => c.MentorId == mentorId);
+
+                if (!string.IsNullOrEmpty(title))
 					query = query.Where(c => c.CourseName.Contains(title));
 
 				if (userId.HasValue && userId != Guid.Empty)

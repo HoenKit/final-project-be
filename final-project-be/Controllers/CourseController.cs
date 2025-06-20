@@ -21,12 +21,12 @@ namespace final_project_be.Controllers
 		}
 		// GET: api/<CourseController>
 		[HttpGet]
-		public IActionResult GetAll(int? page, int? CategoryId, string? title, Guid? userId, string? sortOption, int? pageSize)
+		public IActionResult GetAll(int? page, int? CategoryId, string? title, Guid? userId, string? sortOption, int? pageSize, int? mentorId)
 		{
 			int currentPage = page ?? 1;
 			int currentSize = pageSize ?? 6;
 
-			var pagedCourses = _courseRepository.GetAllCourses(currentPage, currentSize, CategoryId, title, userId, sortOption);
+			var pagedCourses = _courseRepository.GetAllCourses(currentPage, currentSize, CategoryId, title, userId, sortOption, mentorId);
 			return Ok(pagedCourses);
 		}
 
