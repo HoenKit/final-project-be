@@ -35,6 +35,13 @@ namespace final_project_be.Controllers
             return Ok(await _mentorRepository.GetMentorandCertificate(id));
         }
 
+        [HttpGet("get-by-user/{userId}")]
+        public async Task<IActionResult> GetByUserId(Guid userId)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            return Ok(await _mentorRepository.GetMentorByUserId(userId));
+        }
+
         // POST api/<NotificationController>
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] CreateMentorDto MentorDto)

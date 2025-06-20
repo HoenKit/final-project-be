@@ -13,5 +13,6 @@ namespace final_project_be_Infrastructure.DAO
             _context = context;
         }
         public async Task<Mentor> GetMentorandcertificate(int id) => await _context.Mentors.Include(m => m.MentorCertificates).FirstOrDefaultAsync(m => m.MentorId == id);
+        public async Task<Mentor> GetMentorByUserId(Guid userId) => await _context.Mentors.FirstOrDefaultAsync(m => m.UserId == userId);
     }
 }
