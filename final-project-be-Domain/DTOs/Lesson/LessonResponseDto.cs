@@ -9,7 +9,8 @@ namespace final_project_be_Domain.DTOs.Lesson
 {
 	public class LessonResponseDto
 	{
-		public int ModuleId { get; set; }
+        public int LessonId { get; set; }
+        public int ModuleId { get; set; }
 		public string Title { get; set; }
 	}
 }
