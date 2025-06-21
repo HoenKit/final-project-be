@@ -188,54 +188,63 @@ namespace final_project_be_Application.Repository
 			}
 		}
 
-		public async Task<Courses> UpdateCourse(UpdateCourseDto dto)
-		{
-			try
-			{
-				await _courseDAO.BeginTransactionAsync();
+        public async Task<Courses> UpdateCourse(UpdateCourseDto dto)
+        {
+            try
+            {
+                await _courseDAO.BeginTransactionAsync();
 
-				var course = await _courseDAO.GetByIdAsync(dto.CourseId);
-				if (course == null)
-				{
-					_logger.LogWarning("Course not found with ID: {Id}", dto.CourseId);
-					await _courseDAO.RollbackTransactionAsync();
-					return null;
-				}
+                var course = await _courseDAO.GetByIdAsync(dto.CourseId);
+                if (course == null)
+                {
+                    _logger.LogWarning("Course not found with ID: {Id}", dto.CourseId);
+                    await _courseDAO.RollbackTransactionAsync();
+                    return null;
+                }
 
-				string oldImage = course.CoursesImage;
-				 _mapper.Map(dto, course);
+                string oldImageUrl = course.CoursesImage;
 
-				if (dto.CoursesImage != null && dto.CoursesImage.Length > 0)
-				{
-					if (!string.IsNullOrEmpty(oldImage))
-					{
-						var oldFileName = Path.GetFileName(oldImage);
-						await _blobStorageService.DeleteFileIfExistsAsync(oldFileName);
-					}
+                course.CourseName = dto.CourseName;
+                course.CourseContent = dto.CourseContent;
+                course.Cost = dto.Cost;
+                course.SkillLearn = dto.SkillLearn;
+                course.CourseLength = dto.CourseLength;
+                course.CategoryId = dto.CategoryId;
+                course.MentorId = dto.MentorId;
 
-					var fileExtension = Path.GetExtension(dto.CoursesImage.FileName);
-					var uniqueFileName = Guid.NewGuid().ToString() + fileExtension;
+                if (dto.CoursesImage != null && dto.CoursesImage.Length > 0)
+                {
+                    if (!string.IsNullOrEmpty(oldImageUrl))
+                    {
+                        var oldFileName = Path.GetFileName(oldImageUrl);
+                        await _blobStorageService.DeleteFileIfExistsAsync(oldFileName);
+                    }
 
-					using (var stream = dto.CoursesImage.OpenReadStream())
-					{
-						await _blobStorageService.UploadFileAsync(uniqueFileName, stream);
-					}
+                    var fileExtension = Path.GetExtension(dto.CoursesImage.FileName);
+                    var uniqueFileName = Guid.NewGuid().ToString() + fileExtension;
 
-					course.CoursesImage = $"https://finalprojectbestorage.blob.core.windows.net/phronesisfiles/{uniqueFileName}";
-				}
+                    using (var stream = dto.CoursesImage.OpenReadStream())
+                    {
+                        await _blobStorageService.UploadFileAsync(uniqueFileName, stream);
+                    }
 
-				course.UpdateAt = DateTime.Now;
-				await _courseDAO.UpdateAsync(course);
-				await _courseDAO.CommitTransactionAsync();
-				_logger.LogInformation("UpdateAsync Course success");
-				return course;
-			}
-			catch (Exception ex)
-			{
-				await _courseDAO.RollbackTransactionAsync();
-				_logger.LogError(ex, "Error when updating Course");
-				return null;
-			}
-		}
-	}
+                    course.CoursesImage = $"https://finalprojectbestorage.blob.core.windows.net/phronesisfiles/{uniqueFileName}";
+                }
+
+                course.UpdateAt = DateTime.Now;
+
+                await _courseDAO.UpdateAsync(course);
+                await _courseDAO.CommitTransactionAsync();
+                _logger.LogInformation("UpdateAsync Course success");
+                return course;
+            }
+            catch (Exception ex)
+            {
+                await _courseDAO.RollbackTransactionAsync();
+                _logger.LogError(ex, "Error when updating Course");
+                return null;
+            }
+        }
+
+    }
 }
