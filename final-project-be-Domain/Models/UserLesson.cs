@@ -12,8 +12,7 @@ namespace final_project_be_Domain.Models
         public int LessonId { get; set; }
         [ForeignKey("User")]
         public Guid UserId { get; set; }
-        public string Status { get; set; }
-        public float? Percentage { get; set; }
+        public bool IsPassed { get; set; } = false;
         public DateTime? CompletedAt { get; set; }
         public float? Mark { get;set; }
         public ICollection<UserAnswer>? UserAnswer { get; set; }

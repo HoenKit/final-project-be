@@ -10,9 +10,9 @@ namespace final_project_be_Domain.Models
         public int ModuleId { get; set; }
         [ForeignKey("Courses")]
         public int CourseId { get; set; }
-        public string Title { get; set; }
-        public string Description { get; set; }
-        public bool IsPremium { get; set; }
+        public string? Title { get; set; }
+        public string? Description { get; set; }
+        public bool IsPremium { get; set; } = false;
         public Courses? Courses { get; set; }
         [JsonIgnore]
         public ICollection<Lesson> Lessons { get; set; }

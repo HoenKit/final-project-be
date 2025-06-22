@@ -13,10 +13,14 @@ namespace final_project_be_Domain.DTOs.Courses
 	{
 		public int CourseId { get; set; }
 		public string CourseName { get; set; }
-		public string CourseContent { get; set; }
-		public decimal Cost { get; set; }
-		public string SkillLearn { get; set; }
-		public int StudentCount { get; set; }
+		public string? CourseContent { get; set; }
+		public decimal Cost { get; set; } = 0;
+		public string? SkillLearn { get; set; }
+        public string? Requirement { get; set; }
+        public string? IntendedLearner { get; set; }
+        public string? Language { get; set; }
+        public string? Level { get; set; }
+        public int? StudentCount { get; set; }
 		public string? CoursesImage { get; set; }
 		public double? CourseLength { get; set; }
         public DateTime? CreateAt { get; set; }

@@ -12,6 +12,7 @@ namespace final_project_be_Domain.Models
         public int ModuleId { get; set; }
         public string Title { get; set; }
         public string? Description { get; set; }
+        public string? DocumentLink { get; set; }
         public string? VideoLink { get; set; }
         public ICollection<UserLesson>? UserLesson { get; set; }
         public ICollection<Assignment>? Assignments { get; set; }

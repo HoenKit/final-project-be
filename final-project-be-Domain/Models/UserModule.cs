@@ -9,7 +9,7 @@ namespace final_project_be_Domain.Models
         public int ModuleId { get; set; }
         [ForeignKey("User")]
         public Guid UserId {  get; set; }
-        public string Status { get; set; }
+        public string Status { get; set; } = "not started";
         public float? Percentage { get; set; }
         public DateTime? CompletedAt { get; set; }
         public Module? Module { get; set; }

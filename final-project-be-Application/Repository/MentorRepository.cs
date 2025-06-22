@@ -89,7 +89,6 @@ namespace final_project_be_Application.Repository
                     MentorId = p.MentorId,
                     UserId = p.UserId,
                     StudyLevel = p.StudyLevel,
-                    Degree = p.Degree,
                     CitizenID = p.CitizenID,
                     Signature = p.Signature,
                     IssuePlace = p.IssuePlace,

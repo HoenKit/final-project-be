@@ -204,14 +204,12 @@ namespace final_project_be_Infrastructure.Data.Migrations
                         .HasColumnType("decimal(18,4)");
 
                     b.Property<string>("CourseContent")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<double?>("CourseLength")
                         .HasColumnType("float");
 
                     b.Property<string>("CourseName")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("CoursesImage")
@@ -220,17 +218,31 @@ namespace final_project_be_Infrastructure.Data.Migrations
                     b.Property<DateTime?>("CreateAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("IntendedLearner")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
+
+                    b.Property<string>("Language")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Level")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("MentorId")
                         .HasColumnType("int");
 
-                    b.Property<string>("SkillLearn")
-                        .IsRequired()
+                    b.Property<string>("Requirement")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("StudentCount")
+                    b.Property<string>("SkillLearn")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("StudentCount")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdateAt")
@@ -281,6 +293,9 @@ namespace final_project_be_Infrastructure.Data.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("LessonId"));
 
                     b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DocumentLink")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("ModuleId")
@@ -336,9 +351,6 @@ namespace final_project_be_Infrastructure.Data.Migrations
 
                     b.Property<DateTime>("CreateAt")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("Degree")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("ExpiredDate")
                         .HasColumnType("datetime2");
@@ -443,14 +455,12 @@ namespace final_project_be_Infrastructure.Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsPremium")
                         .HasColumnType("bit");
 
                     b.Property<string>("Title")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("ModuleId");
@@ -981,6 +991,9 @@ namespace final_project_be_Infrastructure.Data.Migrations
                     b.Property<bool>("IsBanned")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsConfirmed")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Password")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -1078,18 +1091,14 @@ namespace final_project_be_Infrastructure.Data.Migrations
                     b.Property<DateTime?>("CompletedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<bool>("IsPassed")
+                        .HasColumnType("bit");
+
                     b.Property<int>("LessonId")
                         .HasColumnType("int");
 
                     b.Property<float?>("Mark")
                         .HasColumnType("real");
-
-                    b.Property<float?>("Percentage")
-                        .HasColumnType("real");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
