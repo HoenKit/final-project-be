@@ -10,7 +10,7 @@ namespace final_project_be_Domain.Models
         public string Email { get; set; }
         public string Phone { get; set; }
         public string Password { get; set; }
-        public decimal? Point { get; set; }
+        public decimal? Point { get; set; } = 0;
         public bool IsBanned { get; set; } = false;
         public bool IsConfirmed { get; set; } = false;
         public DateTime CreateAt { get; set; } = DateTime.Now;
