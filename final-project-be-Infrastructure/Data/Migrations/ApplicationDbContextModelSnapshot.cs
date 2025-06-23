@@ -1021,9 +1021,6 @@ namespace final_project_be_Infrastructure.Data.Migrations
                     b.Property<int>("AnswerId")
                         .HasColumnType("int");
 
-                    b.Property<int>("UserAnswerId")
-                        .HasColumnType("int");
-
                     b.HasKey("UserLessonId", "AnswerId");
 
                     b.HasIndex("AnswerId");

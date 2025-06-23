@@ -6,8 +6,6 @@ namespace final_project_be_Domain.Models
 {
 	public class UserAnswer
     {
-        [Key]
-        public int UserAnswerId { get; set; }
         [ForeignKey("UserLesson")]
         public int UserLessonId { get; set; }
         [ForeignKey("Answer")]

@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using DocumentFormat.OpenXml.Office2010.Excel;
 using final_project_be_Application.Interface;
+using final_project_be_Application.Service.EmailService;
 using final_project_be_Domain.DTOs;
 using final_project_be_Domain.DTOs.Comment;
 using final_project_be_Domain.DTOs.Courses;
@@ -8,6 +9,7 @@ using final_project_be_Domain.DTOs.Mentor;
 using final_project_be_Domain.DTOs.Module;
 using final_project_be_Domain.DTOs.Notification;
 using final_project_be_Domain.DTOs.Post;
+using final_project_be_Domain.DTOs.Users;
 using final_project_be_Domain.Models;
 using final_project_be_Infrastructure.DAO;
 using Microsoft.EntityFrameworkCore;
@@ -22,15 +24,19 @@ namespace final_project_be_Application.Repository
 {
     public class MentorRepository : Repository<Mentor>, IMentorRepository
     {
+        private readonly UserDAO _userDAO;
         private readonly MentorDAO _mentorDAO;
         private readonly IMapper _mapper;
         private readonly ILogger<MentorRepository> _logger;
+        private readonly IEmailService _emailService;
 
-        public MentorRepository(MentorDAO mentorDAO, IMapper mapper, ILogger<MentorRepository> logger) : base(mentorDAO)
+        public MentorRepository(MentorDAO mentorDAO, IMapper mapper, ILogger<MentorRepository> logger, UserDAO userDAO, IEmailService emailService) : base(mentorDAO)
         {
             _mentorDAO = mentorDAO;
             _mapper = mapper;
             _logger = logger;
+            _userDAO = userDAO;
+            _emailService = emailService;
         }
 
 
@@ -41,8 +47,61 @@ namespace final_project_be_Application.Repository
                 await _mentorDAO.BeginTransactionAsync();
                 var mentor = _mapper.Map<Mentor>(dto);
                 await _mentorDAO.AddAsync(mentor);
+
+                var user = await _userDAO.GetUserMetadatabyId(dto.UserId);
+                if (user == null)
+                    throw new Exception("User not found");
+                if (user == null)
+                {
+                    user = new UserMetadata
+                    {
+                        FirstName = dto.FirstName,
+                        LastName = dto.LastName
+                    };
+                }
+                else
+                {
+                    user.FirstName = dto.FirstName;
+                    user.LastName = dto.LastName;
+                }
+
+                await _userDAO.UpdateUserMetadataAsync(user);
+
+
+                var mentorRole = await _userDAO.GetRoleByNameAsync("Mentor");
+                if (mentorRole == null)
+                {
+                    mentorRole = new Role { RoleName = "Mentor" };
+                    await _userDAO.AddRoleAsync(mentorRole);
+                }
+                var userRoleExists = await _userDAO.ExistsAsync(dto.UserId, mentorRole.RoleId);
+                if (!userRoleExists)
+                {
+                    var userRole = new UserRole
+                    {
+                        UserId = dto.UserId,
+                        RoleId = mentorRole.RoleId
+                    };
+                    await _userDAO.AddUserRoleAsync(userRole);
+                }
+
+                string body = $@"
+                <div style='font-family: Arial, sans-serif; padding: 20px; background-color: #f4f8fb; color: #333;'>
+                    <div style='max-width: 600px; margin: auto; background-color: #ffffff; padding: 30px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);'>
+                        <h2 style='color: #28a745;'>Welcome to the  Phronesis Learning Mentor Community!</h2>
+                        <p>We are thrilled to have you join our growing network of passionate mentors who are committed to sharing knowledge and guiding learners on their journey.</p>
+                        <p>Your role as a Mentor is truly meaningful — you will be making a positive impact on the personal and professional growth of many students.</p>
+                        <p>Let’s work together to spread valuable knowledge and build a vibrant learning community.</p>
+                        <p>If you ever have any questions or need assistance, feel free to reach out to the Phronesis Learning team.</p>
+                        <p>We wish you a fulfilling and inspiring experience with Phronesis!</p>
+                        <p>Warm regards,<br/>The Phronesis Learning Team</p>
+                    </div>
+                </div>";
+
+                await _emailService.SendEmailAsync(user.User.Email, "Welcome to become a Mentor", body);
+
                 await _mentorDAO.CommitTransactionAsync();
-                _logger.LogInformation("AddAsync Module success");
+                _logger.LogInformation("CreateMentor success");
                 return mentor;
             }
             catch (Exception ex)

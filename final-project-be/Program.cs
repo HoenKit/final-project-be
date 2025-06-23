@@ -129,8 +129,10 @@ builder.Services.AddSingleton<CloudinaryService>();
 builder.Services.Configure<CloudinarySettings>(
 	builder.Configuration.GetSection("Cloudinary"));
 
-//config Valid class
+//config class
 builder.Services.AddScoped<Validate>();
+
+builder.Services.AddScoped<Caculator>();
 
 //Config Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

@@ -31,7 +31,7 @@ namespace final_project_be_Application.Repository
 			await _userDAO.BeginTransactionAsync();
             try
             {
-                var user = _userDAO.GetByIdAsync(userId);
+                var user = await _userDAO.GetByIdAsync(userId);
                 if (user == null)
                 {
                     _logger.LogWarning($"User with ID {userId} not found.");

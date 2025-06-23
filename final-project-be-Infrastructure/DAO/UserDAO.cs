@@ -12,21 +12,32 @@ namespace final_project_be_Infrastructure.DAO
         {
             _context = context;
         }
-		public User GetByIdAsync(Guid userId)
-		{
-			return _context.users
-				.Include(u => u.UserMetaData)
-				.FirstOrDefault(u => u.UserId == userId);
-		}
-		public bool UserRegisterExist(UserRegisterDto registerDto) => _context.users.Any(u => u.Email == registerDto.Email);
+        public async Task<User> GetByIdAsync(Guid userId)
+        {
+            return await _context.users
+                .Include(u => u.UserMetaData)
+                .FirstOrDefaultAsync(u => u.UserId == userId);
+        }
+        public bool UserRegisterExist(UserRegisterDto registerDto) => _context.users.Any(u => u.Email == registerDto.Email);
         public User GetUserbyEmail(UserLoginDto loginDto) => _context.users.FirstOrDefault(u=> u.Email == loginDto.Email);
         public User GetUserbyEmail(string email) => _context.users.FirstOrDefault(u => u.Email == email);
         public IEnumerable<string> GetRolesByUserId(Guid userId) => _context.userRoles.Where(ur => ur.UserId == userId).Select(ur => ur.Role.RoleName).ToList();
-        public  Role GetRoleByName(string roleName)  => _context.roles.FirstOrDefault(r => r.RoleName == roleName);
-        public  void AddUserRole(UserRole userRole) => _context.userRoles.AddAsync(userRole);
-        public  void AddRole(Role role) => _context.roles.AddAsync(role);
-        public void AddUserMetaData(UserMetadata userMetadata) => _context.UserMetadata.AddAsync(userMetadata);
-        public UserMetadata GetUserMetadatabyId(Guid UserId) => _context.UserMetadata.FirstOrDefault(u => u.UserId == UserId);
+        public async Task<Role> GetRoleByNameAsync(string roleName) => await _context.roles.FirstOrDefaultAsync(r => r.RoleName == roleName);
+        public async Task<bool> ExistsAsync(Guid userId, int roleId) => await _context.userRoles.AnyAsync(ur => ur.UserId == userId && ur.RoleId == roleId);
+        public async Task AddUserRoleAsync(UserRole userRole)
+        {
+            _context.userRoles.AddAsync(userRole);
+            await _context.SaveChangesAsync();
+        }
+        public async Task AddRoleAsync(Role role) => await _context.roles.AddAsync(role);
+        public async Task AddUserMetaData(UserMetadata userMetadata) => await _context.UserMetadata.AddAsync(userMetadata);
+        public async Task<UserMetadata> GetUserMetadatabyId(Guid UserId) => await _context.UserMetadata.Include(u => u.User).FirstOrDefaultAsync(u => u.UserId == UserId);
+        public async Task<User> GetUserByMentor(int MentorId) => await _context.users.FirstOrDefaultAsync(m => m.Mentor.MentorId == MentorId);
+        public async Task UpdateUserMetadataAsync(UserMetadata user)
+        {
+            _context.UserMetadata.Update(user);
+            await _context.SaveChangesAsync();
+        }
         public User GetUserandUserMetadata(Guid UserId) => _context.users.Include(u => u.UserMetaData).FirstOrDefault(u => u.UserId == UserId);
     }
 }

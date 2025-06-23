@@ -1,13 +1,14 @@
-﻿using final_project_be_Domain.Models;
-using final_project_be_Domain.DTOs.Users;
-using final_project_be_Application.Interface;
+﻿using final_project_be_Application.Interface;
 using final_project_be_Application.Repository;
 using final_project_be_Application.Ultils;
+using final_project_be_Domain.DTOs.Users;
+using final_project_be_Domain.Models;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using NuGet.Common;
 using System.IdentityModel.Tokens.Jwt;
-using Microsoft.AspNetCore.Identity.Data;
+using System.Linq;
 
 namespace final_project_be.Controllers
 {
@@ -33,12 +34,26 @@ namespace final_project_be.Controllers
         [HttpPost("Login")]
         public async Task<ActionResult<string>> Login(UserLoginDto loginDto)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-            var token = await _userAuthRepository.LoginAsync(loginDto);
-            if (token == null)
-                return BadRequest(new { message = "Invalid username or password" });
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
-            return Ok(new { token });
+            var loginResult = await _userAuthRepository.LoginAsync(loginDto);
+
+            if (!loginResult.Success)
+                return BadRequest(new { message = loginResult.ErrorMessage });
+
+            return Ok(new { token = loginResult.Token });
+        }
+
+        [HttpPut("ConfirmUser")]
+        public async Task<IActionResult> ConfirmUser(Guid UserId)
+        {
+            var updatedUser = await _userAuthRepository.ConfirmAccountAsync(UserId);
+            if (updatedUser == null)
+            {
+                return StatusCode(500, "Failed to UpdateAsync user status.");
+            }
+            return Ok(updatedUser);
         }
 
         [HttpGet("current-user")]
