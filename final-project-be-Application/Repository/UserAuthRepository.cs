@@ -39,42 +39,75 @@ namespace final_project_be_Application.Repository
             _clientSettings = clientoptions.Value;
         }
 
-        public async Task<string> LoginAsync(UserLoginDto dto)
+        public async Task<LoginResultDto> LoginAsync(UserLoginDto dto)
         {
             try
             {
                 var user = _UserDAO.GetUserbyEmail(dto);
                 if (user == null)
                 {
-                    _logger.LogWarning("Login failed: User not found with email: {Email}", dto.Email);
-                    return null;
+                    _logger.LogWarning("Login attempt failed: No user found with email '{Email}'.", dto.Email);
+                    return new LoginResultDto
+                    {
+                        Success = false,
+                        ErrorMessage = "No account associated with this email."
+                    };
+                }
+
+                if (user.IsBanned == true)
+                {
+                    return new LoginResultDto
+                    {
+                        Success = false,
+                        ErrorMessage = "Your account has been banned. Please contact support for more information."
+                    };
+                }
+
+                if (user.IsConfirmed == false)
+                {
+                    return new LoginResultDto
+                    {
+                        Success = false,
+                        ErrorMessage = "Your email has not been confirmed. Please check your inbox for a confirmation link."
+                    };
                 }
 
                 var passwordVerificationResult = new PasswordHasher<User>().VerifyHashedPassword(user, user.Password, dto.Password);
                 if (passwordVerificationResult == PasswordVerificationResult.Failed)
                 {
-                    _logger.LogWarning("Login failed: Invalid password for email: {Email}", dto.Email);
-                    return null;
+                    return new LoginResultDto
+                    {
+                        Success = false,
+                        ErrorMessage = "Incorrect password. Please try again."
+                    };
                 }
 
                 var token = GenerateToken(user);
 
                 var cookieOptions = new CookieOptions
                 {
-                    HttpOnly = false, 
-                    Secure = true,  
-                    SameSite = SameSiteMode.Strict, 
-                    Expires = DateTime.UtcNow.AddHours(1) 
+                    HttpOnly = false,
+                    Secure = true,
+                    SameSite = SameSiteMode.Strict,
+                    Expires = DateTime.UtcNow.AddDays(1)
                 };
-
                 _httpContextAccessor.HttpContext.Response.Cookies.Append("AccessToken", token, cookieOptions);
 
-                return token;
+                return new LoginResultDto
+                {
+                    Success = true,
+                    Token = token
+                };
+
+
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred during login");
-                return null;
+                return new LoginResultDto
+                {
+                    Success = false,
+                    ErrorMessage = "An unexpected error occurred. Please try again later."
+                };
             }
         }
 
@@ -123,13 +156,13 @@ namespace final_project_be_Application.Repository
                     throw new UnauthorizedAccessException("Invalid token");
                 }
 
-                var user = _UserDAO.GetByIdAsync(userId);
+                var user = await _UserDAO.GetByIdAsync(userId);
                 if (user == null)
                 {
                     throw new KeyNotFoundException("User not found");
                 }
 
-                var roles = _UserDAO.GetRolesByUserId(userId);
+                var roles =  _UserDAO.GetRolesByUserId(userId);
 
                 return new UsercurrentDto
                 {
@@ -186,10 +219,10 @@ namespace final_project_be_Application.Repository
                     Address = dto.userMetadataDto.Address
                 };
 
-                _UserDAO.AddUserMetaData(userMeta);
+                await _UserDAO.AddUserMetaData(userMeta);
                 await _UserDAO.SaveChangesAsync();
 
-                var defaultRole = _UserDAO.GetRoleByName("User");
+                var defaultRole = await _UserDAO.GetRoleByNameAsync("User");
                 if (defaultRole != null)
                 {
                     var userRole = new UserRole
@@ -198,10 +231,26 @@ namespace final_project_be_Application.Repository
                         RoleId = defaultRole.RoleId
                     };
 
-                    _UserDAO.AddUserRole(userRole);
+                    await _UserDAO.AddUserRoleAsync(userRole);
                     await _UserDAO.SaveChangesAsync(); 
                 }
 
+                var confirmLink = $"{_clientSettings.BaseUrl}ConfirmEmail?UserId={user.UserId}";
+                string body = $@"
+                <div style='font-family: Arial, sans-serif; padding: 20px; background-color: #f4f8fb; color: #333;'>
+                    <div style='max-width: 600px; margin: auto; background-color: #ffffff; padding: 30px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);'>
+                        <h2 style='color: #28a745;'>Confirm Your Email</h2>
+                        <p>Hello,</p>
+                        <p>Thank you for registering. Please confirm your email address by clicking the button below.</p>
+                        <div style='text-align: center; margin: 30px 0;'>
+                            <a href='{confirmLink}' style='display: inline-block; background-color: #28a745; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-size: 16px;'>Confirm Email</a>
+                        </div>
+                        <p>If you did not create this account, please ignore this email.</p>
+                        <p>Thank you,<br>Your Support Team</p>
+                    </div>
+                </div>";
+
+                await _emailService.SendEmailAsync(dto.Email, "Confirm your email", body);
                 await _UserDAO.CommitTransactionAsync();
                 _logger.LogInformation("User registered successfully with email: {Email}", dto.Email);
                 return user;
@@ -214,6 +263,31 @@ namespace final_project_be_Application.Repository
             }
         }
 
+        public async Task<User> ConfirmAccountAsync(Guid UserId)
+        {
+            await _UserDAO.BeginTransactionAsync();
+            try
+            {
+                var user = await _UserDAO.GetByIdAsync(UserId);
+                if (user == null)
+                {
+                    _logger.LogWarning($"User with ID {UserId} not found.");
+                    return null;
+                }
+
+                user.IsConfirmed = true;
+
+                await _UserDAO.UpdateAsync(user);
+                await _UserDAO.CommitTransactionAsync();
+                return user;
+            }
+            catch (Exception ex)
+            {
+                await _UserDAO.RollbackTransactionAsync();
+                _logger.LogError(ex, "Failed to Confirm user with email: {Email}");
+                return null;
+            }
+        }
         public async Task ForgotPasswordAsync(ForgotpasswordDto dto)
         {
             var user = _UserDAO.GetUserbyEmail(dto.Email);

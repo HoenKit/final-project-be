@@ -18,7 +18,14 @@ namespace final_project_be_Domain.DTOs.Users
 		public string Gender { get; set; }
 		public string Address { get; set; }
 	}
-	public class UserLoginDto
+
+    public class LoginResultDto
+    {
+        public bool Success { get; set; }
+        public string? Token { get; set; }
+        public string? ErrorMessage { get; set; }
+    }
+    public class UserLoginDto
 	{
 		public string Email { get; set; }
 		public string Password { get; set; }

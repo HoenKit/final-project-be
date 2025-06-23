@@ -17,13 +17,14 @@ namespace final_project_be_Domain.DTOs.Mentor
         public Guid UserId { get; set; }
         public string? Introduction { get; set; }
         public string? JobTitle { get; set; }
+        public string? FirstName { get; set; }
+        public string? LastName { get; set; }
         public string? StudyLevel { get; set; }
         public string? CitizenID { get; set; }
-        public string? Degree { get; set; }
         public string? Signature { get; set; }
         public string? IssuePlace { get; set; }
-        public DateTime ExpiredDate { get; set; }
-        public DateTime IssueDate { get; set; }
+        public DateTime? ExpiredDate { get; set; }
+        public DateTime? IssueDate { get; set; }
         public DateTime CreateAt { get; set; }
         public DateTime UpdateAt { get; set; }
         public List<MentorCertificateDto>? MentorCertificates { get; set; }
