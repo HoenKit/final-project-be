@@ -17,12 +17,14 @@ namespace final_project_be_Application.Repository
 	public class CourseRepository : Repository<Courses>, ICourseRepository
 	{
 		private readonly CourseDAO _courseDAO;
+		private readonly ReviewDAO _reviewDAO;
 		private readonly IMapper _mapper;
 		private readonly ILogger<CourseRepository> _logger;
 		private readonly BlobStorageService _blobStorageService;
-		public CourseRepository(CourseDAO courseDAO, IMapper mapper, ILogger<CourseRepository> logger, BlobStorageService blobStorageService) : base(courseDAO)
+		public CourseRepository(CourseDAO courseDAO, ReviewDAO reviewDAO, IMapper mapper, ILogger<CourseRepository> logger, BlobStorageService blobStorageService) : base(courseDAO)
 		{
 			_courseDAO = courseDAO;
+			_reviewDAO = reviewDAO;
 			_mapper = mapper;
 			_logger = logger;
 			_blobStorageService = blobStorageService;
@@ -66,75 +68,102 @@ namespace final_project_be_Application.Repository
 			}
 		}
 
-		public PageResult<GetCourseDto> GetAllCourses(int page, int pageSize, int? CategoryId, string? title, Guid? userId, string? sortOption, int? mentorId)
-		{
-			try
-			{
-				var query = _courseDAO.GetAll()
-					.Include(c => c.Mentor)
-						.ThenInclude(c => c.User)
-							.ThenInclude(c => c.UserMetaData)
-					.Include(c => c.Category)
-					.Where(p => !p.IsDeleted);
+        public PageResult<GetCourseDto> GetAllCourses(int page, int pageSize, int? CategoryId, string? title, Guid? userId, string? sortOption, int? mentorId, string? Language, string? Level, decimal? MinCost, decimal? MaxCost, decimal? MinRate, decimal? MaxRate)
+        {
+            try
+            {
+                var query = _courseDAO.GetAll()
+                    .Include(c => c.Mentor)
+                        .ThenInclude(c => c.User)
+                            .ThenInclude(c => c.UserMetaData)
+                    .Include(c => c.Category)
+                    .Include(c => c.Reviews.Where(r => !r.IsDeleted))
+                    .Where(p => !p.IsDeleted && p.Status == "Approved");
 
-				if (CategoryId.HasValue)
-					query = query.Where(c => c.CategoryId == CategoryId);
+                if (CategoryId.HasValue)
+                    query = query.Where(c => c.CategoryId == CategoryId);
 
                 if (mentorId.HasValue)
                     query = query.Where(c => c.MentorId == mentorId);
 
                 if (!string.IsNullOrEmpty(title))
-					query = query.Where(c => c.CourseName.Contains(title));
+                    query = query.Where(c => c.CourseName.Contains(title));
 
-				if (userId.HasValue && userId != Guid.Empty)
-					query = query.Where(p => p.UserCourses.Any(uc => uc.UserId == userId.Value));
+                if (userId.HasValue && userId != Guid.Empty)
+                    query = query.Where(p => p.UserCourses.Any(uc => uc.UserId == userId.Value));
 
-				query = sortOption?.ToLower() switch
-				{
-					"asc_name" => query.OrderBy(c => c.CourseName),
-					"desc_name" => query.OrderByDescending(c => c.CourseName),
-					"asc_date" => query.OrderBy(c => c.CreateAt),
-					"desc_date" => query.OrderByDescending(c => c.CreateAt),
-					_ => query.OrderByDescending(c => c.CreateAt) 
-				};
 
-				var totalCount = query.Count();
+                if (!string.IsNullOrEmpty(Language))
+                    query = query.Where(c => c.Language == Language);
 
-				var courses = query
-					.Skip((page - 1) * pageSize)
-					.Take(pageSize)
-					.ToList();
+                if (!string.IsNullOrEmpty(Level))
+                    query = query.Where(c => c.Level == Level);
 
-				var coursesDtos = courses.Select(p => new GetCourseDto
-				{
-					CourseId = p.CourseId,
-					CourseName = p.CourseName,
-					CourseContent = p.CourseContent,
-					Cost = p.Cost,
-					SkillLearn = p.SkillLearn,
-					StudentCount = p.StudentCount,
-					CoursesImage = p.CoursesImage,
-					CourseLength = p.CourseLength,
-					CreateAt = p.CreateAt,
-					Mentor = new MentorDto
-					{
-						FirstName = p.Mentor.User.UserMetaData.FirstName,
-						LastName = p.Mentor.User.UserMetaData.LastName
-					}
-				}).ToList();
+                if (MinCost.HasValue)
+                    query = query.Where(c => c.Cost >= MinCost.Value);
+                if (MaxCost.HasValue)
+                    query = query.Where(c => c.Cost <= MaxCost.Value);
 
-				_logger.LogInformation("Get Courses success");
+                if (MinRate.HasValue)
+                    query = query.Where(c => c.Reviews.Any() && c.Reviews.Average(r => r.rate) >= MinRate.Value);
+                if (MaxRate.HasValue)
+                    query = query.Where(c => c.Reviews.Any() && c.Reviews.Average(r => r.rate) <= MaxRate.Value);
 
-				return new PageResult<GetCourseDto>(coursesDtos, totalCount, page, pageSize);
-			}
-			catch (Exception ex)
-			{
-				_logger.LogError(ex, "Error when getting Courses");
-				return new PageResult<GetCourseDto>(new List<GetCourseDto>(), 0, page, pageSize);
-			}
-		}
+                query = sortOption?.ToLower() switch
+                {
+                    "asc_name" => query.OrderBy(c => c.CourseName),
+                    "desc_name" => query.OrderByDescending(c => c.CourseName),
+                    "asc_date" => query.OrderBy(c => c.CreateAt),
+                    "desc_date" => query.OrderByDescending(c => c.CreateAt),
+                    "asc_cost" => query.OrderBy(c => c.Cost),
+                    "desc_cost" => query.OrderByDescending(c => c.Cost),
+                    "asc_rating" => query.OrderBy(c => c.Reviews.Any() ? c.Reviews.Average(r => r.rate) : 0),
+                    "desc_rating" => query.OrderByDescending(c => c.Reviews.Any() ? c.Reviews.Average(r => r.rate) : 0),
+                    "most_reviewed" => query.OrderByDescending(c => c.Reviews.Count()),
+                    _ => query.OrderByDescending(c => c.CreateAt)
+                };
 
-		public async Task<CourseResponseDto> GetCourse(int id)
+                var totalCount = query.Count();
+
+                var courses = query
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToList();
+
+                var coursesDtos = courses.Select(p => new GetCourseDto
+                {
+                    CourseId = p.CourseId,
+                    CourseName = p.CourseName,
+                    CourseContent = p.CourseContent,
+                    Cost = p.Cost,
+                    SkillLearn = p.SkillLearn,
+                    StudentCount = p.StudentCount,
+                    CoursesImage = p.CoursesImage,
+                    CourseLength = p.CourseLength,
+                    CreateAt = p.CreateAt,
+                    Language = p.Language,
+                    Level = p.Level,
+                    Status = p.Status,
+                    AverageRating = p.Reviews.Any() ? Math.Round(p.Reviews.Average(r => r.rate), 1) : 0,
+                    TotalReviews = p.Reviews.Count(),
+                    Mentor = new MentorDto
+                    {
+                        FirstName = p.Mentor.User.UserMetaData.FirstName,
+                        LastName = p.Mentor.User.UserMetaData.LastName
+                    }
+                }).ToList();
+
+                _logger.LogInformation("Get filtered courses success");
+                return new PageResult<GetCourseDto>(coursesDtos, totalCount, page, pageSize);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error when getting filtered courses");
+                return new PageResult<GetCourseDto>(new List<GetCourseDto>(), 0, page, pageSize);
+            }
+        }
+
+        public async Task<CourseResponseDto> GetCourse(int id)
 		{
 			try{
 				await _courseDAO.BeginTransactionAsync();
