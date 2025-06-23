@@ -9,6 +9,8 @@ namespace final_project_be_Domain.Models
         public int MentorId { get; set; }
         [ForeignKey("User")]
         public Guid UserId {  get; set; }
+        public string? Introduction { get; set; }
+        public string? JobTitle { get; set; }
         public string? StudyLevel { get; set; }
         public string? CitizenID { get; set; }
         public string? Signature { get; set; }

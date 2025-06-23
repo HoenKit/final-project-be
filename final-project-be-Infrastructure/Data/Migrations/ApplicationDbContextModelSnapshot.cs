@@ -355,10 +355,16 @@ namespace final_project_be_Infrastructure.Data.Migrations
                     b.Property<DateTime>("ExpiredDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Introduction")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("IssueDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("IssuePlace")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("JobTitle")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Signature")

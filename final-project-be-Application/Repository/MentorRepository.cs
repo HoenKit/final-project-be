@@ -8,6 +8,7 @@ using final_project_be_Domain.DTOs.Mentor;
 using final_project_be_Domain.DTOs.Module;
 using final_project_be_Domain.DTOs.Notification;
 using final_project_be_Domain.DTOs.Post;
+using final_project_be_Domain.DTOs.Review;
 using final_project_be_Domain.Models;
 using final_project_be_Infrastructure.DAO;
 using Microsoft.EntityFrameworkCore;
@@ -23,14 +24,18 @@ namespace final_project_be_Application.Repository
     public class MentorRepository : Repository<Mentor>, IMentorRepository
     {
         private readonly MentorDAO _mentorDAO;
+        private readonly ReviewDAO _reviewDAO;
+        private readonly CourseDAO _courseDAO;
         private readonly IMapper _mapper;
         private readonly ILogger<MentorRepository> _logger;
 
-        public MentorRepository(MentorDAO mentorDAO, IMapper mapper, ILogger<MentorRepository> logger) : base(mentorDAO)
+        public MentorRepository(MentorDAO mentorDAO, IMapper mapper, ILogger<MentorRepository> logger, CourseDAO courseDAO, ReviewDAO reviewDAO) : base(mentorDAO)
         {
             _mentorDAO = mentorDAO;
             _mapper = mapper;
             _logger = logger;
+            _courseDAO = courseDAO;
+            _reviewDAO = reviewDAO;
         }
 
 
@@ -88,6 +93,8 @@ namespace final_project_be_Application.Repository
                 {
                     MentorId = p.MentorId,
                     UserId = p.UserId,
+                    Introduction = p.Introduction,
+                    JobTitle = p.JobTitle,
                     StudyLevel = p.StudyLevel,
                     CitizenID = p.CitizenID,
                     Signature = p.Signature,
@@ -123,7 +130,24 @@ namespace final_project_be_Application.Repository
                 if (mentor == null)
                     return null;
                 var mentorDto = _mapper.Map<GetMentorDto>(mentor);
-                    await _mentorDAO.CommitTransactionAsync();
+
+                var courses = _courseDAO.GetAll().Where(c => c.MentorId == id).ToList();
+                var courseIds = courses.Select(c => c.CourseId).ToList();
+
+                mentorDto.TotalCourses = courses.Count;
+                mentorDto.TotalStudents = courses.Sum(c => c.StudentCount ?? 0);
+
+                // Review data
+                var reviews = _reviewDAO.GetAll()
+                    .Where(r => courseIds.Contains(r.CourseId) && !r.IsDeleted)
+                    .ToList();
+
+                mentorDto.TotalReviews = reviews.Count;
+                mentorDto.AverageRating = reviews.Count > 0
+                    ? Math.Round(reviews.Average(r => r.rate), 1)
+                    : 0;
+
+                await _mentorDAO.CommitTransactionAsync();
 
                 _logger.LogInformation("Get Mentor success");
                 return mentorDto;
@@ -145,6 +169,22 @@ namespace final_project_be_Application.Repository
                 if (mentor == null)
                     return null;
                 var mentorDto = _mapper.Map<GetMentorDto>(mentor);
+
+                var courses = _courseDAO.GetAll().Where(c => c.MentorId == mentor.MentorId).ToList();
+                var courseIds = courses.Select(c => c.CourseId).ToList();
+
+                mentorDto.TotalCourses = courses.Count;
+                mentorDto.TotalStudents = courses.Sum(c => c.StudentCount ?? 0);
+
+                // Review data
+                var reviews = _reviewDAO.GetAll()
+                    .Where(r => courseIds.Contains(r.CourseId) && !r.IsDeleted)
+                    .ToList();
+
+                mentorDto.TotalReviews = reviews.Count;
+                mentorDto.AverageRating = reviews.Count > 0
+                    ? Math.Round(reviews.Average(r => r.rate), 1)
+                    : 0;
                 await _mentorDAO.CommitTransactionAsync();
 
                 _logger.LogInformation("Get Mentor success");
