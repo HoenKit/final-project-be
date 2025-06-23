@@ -5,7 +5,7 @@
 namespace final_project_be_Infrastructure.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class UpdateDB14 : Migration
+    public partial class UpdateDB15 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

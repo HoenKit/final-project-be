@@ -12,8 +12,8 @@ using final_project_be_Infrastructure.Data;
 namespace final_project_be_Infrastructure.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250623140628_UpdateDB14")]
-    partial class UpdateDB14
+    [Migration("20250623140628_UpdateDB15")]
+    partial class UpdateDB15
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
