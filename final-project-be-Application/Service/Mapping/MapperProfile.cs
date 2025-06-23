@@ -14,6 +14,7 @@ using final_project_be_Domain.DTOs.Question;
 using final_project_be_Domain.DTOs.Answer;
 using final_project_be_Domain.DTOs.Assignment;
 using final_project_be_Domain.DTOs.Mentor;
+using final_project_be_Domain.DTOs.Review;
 
 namespace final_project_be_Application.Service.Mapping
 {
@@ -65,6 +66,9 @@ namespace final_project_be_Application.Service.Mapping
             CreateMap<Mentor, CreateMentorDto>().ReverseMap();
             CreateMap<Mentor, GetMentorDto>().ReverseMap();
             CreateMap<MentorCertificate, GetMentorCertificateDto>().ReverseMap();
+            CreateMap<Review, ReviewDto>().ReverseMap();
+            CreateMap<Review, UpdateReviewDto>().ReverseMap();
+            CreateMap<Review, ReviewResponseDto>().ReverseMap();
         }
 	}
 }

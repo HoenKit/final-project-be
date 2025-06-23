@@ -120,6 +120,7 @@ builder.Services.AddScoped<IAnswerRepository, AnswerRepository>();
 builder.Services.AddScoped<IAssignmentRepository, AssignmentRepository>();
 builder.Services.AddScoped<IMentorCertificateRepository, MentorCertificateRepository>();
 builder.Services.AddScoped<IMentorRepository, MentorRepository>();
+builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
 //Config Service
 builder.Services.AddScoped<BlobStorageService>();
 builder.Services.AddHttpClient<AimlService>();
