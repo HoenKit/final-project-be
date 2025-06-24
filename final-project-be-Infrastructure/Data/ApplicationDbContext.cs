@@ -245,18 +245,7 @@ namespace final_project_be_Infrastructure.Data
 				.HasForeignKey(n => n.MentorId)
 				.OnDelete(DeleteBehavior.Restrict);
 
-			// Configure PaymentCourse relationship
-			builder.Entity<PaymentCourse>()
-				.HasOne(n => n.Courses)
-				.WithMany(u => u.PaymentCourses)
-				.HasForeignKey(n => n.CourseId)
-				.OnDelete(DeleteBehavior.Restrict);
 
-			builder.Entity<PaymentCourse>()
-				.HasOne(n => n.Payment)
-				.WithMany(u => u.PaymentCourses)
-				.HasForeignKey(n => n.PaymentId)
-				.OnDelete(DeleteBehavior.Restrict);
 
 			// Configure Payment relationship
 			builder.Entity<Payment>()
@@ -305,9 +294,8 @@ namespace final_project_be_Infrastructure.Data
 
 			builder.Entity<PaymentCourse>()
 				.HasOne(pc => pc.Coupon)
-				.WithOne(c => c.PaymentCourse)
-				.HasForeignKey<PaymentCourse>(pc => pc.CouponId)
-				.IsRequired(false);
+				.WithMany(c => c.PaymentCourses)
+				.HasForeignKey(pc => pc.CouponId);
 
 			// Configure CourseCoupon relationships
 			builder.Entity<CourseCoupon>()

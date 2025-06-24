@@ -12,6 +12,7 @@ namespace final_project_be_Domain.Models
         public string Password { get; set; }
         public decimal? Point { get; set; } = 0;
         public bool IsBanned { get; set; } = false;
+        public bool IsPremium { get; set; } = false;
         public bool IsConfirmed { get; set; } = false;
         public DateTime CreateAt { get; set; } = DateTime.Now;
         public DateTime? UpdateAt { get; set; } = DateTime.Now;

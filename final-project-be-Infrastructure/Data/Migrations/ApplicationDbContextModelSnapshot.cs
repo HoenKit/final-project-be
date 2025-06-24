@@ -544,7 +544,7 @@ namespace final_project_be_Infrastructure.Data.Migrations
                     b.Property<int>("CourseId")
                         .HasColumnType("int");
 
-                    b.Property<int>("CouponId")
+                    b.Property<int?>("CouponId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
@@ -552,8 +552,7 @@ namespace final_project_be_Infrastructure.Data.Migrations
 
                     b.HasKey("PaymentId", "CourseId");
 
-                    b.HasIndex("CouponId")
-                        .IsUnique();
+                    b.HasIndex("CouponId");
 
                     b.HasIndex("CourseId");
 
@@ -1000,6 +999,9 @@ namespace final_project_be_Infrastructure.Data.Migrations
                     b.Property<bool>("IsConfirmed")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsPremium")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Password")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -1441,19 +1443,19 @@ namespace final_project_be_Infrastructure.Data.Migrations
             modelBuilder.Entity("final_project_be_Domain.Models.PaymentCourse", b =>
                 {
                     b.HasOne("final_project_be_Domain.Models.Coupon", "Coupon")
-                        .WithOne("PaymentCourse")
-                        .HasForeignKey("final_project_be_Domain.Models.PaymentCourse", "CouponId");
+                        .WithMany("PaymentCourses")
+                        .HasForeignKey("CouponId");
 
                     b.HasOne("final_project_be_Domain.Models.Courses", "Courses")
                         .WithMany("PaymentCourses")
                         .HasForeignKey("CourseId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("final_project_be_Domain.Models.Payment", "Payment")
                         .WithMany("PaymentCourses")
                         .HasForeignKey("PaymentId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Coupon");
@@ -1910,7 +1912,7 @@ namespace final_project_be_Infrastructure.Data.Migrations
                 {
                     b.Navigation("CourseCoupon");
 
-                    b.Navigation("PaymentCourse");
+                    b.Navigation("PaymentCourses");
                 });
 
             modelBuilder.Entity("final_project_be_Domain.Models.Courses", b =>

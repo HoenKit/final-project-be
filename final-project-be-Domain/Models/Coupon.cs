@@ -9,6 +9,6 @@ namespace final_project_be_Domain.Models
         public float Discount { get; set; }
         public string CouponName { get; set; }
         public ICollection<CourseCoupon>? CourseCoupon { get; set; }
-        public PaymentCourse? PaymentCourse { get; set; }
+        public ICollection<PaymentCourse>? PaymentCourses { get; set; }
     }
 }

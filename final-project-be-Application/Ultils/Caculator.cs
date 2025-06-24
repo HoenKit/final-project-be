@@ -1,4 +1,5 @@
-﻿using final_project_be_Domain.DTOs.Module;
+﻿using final_project_be_Domain.DTOs.Courses;
+using final_project_be_Domain.DTOs.Module;
 using final_project_be_Domain.Models;
 using final_project_be_Infrastructure.DAO;
 using final_project_be_Infrastructure.Data;
@@ -15,33 +16,68 @@ namespace final_project_be_Application.Ultils
     public class Caculator
     {
         private readonly LessonDAO _lessonDAO;
+        private readonly ModuleDAO _moduleDAO;
+        private readonly UserModuleDAO _userModuleDAO;
+        private readonly UserCourseDAO _userCourseDAO;
 
-        public Caculator(LessonDAO lessonDAO)
+        public Caculator(LessonDAO lessonDAO, ModuleDAO moduleDAO, UserCourseDAO userCourseDAO, UserModuleDAO userModuleDAO)
         {
             _lessonDAO = lessonDAO;
+            _moduleDAO = moduleDAO;
+            _userCourseDAO = userCourseDAO;
+            _userModuleDAO = userModuleDAO;
         }
 
-        public double CalculateModuleCompletion(Guid userId, int moduleId)
+        public async Task<float> CalculateModuleCompletion(Guid userId, int moduleId)
         {
-            var totalLessons = _lessonDAO.CountLessonsInModule(moduleId);
-            if (totalLessons == 0) return 0;
+            var lessons = await _lessonDAO.GetLessonsByModuleId(moduleId);
+            if (lessons == null || !lessons.Any()) return 0;
 
-            var completedLessons = _lessonDAO.CountCompletedLessonsInModule(userId, moduleId);
-            return (double)completedLessons / totalLessons * 100;
+            var lessonIds = lessons.Select(l => l.LessonId).ToList();
+            var passedLessons = (await _lessonDAO.GetUserPassedLessons(userId, lessonIds)).Count;
+
+            return (float)passedLessons / lessonIds.Count * 100;
         }
 
-        public double CalculateCourseCompletion(Guid userId, int courseId)
+        public async Task<float> CalculateCourseCompletion(Guid userId, int courseId)
         {
-            var moduleIds = _lessonDAO.GetModuleIdsByCourseId(courseId);
+            var moduleIds = await _lessonDAO.GetModuleIdsByCourseId(courseId);
             if (!moduleIds.Any()) return 0;
 
-            double totalCompletion = 0;
+            float totalCompletion = 0;
             foreach (var moduleId in moduleIds)
             {
-                totalCompletion += CalculateModuleCompletion(userId, moduleId);
+                totalCompletion += await CalculateModuleCompletion(userId, moduleId); 
             }
 
-            return totalCompletion / moduleIds.Count;
+            var percentage = totalCompletion / moduleIds.Count;
+
+            // Cập nhật trạng thái vào bảng UserCourses
+            var userCourse = await _userCourseDAO.GetUserCourse(userId, courseId);
+            if (userCourse != null)
+            {
+                if (percentage == 100)
+                {
+                    userCourse.Status = "Completed";
+                    userCourse.CompletedAt = DateTime.UtcNow;
+                }
+                else if (percentage > 0)
+                {
+                    userCourse.Status = "Pending";
+                    userCourse.CompletedAt = DateTime.UtcNow;
+                }
+                else
+                {
+                    userCourse.Status = "NotStarted";
+                    userCourse.CompletedAt = DateTime.UtcNow;
+                }
+
+                userCourse.Percentage = percentage;
+                await _userCourseDAO.UpdateUserCourse(userCourse);
+                // method để save lại
+            }
+
+            return percentage;
         }
 
         public async Task<(float Score, bool IsPassed)> CalculateQuizScore(Guid userId, int lessonId)
@@ -72,13 +108,39 @@ namespace final_project_be_Application.Ultils
             return (score, isPassed);
         }
 
-        public double CalculateModuleProgress(Guid userId, int moduleId)
+        public async Task<float> CalculateModuleProgress(Guid userId, int moduleId)
         {
-            int totalLessons = _lessonDAO.CountLessonsInModule(moduleId);
+            int totalLessons = await _lessonDAO.CountLessonsInModule(moduleId);
             if (totalLessons == 0) return 0;
 
-            int completedLessons = _lessonDAO.CountCompletedLessonsInModule(userId, moduleId);
-            return (double)completedLessons / totalLessons * 100;
+            int completedLessons = await _lessonDAO.CountCompletedLessonsInModule(userId, moduleId);
+            float percentage = (float)completedLessons / totalLessons * 100;
+
+            // Cập nhật trạng thái trong bảng UserModules
+            var userModule = await  _userModuleDAO.GetUserModule(userId, moduleId);
+            if (userModule != null)
+            {
+                if (percentage == 100)
+                {
+                    userModule.Status = "Completed";
+                    userModule.CompletedAt = DateTime.UtcNow;
+                }
+                else if (percentage > 0)
+                {
+                    userModule.Status = "Pending";
+                    userModule.CompletedAt = null;
+                }
+                else
+                {
+                    userModule.Status = "NotStarted";
+                    userModule.CompletedAt = null;
+                }
+
+                userModule.Percentage = percentage;
+                await  _userModuleDAO.UpdateUserModule(userModule); // DAO lưu lại thay đổi
+            }
+
+            return percentage;
         }
     }
 }

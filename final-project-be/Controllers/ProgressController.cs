@@ -1,6 +1,7 @@
 ﻿using final_project_be_Application.Ultils;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 namespace final_project_be.Controllers
 {
@@ -15,10 +16,16 @@ namespace final_project_be.Controllers
             _caculator = caculator;
         }
         [HttpGet("course-progress")]
-        public IActionResult GetCourseProgress(Guid userId, int courseId)
+        public async Task<IActionResult> GetCourseProgress(Guid userId, int courseId)
         {
-            var progress = _caculator.CalculateCourseCompletion(userId, courseId);
-            return Ok(new { UserId = userId, CourseId = courseId, Percentage = progress });
+            var percentage = await _caculator.CalculateCourseCompletion(userId, courseId);
+
+            return Ok(new
+            {
+                UserId = userId,
+                CourseId = courseId,
+                Percentage = percentage
+            });
         }
 
         [HttpGet("quiz-score")]
@@ -46,9 +53,9 @@ namespace final_project_be.Controllers
         }
 
         [HttpGet("module-progress")]
-        public IActionResult GetModuleProgress(Guid userId, int moduleId)
+        public async Task<IActionResult> GetModuleProgress(Guid userId, int moduleId)
         {
-            double progress = _caculator.CalculateModuleProgress(userId, moduleId);
+            float progress = await  _caculator.CalculateModuleProgress(userId, moduleId);
             return Ok(new
             {
                 UserId = userId,
