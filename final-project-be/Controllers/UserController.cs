@@ -81,7 +81,7 @@ namespace final_project_be.Controllers
             return Ok(userDto);
         }
 
-        [HttpGet("GetUserById")]
+        [HttpGet("GetUserById/{id}")]
         public async Task<IActionResult> GetUserId(Guid id)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
