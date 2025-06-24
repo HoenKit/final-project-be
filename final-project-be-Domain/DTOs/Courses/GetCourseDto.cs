@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace final_project_be_Domain.DTOs.Courses
@@ -29,4 +30,20 @@ namespace final_project_be_Domain.DTOs.Courses
         public DateTime? CreateAt { get; set; }
         public MentorDto? Mentor { get; set; }
 	}
+
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public enum StatusEnum
+    {
+        Pending,
+        Approved,
+        Rejected
+    }
+
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public enum LevelEnum
+    {
+        Beginner,
+        Intermediate,
+        Advanced
+    }
 }
