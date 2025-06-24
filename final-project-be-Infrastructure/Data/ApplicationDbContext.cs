@@ -159,11 +159,11 @@ namespace final_project_be_Infrastructure.Data
 
 			// Configure Transaction
 			builder.Entity<Transaction>()
-				.Property(r => r.PointChange)
+				.Property(r => r.Points)
 				.HasColumnType("decimal(18,4)");
 
 			builder.Entity<Transaction>()
-				.Property(r => r.PointCost)
+				.Property(r => r.Amount)
 				.HasColumnType("decimal(18,4)");
 
 			// Configure User Point

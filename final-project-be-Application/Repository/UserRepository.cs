@@ -167,5 +167,36 @@ namespace final_project_be_Application.Repository
 
             return stats;
         }
+
+        public async Task<User> UpdateUserPoint(decimal point, Guid userId)
+        {
+            try
+            {
+                await _userDAO.BeginTransactionAsync();
+
+                var user = await _userDAO.GetByIdAsync(userId);
+                if (user == null)
+                {
+                    _logger.LogWarning("User not found with ID: {UserId}", userId);
+                    await _userDAO.RollbackTransactionAsync();
+                    return null;
+                }
+
+                user.Point += point;
+
+                await _userDAO.UpdateAsync(user);
+                await _userDAO.CommitTransactionAsync();
+
+                _logger.LogInformation("Update user points success");
+                return user;
+            }
+            catch (Exception ex)
+            {
+                await _userDAO.RollbackTransactionAsync();
+                _logger.LogError(ex, "Error when updating user points");
+                return null;
+            }
+        }
+
     }
 }

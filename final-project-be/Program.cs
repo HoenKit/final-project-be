@@ -123,6 +123,7 @@ builder.Services.AddScoped<IMentorRepository, MentorRepository>();
 builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
 builder.Services.AddScoped<ILearningRepository, LearningRepository>();
 builder.Services.AddScoped<IPaymentRepositoty, PaymentRepository>();
+builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
 //Config Service
 builder.Services.AddScoped<BlobStorageService>();
 builder.Services.AddHttpClient<AimlService>();

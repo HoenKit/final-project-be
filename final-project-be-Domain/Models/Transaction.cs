@@ -9,12 +9,11 @@ namespace final_project_be_Domain.Models
         public int TransactionId { get; set; }
         [ForeignKey("User")]
         public Guid UserId { get; set; }
-        public decimal? PointChange { get; set; }
-        public string? TransactionType { get; set; }
+        public decimal? Points { get; set; }
+        public string? PaymentMethod { get; set; }
         public string? Status { get; set; }
-        public decimal? PointCost { get; set; }
-        public string? Description { get; set; }
-        public DateTime ExpiredAt { get; set; }
+        public decimal? Amount { get; set; }
+        public string? OrderCode { get; set; }
         public DateTime CreateAt {  get; set; }
         public User? Users { get; set; }
 
