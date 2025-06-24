@@ -949,25 +949,22 @@ namespace final_project_be_Infrastructure.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TransactionId"));
 
+                    b.Property<decimal?>("Amount")
+                        .HasColumnType("decimal(18,4)");
+
                     b.Property<DateTime>("CreateAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Description")
+                    b.Property<string>("OrderCode")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("ExpiredAt")
-                        .HasColumnType("datetime2");
+                    b.Property<string>("PaymentMethod")
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal?>("PointChange")
-                        .HasColumnType("decimal(18,4)");
-
-                    b.Property<decimal?>("PointCost")
+                    b.Property<decimal?>("Points")
                         .HasColumnType("decimal(18,4)");
 
                     b.Property<string>("Status")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("TransactionType")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("UserId")

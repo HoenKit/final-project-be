@@ -103,6 +103,14 @@ namespace final_project_be.Controllers
             return Ok(usermanagerDto);
         }
 
+        [HttpPut("update-user-point")]
+        public async Task<IActionResult> UpdateUserPoint(decimal point, Guid userId)
+        {
+            if (!ModelState.IsValid) { return BadRequest(ModelState); }
+            var user = await _userRepository.UpdateUserPoint(point, userId);
+            return Ok(user);
+        }
+
         [HttpPut("UpdateProfile")]
         public async Task<IActionResult> UpdateProfile([FromBody] UserProfileDto dto)
         {
