@@ -68,7 +68,7 @@ namespace final_project_be_Application.Repository
 			}
 		}
 
-        public PageResult<GetCourseDto> GetAllCourses(int page, int pageSize, int? CategoryId, string? title, Guid? userId, string? sortOption, int? mentorId, string? Language, string? Level, decimal? MinCost, decimal? MaxCost, decimal? MinRate, decimal? MaxRate)
+        public PageResult<GetCourseDto> GetAllCourses(int page, int pageSize, int? CategoryId, string? title, Guid? userId, string? sortOption, int? mentorId, string? Language, string? Level, decimal? MinCost, decimal? MaxCost, decimal? MinRate, decimal? MaxRate, List<StatusEnum>? statuses)
         {
             try
             {
@@ -78,7 +78,8 @@ namespace final_project_be_Application.Repository
                             .ThenInclude(c => c.UserMetaData)
                     .Include(c => c.Category)
                     .Include(c => c.Reviews.Where(r => !r.IsDeleted))
-                    .Where(p => !p.IsDeleted && p.Status == "Approved");
+                    .Where(p => !p.IsDeleted && (statuses == null || statuses.Count == 0 || statuses.Select(s => s.ToString()).Contains(p.Status)));
+
 
                 if (CategoryId.HasValue)
                     query = query.Where(c => c.CategoryId == CategoryId);
