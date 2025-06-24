@@ -11,17 +11,27 @@ namespace final_project_be_Infrastructure.DAO
         {
             _context = context;
         }
-        public int CountLessonsInModule(int moduleId) => _context.Lessons.Count(l => l.ModuleId == moduleId);
-        public int CountCompletedLessonsInModule(Guid userId, int moduleId) => _context.UserLessons.Count(ul => ul.UserId == userId && ul.Lesson.ModuleId == moduleId && ul.IsPassed);
-        public List<int> GetModuleIdsByCourseId(int courseId) => _context.Modules.Where(m => m.CourseId == courseId).Select(m => m.ModuleId).ToList();
+        public async Task<int> CountLessonsInModule(int moduleId) => await _context.Lessons.CountAsync(l => l.ModuleId == moduleId);
+        public async Task<int> CountCompletedLessonsInModule(Guid userId, int moduleId) => await _context.UserLessons.CountAsync(ul => ul.UserId == userId && ul.Lesson.ModuleId == moduleId && ul.IsPassed);
+        public async Task<List<int>> GetModuleIdsByCourseId(int courseId) => _context.Modules.Where(m => m.CourseId == courseId).Select(m => m.ModuleId).ToList();
         public async Task<List<UserAnswer>> GetUserAnswersWithDetailsAsync(int userLessonId) => await _context.UserAnswers
                 .Where(ua => ua.UserLessonId == userLessonId)
                 .Include(ua => ua.Answer)
                 .ToListAsync();
-        public async Task<UserLesson?> GetUserLessonByIdAsync(int userLessonId) => await _context.UserLessons.FindAsync(userLessonId);
-        public async Task<bool> IsQuizLessonAsync(int lessonId)=> await _context.Question.AnyAsync(q => q.LessonId == lessonId);
+        public async Task<Lesson?> GetLessonByIdAsync(int lessonId)=> await _context.Lessons.FindAsync(lessonId);
         
+        public async Task<List<Lesson>> GetLessonsByModuleId(int moduleId) => await _context.Lessons.Where(l => l.ModuleId == moduleId).ToListAsync();
+        
+        public async Task<bool> IsQuizLessonAsync(int lessonId)=> await _context.Question.AnyAsync(q => q.LessonId == lessonId);
+        public async Task<List<UserLesson>> GetUserPassedLessons(Guid userId, List<int> lessonIds) => await _context.UserLessons
+                                                                                                                    .Where(ul => ul.UserId == userId && lessonIds
+                                                                                                                    .Contains(ul.LessonId) && ul.IsPassed == true).ToListAsync();
+        public async Task<bool> HasQuestionAsync(int lessonId)=>await _context.Question.AnyAsync(q => q.LessonId == lessonId);
 
+        public async Task AddUserAnswersAsync(List<UserAnswer> userAnswers)=> await _context.UserAnswers.AddRangeAsync(userAnswers);
+        
+        public async Task<bool> HasAssignmentAsync(int lessonId)=>await _context.Assignment.AnyAsync(a => a.LessonId == lessonId);
+        
         public async Task<UserLesson?> GetUserLessonAsync(Guid userId, int lessonId)=> await _context.UserLessons.FirstOrDefaultAsync(ul => ul.UserId == userId && ul.LessonId == lessonId);
        
     }
