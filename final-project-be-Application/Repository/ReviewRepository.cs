@@ -91,7 +91,7 @@ namespace final_project_be_Application.Repository
                     .Where(p => !p.IsDeleted && p.CourseId == courseId);
 
                 var totalCount = query.Count();
-                var averageRating = totalCount > 0 ? Math.Round(query.Average(r => r.rate), 1) : 0;
+                var averageRating = totalCount > 0 ? Math.Round(query.Average(r => r.Rate), 1) : 0;
                 var reviewCount = totalCount;
 
                 var reviews = query
@@ -104,7 +104,7 @@ namespace final_project_be_Application.Repository
                         UserId = r.UserId,
                         Content = r.Content,
                         IsDeleted = r.IsDeleted,
-                        rate = r.rate,
+                        Rate = r.Rate,
                         CreateAt = r.CreateAt,
                         UpdateAt = r.UpdateAt,
                         User = r.User

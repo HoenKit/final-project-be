@@ -173,7 +173,7 @@ namespace final_project_be_Infrastructure.Data
 
 			// Configure Review and User relationship
 			builder.Entity<Review>()
-				.Property(r => r.rate)
+				.Property(r => r.Rate)
 				.HasColumnType("decimal(18,4)");
 
 			builder.Entity<Review>()

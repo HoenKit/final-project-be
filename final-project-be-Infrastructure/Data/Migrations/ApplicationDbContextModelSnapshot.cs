@@ -872,14 +872,14 @@ namespace final_project_be_Infrastructure.Data.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<decimal>("Rate")
+                        .HasColumnType("decimal(18,4)");
+
                     b.Property<DateTime>("UpdateAt")
                         .HasColumnType("datetime2");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<decimal>("rate")
-                        .HasColumnType("decimal(18,4)");
 
                     b.HasKey("ReviewId");
 

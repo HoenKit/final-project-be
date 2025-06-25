@@ -106,9 +106,9 @@ namespace final_project_be_Application.Repository
                     query = query.Where(c => c.Cost <= MaxCost.Value);
 
                 if (MinRate.HasValue)
-                    query = query.Where(c => c.Reviews.Any() && c.Reviews.Average(r => r.rate) >= MinRate.Value);
+                    query = query.Where(c => c.Reviews.Any() && c.Reviews.Average(r => r.Rate) >= MinRate.Value);
                 if (MaxRate.HasValue)
-                    query = query.Where(c => c.Reviews.Any() && c.Reviews.Average(r => r.rate) <= MaxRate.Value);
+                    query = query.Where(c => c.Reviews.Any() && c.Reviews.Average(r => r.Rate) <= MaxRate.Value);
 
                 query = sortOption?.ToLower() switch
                 {
@@ -118,8 +118,8 @@ namespace final_project_be_Application.Repository
                     "desc_date" => query.OrderByDescending(c => c.CreateAt),
                     "asc_cost" => query.OrderBy(c => c.Cost),
                     "desc_cost" => query.OrderByDescending(c => c.Cost),
-                    "asc_rating" => query.OrderBy(c => c.Reviews.Any() ? c.Reviews.Average(r => r.rate) : 0),
-                    "desc_rating" => query.OrderByDescending(c => c.Reviews.Any() ? c.Reviews.Average(r => r.rate) : 0),
+                    "asc_rating" => query.OrderBy(c => c.Reviews.Any() ? c.Reviews.Average(r => r.Rate) : 0),
+                    "desc_rating" => query.OrderByDescending(c => c.Reviews.Any() ? c.Reviews.Average(r => r.Rate) : 0),
                     "most_reviewed" => query.OrderByDescending(c => c.Reviews.Count()),
                     _ => query.OrderByDescending(c => c.CreateAt)
                 };
@@ -145,7 +145,7 @@ namespace final_project_be_Application.Repository
                     Language = p.Language,
                     Level = p.Level,
                     Status = p.Status,
-                    AverageRating = p.Reviews.Any() ? Math.Round(p.Reviews.Average(r => r.rate), 1) : 0,
+                    AverageRating = p.Reviews.Any() ? Math.Round(p.Reviews.Average(r => r.Rate), 1) : 0,
                     TotalReviews = p.Reviews.Count(),
                     Mentor = new MentorDto
                     {
