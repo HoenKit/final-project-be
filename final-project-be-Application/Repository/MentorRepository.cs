@@ -203,7 +203,7 @@ namespace final_project_be_Application.Repository
 
                 mentorDto.TotalReviews = reviews.Count;
                 mentorDto.AverageRating = reviews.Count > 0
-                    ? Math.Round(reviews.Average(r => r.rate), 1)
+                    ? Math.Round(reviews.Average(r => r.Rate), 1)
                     : 0;
 
                 await _mentorDAO.CommitTransactionAsync();
@@ -242,7 +242,7 @@ namespace final_project_be_Application.Repository
 
                 mentorDto.TotalReviews = reviews.Count;
                 mentorDto.AverageRating = reviews.Count > 0
-                    ? Math.Round(reviews.Average(r => r.rate), 1)
+                    ? Math.Round(reviews.Average(r => r.Rate), 1)
                     : 0;
                 await _mentorDAO.CommitTransactionAsync();
 

@@ -38,7 +38,7 @@ namespace final_project_be.Controllers
 
         // POST: ReviewController/Create
         [HttpPost]
-        public async Task<IActionResult> Post([FromForm] ReviewDto dto)
+        public async Task<IActionResult> Post([FromBody] ReviewDto dto)
         {
             try
             {
@@ -55,7 +55,7 @@ namespace final_project_be.Controllers
 
         // PUT: ReviewController/Edit/5
         [HttpPut]
-        public async Task<IActionResult> Put([FromForm] UpdateReviewDto dto)
+        public async Task<IActionResult> Put([FromBody] UpdateReviewDto dto)
         {
             try
             {
