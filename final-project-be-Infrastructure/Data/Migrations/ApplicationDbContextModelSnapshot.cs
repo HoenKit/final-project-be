@@ -885,8 +885,7 @@ namespace final_project_be_Infrastructure.Data.Migrations
 
                     b.HasIndex("CourseId");
 
-                    b.HasIndex("UserId")
-                        .IsUnique();
+                    b.HasIndex("UserId");
 
                     b.ToTable("Reviews");
                 });
@@ -1673,8 +1672,8 @@ namespace final_project_be_Infrastructure.Data.Migrations
                         .IsRequired();
 
                     b.HasOne("final_project_be_Domain.Models.User", "User")
-                        .WithOne("Review")
-                        .HasForeignKey("final_project_be_Domain.Models.Review", "UserId")
+                        .WithMany("Reviews")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
@@ -2030,7 +2029,7 @@ namespace final_project_be_Infrastructure.Data.Migrations
 
                     b.Navigation("Reports");
 
-                    b.Navigation("Review");
+                    b.Navigation("Reviews");
 
                     b.Navigation("Transactions");
 

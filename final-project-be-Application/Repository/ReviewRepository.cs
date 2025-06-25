@@ -1,11 +1,12 @@
 ﻿using AutoMapper;
 using DocumentFormat.OpenXml.Spreadsheet;
 using final_project_be_Application.Interface;
+using final_project_be_Application.Service.CloudinaryService;
 using final_project_be_Domain.DTOs;
 using final_project_be_Domain.DTOs.Answer;
 using final_project_be_Domain.DTOs.Courses;
-using final_project_be_Domain.DTOs.Mentor;
 using final_project_be_Domain.DTOs.Review;
+using final_project_be_Domain.DTOs.Mentor;
 using final_project_be_Domain.Models;
 using final_project_be_Infrastructure.DAO;
 using Microsoft.EntityFrameworkCore;
@@ -30,14 +31,54 @@ namespace final_project_be_Application.Repository
             _reviewDAO = reviewDAO;
         }
 
-        public Task<Review> CreateReview(ReviewDto dto)
+        public async Task<Review> CreateReview(ReviewDto dto)
         {
-            throw new NotImplementedException();
+            try
+            {
+                await _reviewDAO.BeginTransactionAsync();
+                var review = _mapper.Map<Review>(dto);
+                await _reviewDAO.AddAsync(review);
+                await _reviewDAO.CommitTransactionAsync();
+                _logger.LogInformation("Add Review success");
+                return review;
+            }
+            catch (Exception ex)
+            {
+                await _reviewDAO.RollbackTransactionAsync();
+                _logger.LogError(ex, "Error when adding Review");
+                return null;
+            }
         }
 
-        public Task<bool> DeleteReview(int id)
+        public async Task<Review> DeleteReview(int id)
         {
-            throw new NotImplementedException();
+            try
+            {
+                await _reviewDAO.BeginTransactionAsync();
+
+                var review = await _reviewDAO.GetByIdAsync(id);
+                if (review == null)
+                {
+                    _logger.LogWarning("Review not found with ID: {Id}", id);
+                    await _reviewDAO.RollbackTransactionAsync();
+                    return null;
+                }
+
+                review.IsDeleted = !review.IsDeleted;
+                review.UpdateAt = DateTime.Now;
+
+                await _reviewDAO.UpdateAsync(review);
+                await _reviewDAO.CommitTransactionAsync();
+
+                _logger.LogInformation("Toggle IsDeleted success for review ID: {Id}", id);
+                return review;
+            }
+            catch (Exception ex)
+            {
+                await _reviewDAO.RollbackTransactionAsync();
+                _logger.LogError(ex, "Error when toggling IsDeleted for review ID: {Id}", id);
+                return null;
+            }
         }
 
         public CourseReviewPageResult GetAllReviewsByCourseId(int courseId, int page, int pageSize)
@@ -86,9 +127,31 @@ namespace final_project_be_Application.Repository
             throw new NotImplementedException();
         }
 
-        public Task<Review> UpdateReview(UpdateReviewDto dto)
+        public async Task<Review> UpdateReview(UpdateReviewDto dto)
         {
-            throw new NotImplementedException();
+            try
+            {
+                await _reviewDAO.BeginTransactionAsync();
+                var review = await _reviewDAO.GetByIdAsync(dto.ReviewId);
+                if (review == null)
+                {
+                    _logger.LogWarning("Review not found with ID: {Id}", dto.ReviewId);
+                    await _reviewDAO.RollbackTransactionAsync();
+                    return null;
+                }
+                _mapper.Map(dto, review);
+                await _reviewDAO.UpdateAsync(review);
+                await _reviewDAO.CommitTransactionAsync();
+                _logger.LogInformation("Update Review success");
+                return review;
+            }
+            catch (Exception ex)
+            {
+                await _reviewDAO.RollbackTransactionAsync();
+                _logger.LogError(ex, "Error when updating Review");
+                return null;
+            }
         }
     }
+    
 }

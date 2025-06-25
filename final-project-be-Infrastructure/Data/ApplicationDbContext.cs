@@ -184,8 +184,8 @@ namespace final_project_be_Infrastructure.Data
 
 			builder.Entity<Review>()
 				   .HasOne(r => r.User)
-				   .WithOne(u => u.Review)
-				   .HasForeignKey<Review>(r => r.UserId)
+				   .WithMany(u => u.Reviews)
+				   .HasForeignKey(r => r.UserId)
 				   .OnDelete(DeleteBehavior.Restrict);
 
 			// Configure Lesson and Assignment relationship
