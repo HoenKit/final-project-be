@@ -2,6 +2,7 @@
 using DocumentFormat.OpenXml.Office2010.Excel;
 using final_project_be_Application.Interface;
 using final_project_be_Application.Service.EmailService;
+using final_project_be_Application.Ultils;
 using final_project_be_Domain.DTOs;
 using final_project_be_Domain.DTOs.Comment;
 using final_project_be_Domain.DTOs.Courses;
@@ -32,8 +33,9 @@ namespace final_project_be_Application.Repository
         private readonly IMapper _mapper;
         private readonly ILogger<MentorRepository> _logger;
         private readonly IEmailService _emailService;
+        private readonly BlobStorageService _blobStorageService;
 
-        public MentorRepository(MentorDAO mentorDAO, IMapper mapper, ILogger<MentorRepository> logger, CourseDAO courseDAO, ReviewDAO reviewDAO, UserDAO userDAO, IEmailService emailService) : base(mentorDAO)
+        public MentorRepository(MentorDAO mentorDAO, BlobStorageService blobStorageService, IMapper mapper, ILogger<MentorRepository> logger, CourseDAO courseDAO, ReviewDAO reviewDAO, UserDAO userDAO, IEmailService emailService) : base(mentorDAO)
         {
             _mentorDAO = mentorDAO;
             _mapper = mapper;
@@ -42,6 +44,7 @@ namespace final_project_be_Application.Repository
             _reviewDAO = reviewDAO;
             _userDAO = userDAO;
             _emailService = emailService;
+            _blobStorageService= blobStorageService;
         }
 
 
@@ -51,7 +54,24 @@ namespace final_project_be_Application.Repository
             {
                 await _mentorDAO.BeginTransactionAsync();
                 var mentor = _mapper.Map<Mentor>(dto);
+                if (dto.Signature != null && dto.Signature.Length > 0)
+                {
+
+                    // Generate a unique filename using GUID
+                    var fileExtension = Path.GetExtension(dto.Signature.FileName);
+                    var uniqueFileName = Guid.NewGuid().ToString() + fileExtension;
+
+                    // Upload to Azure Blob Storage
+                    using (var stream = dto.Signature.OpenReadStream())
+                    {
+                        await _blobStorageService.UploadFileAsync(uniqueFileName, stream);
+                    }
+
+                    // Store the full URL in the database (UpdateAsync the blob URL with your storage account name)
+                    mentor.Signature = $"https://finalprojectbestorage.blob.core.windows.net/phronesisfiles/{uniqueFileName}";
+                }
                 await _mentorDAO.AddAsync(mentor);
+                await _mentorDAO.SaveChangesAsync();
 
                 var user = await _userDAO.GetUserMetadatabyId(dto.UserId);
                 if (user == null)
@@ -78,6 +98,7 @@ namespace final_project_be_Application.Repository
                 {
                     mentorRole = new Role { RoleName = "Mentor" };
                     await _userDAO.AddRoleAsync(mentorRole);
+                    await _userDAO.SaveChangesAsync();
                 }
                 var userRoleExists = await _userDAO.ExistsAsync(dto.UserId, mentorRole.RoleId);
                 if (!userRoleExists)
@@ -88,6 +109,7 @@ namespace final_project_be_Application.Repository
                         RoleId = mentorRole.RoleId
                     };
                     await _userDAO.AddUserRoleAsync(userRole);
+                    await _userDAO.SaveChangesAsync();
                 }
 
                 string body = $@"

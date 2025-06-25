@@ -2,6 +2,7 @@
 using final_project_be_Application.Repository;
 using final_project_be_Domain.DTOs.Mentor;
 using final_project_be_Domain.DTOs.Notification;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -43,8 +44,9 @@ namespace final_project_be.Controllers
         }
 
         // POST api/<NotificationController>
+        [Authorize]
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] CreateMentorDto MentorDto)
+        public async Task<IActionResult> Post([FromForm] CreateMentorDto MentorDto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             await _mentorRepository.CreateMentor(MentorDto);

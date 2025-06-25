@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -21,7 +22,7 @@ namespace final_project_be_Domain.DTOs.Mentor
         public string? LastName { get; set; }
         public string? StudyLevel { get; set; }
         public string? CitizenID { get; set; }
-        public string? Signature { get; set; }
+        public IFormFile? Signature { get; set; }
         public string? IssuePlace { get; set; }
         public DateTime? ExpiredDate { get; set; }
         public DateTime? IssueDate { get; set; }
