@@ -10,5 +10,6 @@ namespace final_project_be_Domain.DTOs.Payment
     {
         public Guid UserId { get; set; }
         public int CourseId { get; set; }
+        public int CouponId { get; set; }
     }
 }

@@ -19,7 +19,7 @@ namespace final_project_be.Controllers
         [HttpPost("buy-course")]
         public async Task<IActionResult> BuyCourse([FromBody] PaymentDto request)
         {
-            var success = await _paymentRepositoty.BuyCourseAsync(request.UserId, request.CourseId);
+            var success = await _paymentRepositoty.BuyCourseAsync(request.UserId, request.CourseId,request.CouponId);
 
             if (!success)
                 return BadRequest("Unable to purchase course. Possibly due to insufficient points or invalid data.");

@@ -10,6 +10,6 @@ namespace final_project_be_Application.Interface
 {
     public interface IPaymentRepositoty 
     {
-        public Task<bool> BuyCourseAsync(Guid userId, int courseId);
+        public Task<bool> BuyCourseAsync(Guid userId, int courseId, int CouponId);
     }
 }
