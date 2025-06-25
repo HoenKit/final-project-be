@@ -18,7 +18,7 @@ namespace final_project_be.Controllers
             _reviewRepository = reviewRepository;
         }
 
-        [HttpGet("get-by-review/{courseId}")]
+        [HttpGet("get-by-course/{courseId}")]
         public IActionResult GetAllReviewsByCourseId(int courseId, int? page, int? pageSize)
         {
             int currentPage = page ?? 1;
