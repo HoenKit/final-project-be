@@ -14,7 +14,7 @@ namespace final_project_be_Application.Interface
     public interface IReviewRepository : IRepository<Review>
     {
         public Task<Review> CreateReview(ReviewDto dto);
-        public Task<bool> DeleteReview(int id);
+        public Task<Review> DeleteReview(int id);
         public Task<Review> GetReview(int id);
         public Task<Review> UpdateReview(UpdateReviewDto dto);
         public CourseReviewPageResult GetAllReviewsByCourseId(int courseId, int page, int pageSize);

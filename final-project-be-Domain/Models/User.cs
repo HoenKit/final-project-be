@@ -18,7 +18,7 @@ namespace final_project_be_Domain.Models
         public DateTime? UpdateAt { get; set; } = DateTime.Now;
         public UserMetadata? UserMetaData { get; set; }
         public Mentor? Mentor { get; set; }
-        public Review? Review { get; set; }
+        public ICollection<Review>? Reviews { get; set; }
         public ICollection<Post>? Posts { get; set; }
         public ICollection<PollOptionVote>? PollOptionVotes { get; set; }
         public ICollection<Notification>? Notifications { get; set; }
