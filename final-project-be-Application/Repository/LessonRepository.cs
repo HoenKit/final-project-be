@@ -21,12 +21,14 @@ namespace final_project_be_Application.Repository
 		private readonly CloudinaryService _cloudinaryService;
 		private readonly IMapper _mapper;
 		private readonly ILogger<LessonRepository> _logger;
-		public LessonRepository(LessonDAO lessonDAO, CloudinaryService cloudinaryService, IMapper mapper, ILogger<LessonRepository> logger) : base(lessonDAO)
+        private readonly BlobStorageService _blobStorageService;
+        public LessonRepository(LessonDAO lessonDAO, CloudinaryService cloudinaryService, IMapper mapper, ILogger<LessonRepository> logger, BlobStorageService blobStorageService) : base(lessonDAO)
 		{
 			_lessonDAO = lessonDAO;
 			_cloudinaryService = cloudinaryService;
 			_mapper = mapper;
 			_logger = logger;
+			_blobStorageService = blobStorageService;
 		}
 
 		public async Task<Lesson> CreateLesson(LessonDto dto)
@@ -40,7 +42,22 @@ namespace final_project_be_Application.Repository
 					var videoLink = await _cloudinaryService.UploadVideoAndGetUrlAsync(dto.Video);
 					lesson.VideoLink = videoLink;
 				}
-				await _lessonDAO.AddAsync(lesson);
+                if (dto.Document != null && dto.Document.Length > 0)
+                {
+                    // Generate a unique filename using GUID
+                    var fileExtension = Path.GetExtension(dto.Document.FileName);
+                    var uniqueFileName = Guid.NewGuid().ToString() + fileExtension;
+
+                    // Upload to Azure Blob Storage
+                    using (var stream = dto.Document.OpenReadStream())
+                    {
+                        await _blobStorageService.UploadFileAsync(uniqueFileName, stream);
+                    }
+
+                    // Store the full URL in the database (UpdateAsync the blob URL with your storage account name)
+                    lesson.DocumentLink = $"https://finalprojectbestorage.blob.core.windows.net/phronesisfiles/{uniqueFileName}";
+                }
+                await _lessonDAO.AddAsync(lesson);
 				await _lessonDAO.CommitTransactionAsync();
 				_logger.LogInformation("Add Lesson success");
 				return lesson;
@@ -128,7 +145,8 @@ namespace final_project_be_Application.Repository
 				}
 				_mapper.Map(dto, lesson);
 				var oldVideo = lesson.VideoLink;
-				if (dto.Video != null && dto.Video.Length > 0)
+                string oldDocumentUrl = lesson.DocumentLink;
+                if (dto.Video != null && dto.Video.Length > 0)
 				{
 					if (!string.IsNullOrEmpty(oldVideo))
 					{
@@ -137,7 +155,25 @@ namespace final_project_be_Application.Repository
 					var videoLink = await _cloudinaryService.UploadVideoAndGetUrlAsync(dto.Video);
 					lesson.VideoLink = videoLink;
 				}
-				await _lessonDAO.UpdateAsync(lesson);
+                if (dto.Document != null && dto.Document.Length > 0)
+                {
+                    if (!string.IsNullOrEmpty(oldDocumentUrl))
+                    {
+                        var oldFileName = Path.GetFileName(oldDocumentUrl);
+                        await _blobStorageService.DeleteFileIfExistsAsync(oldFileName);
+                    }
+
+                    var fileExtension = Path.GetExtension(dto.Document.FileName);
+                    var uniqueFileName = Guid.NewGuid().ToString() + fileExtension;
+
+                    using (var stream = dto.Document.OpenReadStream())
+                    {
+                        await _blobStorageService.UploadFileAsync(uniqueFileName, stream);
+                    }
+
+                    lesson.DocumentLink = $"https://finalprojectbestorage.blob.core.windows.net/phronesisfiles/{uniqueFileName}";
+                }
+                await _lessonDAO.UpdateAsync(lesson);
 				await _lessonDAO.CommitTransactionAsync();
 				_logger.LogInformation("Update Lesson success");
 				return lesson;
