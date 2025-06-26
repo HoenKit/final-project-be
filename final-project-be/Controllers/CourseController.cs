@@ -72,8 +72,19 @@ namespace final_project_be.Controllers
 			}
 		}
 
-		// DELETE api/<PostController>/5
-		[HttpPut("toggle-deleted/{id}")]
+        [HttpPut("toggle-status")]
+        public async Task<IActionResult> ToggleCourseStatus(int id, string status)
+        {
+            var updatedCourse = await _courseRepository.ToggleStatus(id, status);
+            if (updatedCourse == null)
+            {
+                return StatusCode(500, "Failed to UpdateAsync course status.");
+            }
+            return Ok(updatedCourse);
+        }
+
+        // DELETE api/<PostController>/5
+        [HttpPut("toggle-deleted/{id}")]
 		public async Task<IActionResult> TogglePostDeleteStatus(int id)
 		{
 			var updatedCourse = await _courseRepository.ToggleIsDeleted(id);

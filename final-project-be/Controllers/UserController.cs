@@ -34,7 +34,7 @@ namespace final_project_be.Controllers
         public IActionResult GetAll(int? page, int? pageSize)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            int currentSize = pageSize ?? 6;
+            int currentSize = pageSize ?? 100;
             int currentPage = page ?? 1;
             var pagedComments = _userRepository.GetAllUsers(currentPage, currentSize);
             return Ok(pagedComments);

@@ -218,6 +218,37 @@ namespace final_project_be_Application.Repository
 			}
 		}
 
+        public async Task<Courses> ToggleStatus(int id, string statuses)
+        {
+            try
+            {
+                await _courseDAO.BeginTransactionAsync();
+
+                var course = await _courseDAO.GetByIdAsync(id);
+                if (course == null)
+                {
+                    _logger.LogWarning("Course not found with ID: {Id}", id);
+                    await _courseDAO.RollbackTransactionAsync();
+                    return null;
+                }
+
+                course.Status = statuses;
+                course.UpdateAt = DateTime.Now;
+
+                await _courseDAO.UpdateAsync(course);
+                await _courseDAO.CommitTransactionAsync();
+
+                _logger.LogInformation("Toggle Status success for course ID: {Id}", id);
+                return course;
+            }
+            catch (Exception ex)
+            {
+                await _courseDAO.RollbackTransactionAsync();
+                _logger.LogError(ex, "Error when toggling Status for course ID: {Id}", id);
+                return null;
+            }
+        }
+
         public async Task<Courses> UpdateCourse(UpdateCourseDto dto)
         {
             try
