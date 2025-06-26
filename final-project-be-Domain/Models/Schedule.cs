@@ -9,9 +9,12 @@ namespace final_project_be_Domain.Models
         public int ScheduleId { get; set; }
         [ForeignKey("Mentor")]
         public int MentorId { get; set; }
+        [ForeignKey("Courses")]
+        public int CourseId { get; set; }
         public string? ScheduleName { get; set; }
         public DateTime MentorDay { get; set; }
         public DateTime CreateAt { get; set; }
+        public Courses? Courses { get; set; }
         public ICollection<UserSchedule>? UserSchedules { get; set; }
         public Mentor? Mentor { get; set; }
 

@@ -27,6 +27,7 @@ namespace final_project_be_Domain.Models
         public bool IsDeleted { get; set; } = false;
 		public DateTime? CreateAt { get; set;}
         public DateTime? UpdateAt { get; set;}
+        public ICollection<Schedule>? schedules { get; set; }
         public ICollection<CourseCoupon>? CourseCoupons { get; set;}
         public ICollection<PaymentCourse>? PaymentCourses { get; set;}
         public ICollection<Review>? Reviews { get; set;}

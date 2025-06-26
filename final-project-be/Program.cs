@@ -15,6 +15,7 @@ using final_project_be_Application.Service.EmailService;
 using NuGet.Configuration;
 using final_project_be_Application.Service.CloudinaryService;
 using final_project_be_Application.Service.AimlService;
+using DocumentFormat.OpenXml.VariantTypes;
 
 var builder = WebApplication.CreateBuilder(args);
 
