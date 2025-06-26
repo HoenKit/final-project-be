@@ -54,6 +54,7 @@ namespace final_project_be_Application.Repository
 				course.CreateAt = DateTime.Now;
 				course.UpdateAt = DateTime.Now;
 				course.StudentCount = 0;
+                course.Status = "Not Completed";
 				await _courseDAO.AddAsync(course);
 				await _courseDAO.CommitTransactionAsync();
 				_logger.LogInformation("AddAsync Course success");
@@ -241,6 +242,12 @@ namespace final_project_be_Application.Repository
                 course.CourseLength = dto.CourseLength;
                 course.CategoryId = dto.CategoryId;
                 course.MentorId = dto.MentorId;
+                course.IntendedLearner = dto.IntendedLearner;
+                course.Level = dto.Level;
+                course.Language = dto.Language;
+                course.Requirement = dto.Requirement;
+
+                course.Status = "Pending";
 
                 if (dto.CoursesImage != null && dto.CoursesImage.Length > 0)
                 {
