@@ -33,9 +33,9 @@ namespace final_project_be_Application.Repository
         private readonly IMapper _mapper;
         private readonly ILogger<MentorRepository> _logger;
         private readonly IEmailService _emailService;
-        private readonly BlobStorageService _blobStorageService;
+        private readonly IBlobStorageService _blobStorageService;
 
-        public MentorRepository(MentorDAO mentorDAO, BlobStorageService blobStorageService, IMapper mapper, ILogger<MentorRepository> logger, CourseDAO courseDAO, ReviewDAO reviewDAO, UserDAO userDAO, IEmailService emailService) : base(mentorDAO)
+        public MentorRepository(MentorDAO mentorDAO, IBlobStorageService blobStorageService, IMapper mapper, ILogger<MentorRepository> logger, CourseDAO courseDAO, ReviewDAO reviewDAO, UserDAO userDAO, IEmailService emailService) : base(mentorDAO)
         {
             _mentorDAO = mentorDAO;
             _mapper = mapper;

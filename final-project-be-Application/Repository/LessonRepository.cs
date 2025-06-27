@@ -18,11 +18,11 @@ namespace final_project_be_Application.Repository
 	public class LessonRepository : Repository<Lesson>, ILessonRepository
 	{
 		private readonly LessonDAO _lessonDAO;
-		private readonly CloudinaryService _cloudinaryService;
+		private readonly ICloudinaryService _cloudinaryService;
 		private readonly IMapper _mapper;
 		private readonly ILogger<LessonRepository> _logger;
-        private readonly BlobStorageService _blobStorageService;
-        public LessonRepository(LessonDAO lessonDAO, CloudinaryService cloudinaryService, IMapper mapper, ILogger<LessonRepository> logger, BlobStorageService blobStorageService) : base(lessonDAO)
+        private readonly IBlobStorageService _blobStorageService;
+        public LessonRepository(LessonDAO lessonDAO, ICloudinaryService cloudinaryService, IMapper mapper, ILogger<LessonRepository> logger, IBlobStorageService blobStorageService) : base(lessonDAO)
 		{
 			_lessonDAO = lessonDAO;
 			_cloudinaryService = cloudinaryService;

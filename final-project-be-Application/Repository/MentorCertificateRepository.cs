@@ -22,9 +22,9 @@ namespace final_project_be_Application.Repository
         private readonly MentorCertificateDAO _mentorCertificateDAO;
         private readonly IMapper _mapper;
         private readonly ILogger<MentorCertificateRepository> _logger;
-        private readonly BlobStorageService _blobStorageService;
+        private readonly IBlobStorageService _blobStorageService;
 
-        public MentorCertificateRepository(MentorCertificateDAO mentorCertificateDAO, IMapper mapper, ILogger<MentorCertificateRepository> logger, BlobStorageService blobStorageService) : base(mentorCertificateDAO)
+        public MentorCertificateRepository(MentorCertificateDAO mentorCertificateDAO, IMapper mapper, ILogger<MentorCertificateRepository> logger, IBlobStorageService blobStorageService) : base(mentorCertificateDAO)
         {
             _mentorCertificateDAO = mentorCertificateDAO;
             _mapper = mapper;

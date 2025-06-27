@@ -20,8 +20,8 @@ namespace final_project_be_Application.Repository
 		private readonly ReviewDAO _reviewDAO;
 		private readonly IMapper _mapper;
 		private readonly ILogger<CourseRepository> _logger;
-		private readonly BlobStorageService _blobStorageService;
-		public CourseRepository(CourseDAO courseDAO, ReviewDAO reviewDAO, IMapper mapper, ILogger<CourseRepository> logger, BlobStorageService blobStorageService) : base(courseDAO)
+		private readonly IBlobStorageService _blobStorageService;
+		public CourseRepository(CourseDAO courseDAO, ReviewDAO reviewDAO, IMapper mapper, ILogger<CourseRepository> logger, IBlobStorageService blobStorageService) : base(courseDAO)
 		{
 			_courseDAO = courseDAO;
 			_reviewDAO = reviewDAO;

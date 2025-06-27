@@ -27,8 +27,8 @@ namespace final_project_be_Application.Repository
 		private readonly IMapper _mapper;
 		private readonly ILogger<QuestionRepository> _logger;
 		private readonly IAnswerRepository _answerRepository;
-		private readonly AimlService _aimlService;
-		public QuestionRepository(QuestionDAO questionDAO, IMapper mapper, ILogger<QuestionRepository> logger, IAnswerRepository answerRepository, AimlService aimlService) : base(questionDAO)
+		private readonly IAimlService _aimlService;
+		public QuestionRepository(QuestionDAO questionDAO, IMapper mapper, ILogger<QuestionRepository> logger, IAnswerRepository answerRepository, IAimlService aimlService) : base(questionDAO)
 		{
 			_questionDAO = questionDAO;
 			_mapper = mapper;
