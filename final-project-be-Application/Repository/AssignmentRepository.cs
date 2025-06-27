@@ -1,15 +1,22 @@
 ﻿using AutoMapper;
 using final_project_be_Application.Interface;
+using final_project_be_Application.Service.EmailService;
+using final_project_be_Application.Ultils;
 using final_project_be_Domain.DTOs.Assignment;
 using final_project_be_Domain.DTOs.Assignment;
 using final_project_be_Domain.Models;
 using final_project_be_Infrastructure.DAO;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using static Org.BouncyCastle.Math.EC.ECCurve;
 
 namespace final_project_be_Application.Repository
 {
@@ -18,11 +25,13 @@ namespace final_project_be_Application.Repository
 		private readonly AssignmentDAO _assignmentDAO;
 		private readonly IMapper _mapper;
 		private readonly ILogger<AssignmentRepository> _logger;
-		public AssignmentRepository(AssignmentDAO assignmentDAO, IMapper mapper, ILogger<AssignmentRepository> logger) : base(assignmentDAO)
+        private readonly ClientSettings _clientSettings;
+        public AssignmentRepository(AssignmentDAO assignmentDAO, IMapper mapper, ILogger<AssignmentRepository> logger, IOptions<ClientSettings> clientoptions) : base(assignmentDAO)
 		{
 			_assignmentDAO = assignmentDAO;
 			_mapper = mapper;
-			_logger = logger;
+			_clientSettings = clientoptions.Value;
+            _logger = logger;
 		}
 
 		public async Task<Assignment> CreateAssignment(AssignmentDto dto)
@@ -105,7 +114,9 @@ namespace final_project_be_Application.Repository
 			}
 		}
 
-		public async Task<Assignment> UpdateAssignment(UpdateAssignmentDto dto)
+
+
+        public async Task<Assignment> UpdateAssignment(UpdateAssignmentDto dto)
 		{
 			try
 			{

@@ -1,5 +1,7 @@
 ﻿using final_project_be_Domain.DTOs.Comment;
+using final_project_be_Domain.DTOs.Coupon;
 using final_project_be_Domain.Models;
+using final_project_be_Infrastructure.DAO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,5 +16,6 @@ namespace final_project_be_Application.Interface
         public Task<bool> DeleteUserCourse(int id);
         public Task<UserCourse> GetUserCourse(int id);
         public Task<UserCourse> UpdateUserCourse(CommentDto dto);
+        public Task<List<UserCouponDto>> GetUserCoursesAsync(Guid userId);
     }
 }

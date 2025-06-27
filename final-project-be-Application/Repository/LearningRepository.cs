@@ -51,6 +51,7 @@ namespace final_project_be_Application.Repository
                     UserId = userId,
                     CourseId = courseId,
                     CompletedAt = DateTime.UtcNow,
+                    Status = "Pending",
                 });
             }
 
@@ -63,7 +64,7 @@ namespace final_project_be_Application.Repository
                     {
                         UserId = userId,
                         ModuleId = module.ModuleId,
-                        CompletedAt = DateTime.UtcNow
+                        CompletedAt = null
                     });
                 }
             }

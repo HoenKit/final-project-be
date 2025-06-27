@@ -245,10 +245,15 @@ namespace final_project_be_Infrastructure.Data
 				.HasForeignKey(n => n.MentorId)
 				.OnDelete(DeleteBehavior.Restrict);
 
+            builder.Entity<Schedule>()
+				.HasOne(n => n.Courses)
+				.WithMany(u => u.schedules)
+				.HasForeignKey(n => n.CourseId)
+				.OnDelete(DeleteBehavior.Restrict);
 
 
-			// Configure Payment relationship
-			builder.Entity<Payment>()
+            // Configure Payment relationship
+            builder.Entity<Payment>()
 				.HasOne(n => n.User)
 				.WithMany(u => u.Payments)
 				.HasForeignKey(n => n.UserId)

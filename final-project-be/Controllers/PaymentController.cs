@@ -19,13 +19,23 @@ namespace final_project_be.Controllers
         [HttpPost("buy-course")]
         public async Task<IActionResult> BuyCourse([FromBody] PaymentDto request)
         {
-            var success = await _paymentRepositoty.BuyCourseAsync(request.UserId, request.CourseId,request.CouponId);
+            var result = await _paymentRepositoty.BuyCourseAsync(request.UserId, request.CourseId, request.CouponId);
 
-            if (!success)
-                return BadRequest("Unable to purchase course. Possibly due to insufficient points or invalid data.");
+            if (!result.Success)
+            {
+                return result.Error switch
+                {
+                    "NotEnoughPoint" => BadRequest("Not enough points to purchase the course."),
+                    "NotFound" => NotFound("User or course not found."),
+                    "MentorNotFound" => NotFound("Mentor not found."),
+                    "PreviouslyPurchased" => Conflict("You have already purchased this course."),
+                    "InactiveCourse" => BadRequest("Course is not available for purchase."),
+                    _ => StatusCode(500, "Unexpected error occurred while purchasing the course.")
+                };
+            }
 
             await _learnrepository.StartCourseAsync(request.UserId, request.CourseId);
-            return Ok("Purchase and start the course successfully.");
+            return Ok("Purchase and course start successful.");
         }
     }
 }

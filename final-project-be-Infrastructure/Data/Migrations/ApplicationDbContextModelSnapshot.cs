@@ -921,6 +921,9 @@ namespace final_project_be_Infrastructure.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ScheduleId"));
 
+                    b.Property<int>("CourseId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("CreateAt")
                         .HasColumnType("datetime2");
 
@@ -934,6 +937,8 @@ namespace final_project_be_Infrastructure.Data.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("ScheduleId");
+
+                    b.HasIndex("CourseId");
 
                     b.HasIndex("MentorId");
 
@@ -1684,11 +1689,19 @@ namespace final_project_be_Infrastructure.Data.Migrations
 
             modelBuilder.Entity("final_project_be_Domain.Models.Schedule", b =>
                 {
+                    b.HasOne("final_project_be_Domain.Models.Courses", "Courses")
+                        .WithMany("schedules")
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("final_project_be_Domain.Models.Mentor", "Mentor")
                         .WithMany("Schedules")
                         .HasForeignKey("MentorId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("Courses");
 
                     b.Navigation("Mentor");
                 });
@@ -1922,6 +1935,8 @@ namespace final_project_be_Infrastructure.Data.Migrations
                     b.Navigation("Reviews");
 
                     b.Navigation("UserCourses");
+
+                    b.Navigation("schedules");
                 });
 
             modelBuilder.Entity("final_project_be_Domain.Models.Event", b =>

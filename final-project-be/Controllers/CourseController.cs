@@ -55,8 +55,20 @@ namespace final_project_be.Controllers
 			}
 		}
 
-		// PUT: CourseController/Edit/5
-		[HttpPut]
+
+        [HttpGet("status")]
+        public async Task<IActionResult> GetUserCoursesByStatus([FromQuery] Guid userId, [FromQuery] string? status)
+        {
+            if (userId == Guid.Empty)
+                return BadRequest("UserId is required");
+
+            var courses = await _courseRepository.GetUserCoursesByStatusAsync(userId, status);
+            return Ok(courses);
+        }
+
+
+        // PUT: CourseController/Edit/5
+        [HttpPut]
 		public async Task<IActionResult> Put([FromForm] UpdateCourseDto dto)
 		{
 			try

@@ -16,11 +16,13 @@ namespace final_project_be_Domain.DTOs.LearnDto
         public int CourseId { get; set; }
     }
 
-    public class CompleteLessonDto
+    public class UserLessonDto
     {
         public Guid UserId { get; set; }
         public int LessonId { get; set; }
-        public float? Score { get; set; } 
+        public DateTime CompletedAt { get; set; }
+        public float? Mark { get; set; }
+        public bool IsPassed { get; set; }
     }
 
     public class QuizDto
