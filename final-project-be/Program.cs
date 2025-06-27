@@ -125,10 +125,11 @@ builder.Services.AddScoped<ILearningRepository, LearningRepository>();
 builder.Services.AddScoped<IPaymentRepositoty, PaymentRepository>();
 builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
 //Config Service
-builder.Services.AddScoped<BlobStorageService>();
+builder.Services.AddScoped<IBlobStorageService,BlobStorageService>();
+builder.Services.AddScoped<IAimlService, AimlService>();
 builder.Services.AddHttpClient<AimlService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
-builder.Services.AddSingleton<CloudinaryService>();
+builder.Services.AddSingleton<ICloudinaryService,CloudinaryService>();
 builder.Services.Configure<CloudinarySettings>(
 	builder.Configuration.GetSection("Cloudinary"));
 

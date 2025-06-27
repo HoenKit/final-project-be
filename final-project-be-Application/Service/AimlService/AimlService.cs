@@ -1,4 +1,5 @@
-﻿using System;
+﻿using final_project_be_Application.Interface;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http.Json;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace final_project_be_Application.Service.AimlService
 {
-	public class AimlService
+	public class AimlService : IAimlService
 	{
 		private readonly HttpClient _httpClient;
 

@@ -2,11 +2,12 @@
 using Azure.Storage.Blobs.Models;
 using Azure.Storage.Blobs;
 using Microsoft.Extensions.Configuration;
+using final_project_be_Application.Interface;
 
 namespace final_project_be_Application.Ultils
 {
-	public class BlobStorageService
-	{
+	public class BlobStorageService : IBlobStorageService
+    {
 		private readonly BlobServiceClient _blobServiceClient;
 		private readonly string _containerName = "phronesisfiles";
 

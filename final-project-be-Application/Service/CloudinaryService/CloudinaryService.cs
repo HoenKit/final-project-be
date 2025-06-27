@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
+using final_project_be_Application.Interface;
 using final_project_be_Application.Repository;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
@@ -14,7 +15,7 @@ using Microsoft.Extensions.Options;
 
 namespace final_project_be_Application.Service.CloudinaryService
 {
-    public class CloudinaryService
+    public class CloudinaryService : ICloudinaryService
     {
         private readonly Cloudinary _cloudinary;
 		private readonly ILogger<CloudinaryService> _logger;
