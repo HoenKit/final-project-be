@@ -4,8 +4,10 @@ using final_project_be_Application.Repository;
 using final_project_be_Application.Ultils;
 using final_project_be_Domain.DTOs.Courses;
 using final_project_be_Domain.Models;
+using final_project_be_Infrastructure.DAO;
 using final_project_be_Infrastructure.Data;
 using final_project_be_Tests.TestDAOs;
+using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -20,86 +22,97 @@ namespace final_project_be_Tests
     public class CourseRepositoryTests
     {
         private readonly IMapper _mapper;
-        private readonly ILogger<CourseRepository> _logger;
-        private readonly Mock<IBlobStorageService> _blobMock;
 
         public CourseRepositoryTests()
         {
             var config = new MapperConfiguration(cfg =>
             {
                 cfg.CreateMap<CourseDto, Courses>();
+                cfg.CreateMap<UpdateCourseDto, Courses>();
                 cfg.CreateMap<Courses, CourseResponseDto>();
             });
             _mapper = config.CreateMapper();
-            _logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger<CourseRepository>();
-            _blobMock = new Mock<IBlobStorageService>();
-            _blobMock.Setup(x => x.UploadFileAsync(It.IsAny<string>(), It.IsAny<Stream>())).Returns(Task.CompletedTask);
-            _blobMock.Setup(x => x.DeleteFileIfExistsAsync(It.IsAny<string>())).Returns(Task.CompletedTask);
         }
 
-        private ApplicationDbContext CreateContext()
+        private ApplicationDbContext GetInMemoryDbContext()
         {
             var options = new DbContextOptionsBuilder<ApplicationDbContext>()
                 .UseInMemoryDatabase(Guid.NewGuid().ToString())
                 .Options;
+
             return new ApplicationDbContext(options);
         }
 
-        private CourseRepository CreateRepository(ApplicationDbContext context)
+        private CourseRepository CreateRepository(ApplicationDbContext context, out Mock<IBlobStorageService> blobMock)
         {
+            blobMock = new Mock<IBlobStorageService>();
+            blobMock.Setup(x => x.UploadFileAsync(It.IsAny<string>(), It.IsAny<Stream>()))
+                    .Returns(Task.CompletedTask);
+            blobMock.Setup(x => x.DeleteFileIfExistsAsync(It.IsAny<string>()))
+                    .Returns(Task.CompletedTask);
+
             var courseDao = new NoTransactionCourseDAO(context);
             var reviewDao = new NoTransactionReviewDAO(context);
-            return new CourseRepository(courseDao, reviewDao, _mapper, _logger, _blobMock.Object);
+            var userCourseDao = new NoTransactionUserCourseDAO(context);
+
+            var lessonDao = new NoTransactionLessonDAO(context);
+            var moduleDao = new NoTransactionModuleDAO(context);
+            var userModuleDao = new NoTransactionUserModuleDAO(context);
+
+            var loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
+
+            var courseLogger = loggerFactory.CreateLogger<CourseRepository>();
+            var calculatorLogger = loggerFactory.CreateLogger<Caculator>();
+
+            var calculator = new Caculator(lessonDao, moduleDao, userCourseDao, userModuleDao);
+
+            return new CourseRepository(
+                courseDao,
+                calculator,
+                userCourseDao,
+                reviewDao,
+                _mapper,
+                courseLogger,
+                blobMock.Object
+            );
         }
 
         [Fact]
         public async Task CreateCourse_ShouldAddCourse()
         {
-            var context = CreateContext();
-            var repository = CreateRepository(context);
+            var context = GetInMemoryDbContext();
+            var repo = CreateRepository(context, out var blobMock);
 
-            var courseDto = new CourseDto
+            var image = new FormFile(new MemoryStream(Encoding.UTF8.GetBytes("img")), 0, 3, "Image", "img.jpg");
+
+            var dto = new CourseDto
             {
                 CourseName = "Test Course",
                 CategoryId = 1,
                 MentorId = 1,
                 CourseContent = "Content",
                 Cost = 100,
-                SkillLearn = "Skills"
+                SkillLearn = "Skill",
+                CoursesImage = image
             };
 
-            var result = await repository.CreateCourse(courseDto);
+            var result = await repo.CreateCourse(dto);
 
             Assert.NotNull(result);
             Assert.Equal("Test Course", result.CourseName);
-        }
-
-        [Fact]
-        public async Task GetCourse_ShouldReturnCorrectCourse()
-        {
-            var context = CreateContext();
-            var course = new Courses { CourseName = "Course 1", CategoryId = 1, MentorId = 1 };
-            context.Courses.Add(course);
-            await context.SaveChangesAsync();
-
-            var repository = CreateRepository(context);
-
-            var result = await repository.GetCourse(course.CourseId);
-
-            Assert.NotNull(result);
-            Assert.Equal("Course 1", result.CourseName);
+            Assert.StartsWith("https://", result.CoursesImage);
         }
 
         [Fact]
         public async Task ToggleIsDeleted_ShouldSwitchFlag()
         {
-            var context = CreateContext();
-            var course = new Courses { CourseName = "Course 2", IsDeleted = false };
+            var context = GetInMemoryDbContext();
+            var course = new Courses { CourseName = "Course A", IsDeleted = false };
             context.Courses.Add(course);
             await context.SaveChangesAsync();
 
-            var repository = CreateRepository(context);
-            var result = await repository.ToggleIsDeleted(course.CourseId);
+            var repo = CreateRepository(context, out var _);
+            var result = await repo.ToggleIsDeleted(course.CourseId);
 
             Assert.True(result.IsDeleted);
         }
@@ -107,92 +120,76 @@ namespace final_project_be_Tests
         [Fact]
         public async Task ToggleStatus_ShouldUpdateStatus()
         {
-            var context = CreateContext();
-            var course = new Courses { CourseName = "Course 3", Status = "Pending" };
+            var context = GetInMemoryDbContext();
+            var course = new Courses { CourseName = "Course B", Status = "Pending" };
             context.Courses.Add(course);
             await context.SaveChangesAsync();
 
-            var repository = CreateRepository(context);
-            var result = await repository.ToggleStatus(course.CourseId, "Approved");
+            var repo = CreateRepository(context, out var _);
+            var result = await repo.ToggleStatus(course.CourseId, "Approved");
 
             Assert.Equal("Approved", result.Status);
         }
 
         [Fact]
+        public async Task UpdateCourse_ShouldUpdateFieldsAndReplaceImage()
+        {
+            var context = GetInMemoryDbContext();
+            var course = new Courses { CourseName = "Old", Status = "Approved", CoursesImage = "https://old.img.com/file.jpg" };
+            context.Courses.Add(course);
+            await context.SaveChangesAsync();
+
+            var repo = CreateRepository(context, out var blobMock);
+
+            var newImage = new FormFile(new MemoryStream(Encoding.UTF8.GetBytes("newimg")), 0, 6, "NewImage", "new.jpg");
+
+            var dto = new UpdateCourseDto
+            {
+                CourseId = course.CourseId,
+                CourseName = "New",
+                Cost = 150,
+                CoursesImage = newImage
+            };
+
+            var result = await repo.UpdateCourse(dto);
+
+            Assert.NotNull(result);
+            Assert.Equal("New", result.CourseName);
+            Assert.StartsWith("https://", result.CoursesImage);
+        }
+
+        [Fact]
         public void GetAllCourses_ShouldReturnFilteredPaginatedCourses()
         {
-            // Arrange
-            var context = CreateContext();
-
-            // Add test data
+            var context = GetInMemoryDbContext();
             context.Courses.AddRange(
-                new Courses { CourseName = "Course A", Cost = 100, Status = StatusEnum.Approved.ToString(), CreateAt = DateTime.Now },
-                new Courses { CourseName = "Course B", Cost = 200, Status = StatusEnum.Approved.ToString(), CreateAt = DateTime.Now },
-                new Courses { CourseName = "Course C", Cost = 300, Status = StatusEnum.Pending.ToString(), CreateAt = DateTime.Now }
+                new Courses { CourseName = "A", Cost = 100, Status = "Approved", CreateAt = DateTime.Now },
+                new Courses { CourseName = "B", Cost = 200, Status = "Approved", CreateAt = DateTime.Now },
+                new Courses { CourseName = "C", Cost = 300, Status = "Pending", CreateAt = DateTime.Now }
             );
             context.SaveChanges();
 
-            // DAO + Logger + Repo
-            var dao = new NoTransactionCourseDAO(context);
-            var reviewDao = new NoTransactionReviewDAO(context);
-            var logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger<CourseRepository>();
-            var blobMock = new Mock<IBlobStorageService>();
+            var repo = CreateRepository(context, out var _);
 
-            var repo = new CourseRepository(dao, reviewDao, _mapper, logger, blobMock.Object);
-
-            var statuses = new List<StatusEnum> { StatusEnum.Approved };
-
-            // Act
-            var result = repo.GetAllCourses(
-                page: 1,
-                pageSize: 10,
-                CategoryId: null,
-                title: null,
-                userId: null,
-                sortOption: null,
-                mentorId: null,
-                Language: null,
-                Level: null,
-                MinCost: null,
-                MaxCost: null,
-                MinRate: null,
-                MaxRate: null,
-                statuses: statuses
-            );
-
-            // Assert
-            logger.LogInformation($"TotalCount: {result.TotalCount}, ItemCount: {result.Items.Count()}");
-
-            foreach (var item in result.Items)
-            {
-                logger.LogInformation($"Course: {item.CourseName}, Status: {item.Status}, Cost: {item.Cost}");
-            }
+            var result = repo.GetAllCourses(1, 10, null, null, null, null, null, null, null, null, null, null, null, new List<StatusEnum> { StatusEnum.Approved });
 
             Assert.Equal(2, result.TotalCount);
         }
 
         [Fact]
-        public async Task UpdateCourse_ShouldModifyFields()
+        public async Task GetCourse_ShouldReturnCorrectCourse()
         {
-            var context = CreateContext();
-            var existing = new Courses { CourseName = "Old", Cost = 100, Status = "Approved" };
-            context.Courses.Add(existing);
+            var context = GetInMemoryDbContext();
+            var course = new Courses { CourseName = "Course 1", CategoryId = 1, MentorId = 1 };
+            context.Courses.Add(course);
             await context.SaveChangesAsync();
 
-            var repository = CreateRepository(context);
+            var repository = CreateRepository(context, out var _);
 
-            var updateDto = new UpdateCourseDto
-            {
-                CourseId = existing.CourseId,
-                CourseName = "New",
-                Cost = 200
-            };
-
-            var result = await repository.UpdateCourse(updateDto);
+            var result = await repository.GetCourse(course.CourseId);
 
             Assert.NotNull(result);
-            Assert.Equal("New", result.CourseName);
-            Assert.Equal(200, result.Cost);
+            Assert.Equal("Course 1", result.CourseName);
         }
     }
 
