@@ -22,8 +22,10 @@ namespace final_project_be_Application.Repository
         private readonly Caculator _Caculator;
         private readonly IMapper _mapper;
 		private readonly ILogger<CourseRepository> _logger;
-		private readonly BlobStorageService _blobStorageService;
-		public CourseRepository(CourseDAO courseDAO, Caculator Caculator, ReviewDAO reviewDAO, IMapper mapper, ILogger<CourseRepository> logger, BlobStorageService blobStorageService, UserCourseDAO userCourseDAO) : base(courseDAO)
+        private readonly IBlobStorageService _blobStorageService;
+ 
+		public CourseRepository(CourseDAO courseDAO, Caculator Caculator,UserCourseDAO userCourseDAO, ReviewDAO reviewDAO, IMapper mapper, ILogger<CourseRepository> logger, IBlobStorageService blobStorageService) : base(courseDAO)
+
 		{
 			_courseDAO = courseDAO;
             _Caculator = Caculator;

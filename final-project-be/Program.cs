@@ -129,10 +129,11 @@ builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
 builder.Services.AddScoped<ICouponRepository, CouponRepository>();
 builder.Services.AddScoped<IScheduleRepository, ScheduleRepository>();
 //Config Service
-builder.Services.AddScoped<BlobStorageService>();
+builder.Services.AddScoped<IBlobStorageService,BlobStorageService>();
+builder.Services.AddScoped<IAimlService, AimlService>();
 builder.Services.AddHttpClient<AimlService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
-builder.Services.AddSingleton<CloudinaryService>();
+builder.Services.AddSingleton<ICloudinaryService,CloudinaryService>();
 builder.Services.Configure<CloudinarySettings>(
 builder.Configuration.GetSection("Cloudinary"));
 //config class

@@ -13,8 +13,8 @@ namespace final_project_be.Controllers
 	public class CourseController : ControllerBase
 	{
 		private readonly ICourseRepository _courseRepository;
-		private readonly CloudinaryService _cloudinaryService;
-		public CourseController(ICourseRepository courseRepository, CloudinaryService cloudinaryService)
+		private readonly ICloudinaryService _cloudinaryService;
+		public CourseController(ICourseRepository courseRepository, ICloudinaryService cloudinaryService)
 		{
 			_courseRepository = courseRepository;
 			_cloudinaryService = cloudinaryService;
