@@ -1,21 +1,22 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
-using final_project_be_Infrastructure.DAO;
-using final_project_be_Infrastructure.Data;
+﻿using DocumentFormat.OpenXml.VariantTypes;
 using final_project_be_Application.Interface;
 using final_project_be_Application.Repository;
+using final_project_be_Application.Service.AimlService;
+using final_project_be_Application.Service.CloudinaryService;
+using final_project_be_Application.Service.EmailService;
+using final_project_be_Application.Service.Mapping;
+using final_project_be_Application.Ultils;
+using final_project_be_Infrastructure.DAO;
+using final_project_be_Infrastructure.Data;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Azure;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+using NuGet.Configuration;
 using Serilog;
 using Serilog.Formatting.Json;
-using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using final_project_be_Application.Ultils;
-using Microsoft.Extensions.Azure;
-using final_project_be_Application.Service.Mapping;
-using final_project_be_Application.Service.EmailService;
-using NuGet.Configuration;
-using final_project_be_Application.Service.CloudinaryService;
-using final_project_be_Application.Service.AimlService;
-using DocumentFormat.OpenXml.VariantTypes;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -125,14 +126,15 @@ builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
 builder.Services.AddScoped<ILearningRepository, LearningRepository>();
 builder.Services.AddScoped<IPaymentRepositoty, PaymentRepository>();
 builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
+builder.Services.AddScoped<ICouponRepository, CouponRepository>();
+builder.Services.AddScoped<IScheduleRepository, ScheduleRepository>();
 //Config Service
 builder.Services.AddScoped<BlobStorageService>();
 builder.Services.AddHttpClient<AimlService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddSingleton<CloudinaryService>();
 builder.Services.Configure<CloudinarySettings>(
-	builder.Configuration.GetSection("Cloudinary"));
-
+builder.Configuration.GetSection("Cloudinary"));
 //config class
 builder.Services.AddScoped<Validate>();
 

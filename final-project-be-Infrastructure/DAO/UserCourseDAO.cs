@@ -13,7 +13,14 @@ namespace final_project_be_Infrastructure.DAO
 		}
         public async Task<UserCourse> GetUserCourse(Guid userId, int courseId )=>await _context.UserCourses.FirstOrDefaultAsync(uc => uc.UserId == userId && uc.CourseId == courseId);
         public async Task<bool> UserCourseExists(Guid userId, int courseId)=> await _context.UserCourses.AnyAsync(uc => uc.UserId == userId && uc.CourseId == courseId);
-        
+        public async Task<List<UserCourse>> GetUserCoursesByUserId(Guid userId)
+        {
+            return await _context.UserCourses
+                .Include(uc => uc.Courses)
+                .Where(uc => uc.UserId == userId)
+                .ToListAsync();
+        }
+
         public async Task AddUserCourseAsync(UserCourse userCourse)=> await _context.UserCourses.AddAsync(userCourse);
 
         public async Task UpdateUserCourse(UserCourse userCourse)

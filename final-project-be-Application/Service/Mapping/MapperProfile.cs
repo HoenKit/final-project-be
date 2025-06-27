@@ -16,6 +16,7 @@ using final_project_be_Domain.DTOs.Assignment;
 using final_project_be_Domain.DTOs.Mentor;
 using final_project_be_Domain.DTOs.Review;
 using final_project_be_Domain.DTOs.Transaction;
+using final_project_be_Domain.DTOs.Schedule;
 
 namespace final_project_be_Application.Service.Mapping
 {
@@ -71,6 +72,7 @@ namespace final_project_be_Application.Service.Mapping
             CreateMap<Review, UpdateReviewDto>().ReverseMap();
             CreateMap<Review, ReviewResponseDto>().ReverseMap();
             CreateMap<Transaction, TransactionDto>().ReverseMap();
+			CreateMap<Schedule, ScheduleDto>().ReverseMap();
         }
 	}
 }

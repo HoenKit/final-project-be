@@ -1,4 +1,5 @@
-﻿using final_project_be_Application.Ultils;
+﻿using final_project_be_Application.Interface;
+using final_project_be_Application.Ultils;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
@@ -10,10 +11,12 @@ namespace final_project_be.Controllers
     public class ProgressController : ControllerBase
     {
         private readonly Caculator _caculator;
+        private readonly ICourseRepository _courseRepository;
 
-        public ProgressController(Caculator caculator)
+        public ProgressController(Caculator caculator, ICourseRepository courseRepository)
         {
             _caculator = caculator;
+            _courseRepository = courseRepository;
         }
         [HttpGet("course-progress")]
         public async Task<IActionResult> GetCourseProgress(Guid userId, int courseId)
@@ -26,6 +29,17 @@ namespace final_project_be.Controllers
                 CourseId = courseId,
                 Percentage = percentage
             });
+        }
+
+        [HttpGet("{userId}")]
+        public async Task<IActionResult> GetUserCourses(Guid userId)
+        {
+            var result = await _courseRepository.GetUserCoursesAsync(userId);
+
+            if (!result.Any())
+                return NotFound(new { message = "No courses found for this user." });
+
+            return Ok(result);
         }
 
         [HttpGet("quiz-score")]

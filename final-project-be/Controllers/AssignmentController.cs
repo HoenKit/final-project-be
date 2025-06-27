@@ -1,6 +1,8 @@
-﻿using final_project_be_Application.Interface;
+﻿using Azure.Core;
+using final_project_be_Application.Interface;
 using final_project_be_Domain.DTOs.Assignment;
 using Microsoft.AspNetCore.Mvc;
+using Org.BouncyCastle.Asn1.Cmp;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -19,7 +21,9 @@ namespace final_project_be.Controllers
 		[HttpGet("get-all-assignment-by-lesson/{lessonId}")]
 		public async Task<IActionResult> GetAllAssignmentByLessonId(int lessonId)
 		{
-			var assignments = await _assignmentRepository.GetAllAssignmentByLessonId(lessonId);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            var assignments = await _assignmentRepository.GetAllAssignmentByLessonId(lessonId);
 			return Ok(assignments);
 		}
 
@@ -27,7 +31,9 @@ namespace final_project_be.Controllers
 		[HttpGet("{id}")]
 		public async Task<IActionResult> Get(int id)
 		{
-			var assignment = await _assignmentRepository.GetAssignment(id);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            var assignment = await _assignmentRepository.GetAssignment(id);
 			return Ok(assignment);
 		}
 
@@ -48,8 +54,10 @@ namespace final_project_be.Controllers
 			}
 		}
 
-		// PUT api/<AssignmentController>/5
-		[HttpPut]
+
+
+        // PUT api/<AssignmentController>/5
+        [HttpPut]
 		public async Task<IActionResult> Put([FromBody] UpdateAssignmentDto dto)
 		{
 			try

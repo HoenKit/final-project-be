@@ -17,14 +17,18 @@ namespace final_project_be_Application.Repository
 	public class CourseRepository : Repository<Courses>, ICourseRepository
 	{
 		private readonly CourseDAO _courseDAO;
+        private readonly UserCourseDAO _userCourseDAO;
 		private readonly ReviewDAO _reviewDAO;
-		private readonly IMapper _mapper;
+        private readonly Caculator _Caculator;
+        private readonly IMapper _mapper;
 		private readonly ILogger<CourseRepository> _logger;
 		private readonly BlobStorageService _blobStorageService;
-		public CourseRepository(CourseDAO courseDAO, ReviewDAO reviewDAO, IMapper mapper, ILogger<CourseRepository> logger, BlobStorageService blobStorageService) : base(courseDAO)
+		public CourseRepository(CourseDAO courseDAO, Caculator Caculator, ReviewDAO reviewDAO, IMapper mapper, ILogger<CourseRepository> logger, BlobStorageService blobStorageService, UserCourseDAO userCourseDAO) : base(courseDAO)
 		{
 			_courseDAO = courseDAO;
-			_reviewDAO = reviewDAO;
+            _Caculator = Caculator;
+            _reviewDAO = reviewDAO;
+            _userCourseDAO = userCourseDAO;
 			_mapper = mapper;
 			_logger = logger;
 			_blobStorageService = blobStorageService;
@@ -188,7 +192,63 @@ namespace final_project_be_Application.Repository
 			}
 		}
 
-		public async Task<Courses> ToggleIsDeleted(int id)
+        public async Task<List<UserCourseDto>> GetUserCoursesAsync(Guid userId)
+        {
+            var userCourses = await _userCourseDAO.GetUserCoursesByUserId(userId);
+
+            var result = new List<UserCourseDto>();
+
+            foreach (var uc in userCourses)
+            {
+                // 👉 Gọi lại hàm tính tiến độ để đảm bảo cập nhật mới nhất
+                var updatedPercentage = await _Caculator.CalculateCourseCompletion(userId, uc.CourseId);
+
+                result.Add(new UserCourseDto
+                {
+                    CourseId = uc.CourseId,
+                    CourseName = uc.Courses?.CourseName ?? "Unknown",
+                    CourseImage = uc.Courses?.CoursesImage,
+                    CertificateLink = uc.CertificateLink,
+                    Status = uc.Status,
+                    Percentage = updatedPercentage,
+                    CompletedAt = uc.CompletedAt
+                });
+            }
+
+            return result;
+        }
+
+        public async Task<List<UserCourseDto>> GetUserCoursesByStatusAsync(Guid userId, string? status)
+        {
+            var userCourses = await _userCourseDAO.GetUserCoursesByUserId(userId);
+
+            var result = new List<UserCourseDto>();
+
+            foreach (var uc in userCourses)
+            {
+                // Gọi tính tiến độ để cập nhật lại dữ liệu mới nhất
+                await _Caculator.CalculateCourseCompletion(userId, uc.CourseId);
+                
+                // Nếu có truyền status thì lọc
+                if (string.IsNullOrEmpty(status) || string.Equals(uc.Status, status, StringComparison.OrdinalIgnoreCase))
+                {
+                    result.Add(new UserCourseDto
+                    {
+                        CourseId = uc.CourseId,
+                        CourseName = uc.Courses?.CourseName ?? "Unknown",
+                        CourseImage = uc.Courses?.CoursesImage,
+                        CertificateLink = uc.CertificateLink,
+                        Status = uc.Status,
+                        Percentage = uc.Percentage,
+                        CompletedAt = uc.CompletedAt
+                    });
+                }
+            }
+
+            return result;
+        }
+
+        public async Task<Courses> ToggleIsDeleted(int id)
 		{
 			try
 			{

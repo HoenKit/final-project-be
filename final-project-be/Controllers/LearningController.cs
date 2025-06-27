@@ -22,9 +22,19 @@ namespace final_project_be.Controllers
         }
 
         [HttpPost("complete-lesson")]
-        public async Task<IActionResult> CompleteLesson([FromBody] CompleteLessonDto dto)
+        public async Task<IActionResult> CompleteLesson([FromBody] UserLessonDto dto)
         {
-            var result = await _learnrepository.CompleteLessonAsync(dto.UserId, dto.LessonId, dto.Score);
+            var userLesson = await _learnrepository.CompleteLessonAsync(dto.UserId, dto.LessonId, dto.Mark);
+
+            var result = new UserLessonDto
+            {
+                UserId = userLesson.UserId,
+                LessonId = userLesson.LessonId,
+                CompletedAt = DateTime.UtcNow,
+                Mark = userLesson.Mark,
+                IsPassed = userLesson.IsPassed
+            };
+
             return Ok(result);
         }
 

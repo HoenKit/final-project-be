@@ -12,4 +12,9 @@ namespace final_project_be_Domain.DTOs.Payment
         public int CourseId { get; set; }
         public int CouponId { get; set; }
     }
+    public class BuyCourseResult
+    {
+        public bool Success { get; set; }
+        public string? Error { get; set; }
+    }
 }

@@ -14,6 +14,6 @@ namespace final_project_be_Application.Interface
 		public Task<bool> DeleteAssignment(int id);
 		public Task<Assignment> GetAssignment(int id);
 		public Task<Assignment> UpdateAssignment(UpdateAssignmentDto dto);
-		public Task<ICollection<AssignmentResponseDto>> GetAllAssignmentByLessonId(int lessonId);
+        public Task<ICollection<AssignmentResponseDto>> GetAllAssignmentByLessonId(int lessonId);
 	}
 }

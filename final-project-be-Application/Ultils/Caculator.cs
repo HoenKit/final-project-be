@@ -39,6 +39,7 @@ namespace final_project_be_Application.Ultils
             return (float)passedLessons / lessonIds.Count * 100;
         }
 
+
         public async Task<float> CalculateCourseCompletion(Guid userId, int courseId)
         {
             var moduleIds = await _lessonDAO.GetModuleIdsByCourseId(courseId);
