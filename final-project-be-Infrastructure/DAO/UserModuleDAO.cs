@@ -15,7 +15,12 @@ namespace final_project_be_Infrastructure.DAO
         public async Task<UserModule> GetUserModule(Guid userId, int moduleId)=> await _context.UserModules.FirstOrDefaultAsync(um => um.UserId == userId && um.ModuleId == moduleId);
         public async Task<bool> UserModuleExists(Guid userId, int moduleId)=>await _context.UserModules.AnyAsync(um => um.UserId == userId && um.ModuleId == moduleId);
         public async Task AddUserModuleAsync(UserModule userModule)=> await _context.UserModules.AddAsync(userModule);
-        
+        public Task<List<UserModule>> GetUserModulesAsync(Guid userId)
+        {
+            return _context.UserModules
+                .Where(um => um.UserId == userId)
+                .ToListAsync();
+        }
 
         public async Task UpdateUserModule(UserModule userModule)
         {

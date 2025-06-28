@@ -2,6 +2,7 @@
 using CloudinaryDotNet;
 using final_project_be_Application.Interface;
 using final_project_be_Domain.DTOs.Courses;
+using final_project_be_Domain.DTOs.Lesson;
 using final_project_be_Domain.DTOs.Module;
 using final_project_be_Domain.Models;
 using final_project_be_Infrastructure.DAO;
@@ -18,11 +19,16 @@ namespace final_project_be_Application.Repository
 	public class ModuleRepository : Repository<Module>, IModuleRepository
 	{
 		private readonly ModuleDAO _moduleDAO;
-		private readonly IMapper _mapper;
+		private readonly UserModuleDAO _userModuleDAO;
+        private readonly UserLessonDAO _userlessonDAO;
+        private readonly IMapper _mapper;
 		private readonly ILogger<ModuleRepository> _logger;
-		public ModuleRepository(ModuleDAO moduleDAO, IMapper mapper, ILogger<ModuleRepository> logger) : base(moduleDAO)
+		
+		public ModuleRepository(ModuleDAO moduleDAO, IMapper mapper, ILogger<ModuleRepository> logger, UserLessonDAO userlessonDAO,UserModuleDAO userModuleDAO) : base(moduleDAO)
 		{
-			_moduleDAO = moduleDAO;
+            _userlessonDAO = userlessonDAO;
+			_userModuleDAO = userModuleDAO;
+            _moduleDAO = moduleDAO;
 			_mapper = mapper;
 			_logger = logger;
 		}
@@ -45,8 +51,38 @@ namespace final_project_be_Application.Repository
 				return null;
 			}
 		}
+        public async Task<List<ModuleProgressDto>> GetModuleProgressByCourseAsync(Guid userId, int courseId)
+        {
+            var modules = await _moduleDAO.GetModulesWithLessonsByCourseIdAsync(courseId);
+            var userModules = await _userModuleDAO.GetUserModulesAsync(userId);
+            var userLessons = await _userlessonDAO.GetUserLessonsAsync(userId);
 
-		public async Task<bool> DeleteModule(int id)
+            return modules.Select(module =>
+            {
+                var userModule = userModules.FirstOrDefault(um => um.ModuleId == module.ModuleId);
+
+                return new ModuleProgressDto
+                {
+                    ModuleId = module.ModuleId,
+                    Title = module.Title,
+					Description = module.Description,
+                    Percentage = userModule?.Percentage ?? 0,
+                    Lessons = module.Lessons.Select(lesson =>
+                    {
+                        var userLesson = userLessons.FirstOrDefault(ul => ul.LessonId == lesson.LessonId);
+                        return new LessonProgressDto
+                        {
+                            LessonId = lesson.LessonId,
+                            Title = lesson.Title,
+                            Ispassed = userLesson?.IsPassed ?? false
+                        };
+                    }).ToList()
+                };
+            }).ToList();
+        }
+
+
+        public async Task<bool> DeleteModule(int id)
 		{
 			try
 			{

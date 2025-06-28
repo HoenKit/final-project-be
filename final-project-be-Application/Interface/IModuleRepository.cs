@@ -16,6 +16,7 @@ namespace final_project_be_Application.Interface
 		public Task<bool> DeleteModule(int id);
 		public Task<ModuleResponseDto> GetModule(int id);
 		public Task<Module> UpdateModule(UpdateModuleDto dto);
-		public Task<ICollection<ModuleResponseDto>> GetAllModulesByCourseId(int courseId);
+        Task<List<ModuleProgressDto>> GetModuleProgressByCourseAsync(Guid userId, int courseId);
+        public Task<ICollection<ModuleResponseDto>> GetAllModulesByCourseId(int courseId);
 	}
 }

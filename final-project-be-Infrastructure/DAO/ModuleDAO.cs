@@ -15,6 +15,13 @@ namespace final_project_be_Infrastructure.DAO
 			return await _context.Modules.Include(c => c.Lessons).FirstOrDefaultAsync(c => c.ModuleId == id);
 		}
         public async Task<List<Module>> GetModulesByCourseId(int courseId)=> await _context.Modules.Where(m => m.CourseId == courseId).ToListAsync();
+        public Task<List<Module>> GetModulesWithLessonsByCourseIdAsync(int courseId)
+        {
+            return _context.Modules
+                .Where(m => m.CourseId == courseId)
+                .Include(m => m.Lessons)
+                .ToListAsync();
+        }
         public async Task<Module?> GetByCourseIdAsync(int CourseId)
         {
             return await _context.Modules.Include(c => c.Lessons).FirstOrDefaultAsync(c => c.CourseId == CourseId);
