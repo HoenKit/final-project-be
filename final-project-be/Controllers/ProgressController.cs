@@ -12,11 +12,13 @@ namespace final_project_be.Controllers
     {
         private readonly Caculator _caculator;
         private readonly ICourseRepository _courseRepository;
+        private readonly IModuleRepository _moduleRepository;
 
-        public ProgressController(Caculator caculator, ICourseRepository courseRepository)
+        public ProgressController(Caculator caculator, ICourseRepository courseRepository, IModuleRepository moduleRepository)
         {
             _caculator = caculator;
             _courseRepository = courseRepository;
+            _moduleRepository = moduleRepository;
         }
         [HttpGet("course-progress")]
         public async Task<IActionResult> GetCourseProgress(Guid userId, int courseId)
@@ -77,5 +79,16 @@ namespace final_project_be.Controllers
                 Percentage = progress
             });
         }
+
+        [HttpGet("get-module-progress-by-course")]
+        public async Task<IActionResult> GetModuleProgressByCourse(Guid userId, int courseId)
+        {
+            if (userId == Guid.Empty || courseId <= 0)
+                return BadRequest("Invalid parameters.");
+
+            var data = await _moduleRepository.GetModuleProgressByCourseAsync(userId, courseId);
+            return Ok(data);
+        }
+
     }
 }

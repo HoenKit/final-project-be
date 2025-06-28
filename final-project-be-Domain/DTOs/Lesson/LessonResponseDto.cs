@@ -12,5 +12,7 @@ namespace final_project_be_Domain.DTOs.Lesson
         public int LessonId { get; set; }
         public int ModuleId { get; set; }
 		public string Title { get; set; }
-	}
+		public string? Description { get; set; }
+		public bool Ispassed { get; set; }
+    }
 }

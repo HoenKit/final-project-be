@@ -15,6 +15,6 @@ namespace final_project_be_Application.Interface
 		public Task<bool> DeleteLesson(int id);
 		public Task<Lesson> GetLesson(int id);
 		public Task<Lesson> UpdateLesson(UpdateLessonDto dto);
-		public Task<ICollection<LessonResponseDto>> GetAllLessonByModuleId(int moduleId);
+        public Task<ICollection<LessonResponseDto>> GetAllLessonByModuleId(int moduleId);
 	}
 }

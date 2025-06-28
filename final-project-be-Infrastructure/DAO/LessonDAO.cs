@@ -18,10 +18,12 @@ namespace final_project_be_Infrastructure.DAO
                 .Where(ua => ua.UserLessonId == userLessonId)
                 .Include(ua => ua.Answer)
                 .ToListAsync();
+
         public async Task<Lesson?> GetLessonByIdAsync(int lessonId)=> await _context.Lessons.FindAsync(lessonId);
         
         public async Task<List<Lesson>> GetLessonsByModuleId(int moduleId) => await _context.Lessons.Where(l => l.ModuleId == moduleId).ToListAsync();
-        
+
+
         public async Task<bool> IsQuizLessonAsync(int lessonId)=> await _context.Question.AnyAsync(q => q.LessonId == lessonId);
         public async Task<List<UserLesson>> GetUserPassedLessons(Guid userId, List<int> lessonIds) => await _context.UserLessons
                                                                                                                     .Where(ul => ul.UserId == userId && lessonIds

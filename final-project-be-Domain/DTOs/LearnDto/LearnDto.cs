@@ -28,6 +28,7 @@ namespace final_project_be_Domain.DTOs.LearnDto
     public class QuizDto
     {
         public string? QuestionText { get; set; }
+        public string? QuestionType { get; set; }
         public List<QuizAnswer> Answers { get; set; }
     }
     public class SubmitQuizDto

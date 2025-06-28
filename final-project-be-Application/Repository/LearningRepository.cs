@@ -20,6 +20,7 @@ namespace final_project_be_Application.Repository
         private readonly UserCourseDAO _usercourseDAO;
         private readonly UserLessonDAO _userlessonDAO;
         private readonly UserModuleDAO _userModuleDAO;
+        private readonly UserAnswerDAO _userAnswerDAO;
         private readonly ModuleDAO _moduleDAO;
         private readonly LessonDAO _lessonDAO;
         private readonly QuestionDAO _questionDAO;
@@ -27,13 +28,14 @@ namespace final_project_be_Application.Repository
         private readonly IMapper _mapper;
         private readonly ILogger<LearningRepository> _logger;
 
-        public LearningRepository(UserCourseDAO usercourseDAO, UserLessonDAO userlessonDAO, LessonDAO lessonDAO, UserModuleDAO userModuleDAO, IMapper mapper, ILogger<LearningRepository> logger,
+        public LearningRepository(UserCourseDAO usercourseDAO, UserLessonDAO userlessonDAO, UserAnswerDAO userAnswerDAO, LessonDAO lessonDAO, UserModuleDAO userModuleDAO, IMapper mapper, ILogger<LearningRepository> logger,
             ModuleDAO moduleDAO,Caculator caculator, QuestionDAO questionDAO)
         {
             _lessonDAO = lessonDAO;
             _usercourseDAO = usercourseDAO;
             _userlessonDAO = userlessonDAO;
             _userModuleDAO = userModuleDAO;
+            _userAnswerDAO = userAnswerDAO;
             _mapper = mapper;
             _logger = logger;
             _moduleDAO = moduleDAO;
@@ -74,14 +76,23 @@ namespace final_project_be_Application.Repository
 
         public async Task<UserLesson> CompleteLessonAsync(Guid userId, int lessonId, float? score)
         {
-            if (await _userlessonDAO.UserLessonExists(userId, lessonId))
-                throw new InvalidOperationException("User has already completed this lesson.");
+            var existing = await _userlessonDAO.GetUserLessonbyuserandlessonAsync(userId, lessonId);
+
+            if (existing != null)
+            {
+                if (existing.IsPassed)
+                    throw new InvalidOperationException("User has already completed this lesson.");
+
+                // ❌ Nếu chưa pass thì xóa để thêm bản ghi mới
+                await _userlessonDAO.DeleteUserLessonAsync(existing);
+                await _userlessonDAO.SaveChangesAsync();
+            }
 
             var lesson = await _lessonDAO.GetLessonByIdAsync(lessonId);
             if (lesson == null)
                 throw new Exception("Lesson not found.");
 
-            // Nhận diện loại bài học
+            // Xác định loại bài học
             var isQuiz = await _lessonDAO.HasQuestionAsync(lessonId);
             var isAssignment = await _lessonDAO.HasAssignmentAsync(lessonId);
             var isDocs = !string.IsNullOrEmpty(lesson.DocumentLink);
@@ -104,16 +115,13 @@ namespace final_project_be_Application.Repository
             else if (isAssignment)
             {
                 userLesson.Mark = null;
-                userLesson.IsPassed = false; 
-            }
-            else if (isDocs || isVideo)
-            {
-                userLesson.Mark = 100;
-                userLesson.IsPassed = true;
+                userLesson.IsPassed = false;
             }
             else
             {
-                throw new Exception("Cannot determine lesson type. Missing links or associations.");
+                // ✅ Default: nếu không phải quiz, không phải assignment → luôn pass
+                userLesson.Mark = 100;
+                userLesson.IsPassed = true;
             }
 
             await _userlessonDAO.AddUserLessonAsync(userLesson);
@@ -144,21 +152,26 @@ namespace final_project_be_Application.Repository
                 await _lessonDAO.SaveChangesAsync();
             }
 
-            // Tạo các UserAnswer
-            var userAnswers = dto.AnswerIds.Select(aid => new UserAnswer
-            {
-                UserLessonId = userLesson.UserLessonId,
-                AnswerId = aid
-            }).ToList();
+            // Xoá userAnswer cũ
+            await _userAnswerDAO.DeleteUserAnswersByUserLessonIdAsync(userLesson.UserLessonId);
+            await _lessonDAO.SaveChangesAsync();
+
+            // Tạo mới
+            var userAnswers = dto.AnswerIds
+                .Select(aid => new UserAnswer
+                {
+                    UserLessonId = userLesson.UserLessonId,
+                    AnswerId = aid
+                }).ToList();
 
             await _lessonDAO.AddUserAnswersAsync(userAnswers);
             await _lessonDAO.SaveChangesAsync();
 
-            // Gọi lại hàm tính điểm (hàm bạn đã có)
             var (score, isPassed) = await _caculator.CalculateQuizScore(dto.UserId, dto.LessonId);
 
             return score;
         }
+
         public async Task<List<QuizDto>> GetQuizByLessonIdAsync(int lessonId)
         {
             var questions = await _questionDAO.GetQuestionsByLessonIdAsync(lessonId);
@@ -166,8 +179,10 @@ namespace final_project_be_Application.Repository
             return questions.Select(q => new QuizDto
             {
                 QuestionText = q.Question_text,
+                QuestionType = q.QuestionType,
                 Answers = q.Answers.Select(a => new QuizAnswer
                 {
+                    AnswerId = a.AnswerId,
                     Text = a.Text,
                     IsCorrect = a.Is_correct,
                 }).ToList()
