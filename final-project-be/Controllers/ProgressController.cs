@@ -87,6 +87,7 @@ namespace final_project_be.Controllers
                 return BadRequest("Invalid parameters.");
 
             var data = await _moduleRepository.GetModuleProgressByCourseAsync(userId, courseId);
+
             return Ok(data);
         }
 
