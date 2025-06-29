@@ -16,6 +16,16 @@ namespace final_project_be.Controllers
         {
             _transactionRepository = transactionRepository;
         }
+        // GET: api/<TransactionController>
+        [HttpGet]
+        public IActionResult GetAll(int? page, int? pageSize, Guid? userId, string? sortOption, [FromQuery] List<StatusTransactionEnum>? statuses)
+        {
+            int currentPage = page ?? 1;
+            int currentSize = pageSize ?? 50;
+
+            var pagedTransactions = _transactionRepository.GetAllTransaction(currentPage, currentSize, userId, sortOption, statuses);
+            return Ok(pagedTransactions);
+        }
 
         // POST api/<TransactionController>
         [HttpPost]

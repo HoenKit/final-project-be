@@ -73,6 +73,7 @@ namespace final_project_be_Application.Service.Mapping
             CreateMap<Review, ReviewResponseDto>().ReverseMap();
             CreateMap<Transaction, TransactionDto>().ReverseMap();
 			CreateMap<Schedule, ScheduleDto>().ReverseMap();
+            CreateMap<Transaction, GetTransactionDto>().ReverseMap();
         }
 	}
 }
