@@ -12,6 +12,7 @@ namespace final_project_be_Domain.DTOs.Mentor
 		public string FirstName { get; set; }
 		public string LastName { get; set; }
 	}
+
     public class CreateMentorDto
     {
         public int MentorId { get; set; }
@@ -29,6 +30,18 @@ namespace final_project_be_Domain.DTOs.Mentor
         public DateTime CreateAt { get; set; }
         public DateTime UpdateAt { get; set; }
         public List<MentorCertificateDto>? MentorCertificates { get; set; }
+    }
+
+    public class MentorbyCourseDto
+    {
+        public int MentorId { get; set; }
+        public Guid UserId { get; set; }
+        public string? Introduction { get; set; }
+        public string? JobTitle { get; set; }
+        public string? FirstName { get; set; }
+        public string? LastName { get; set; }
+        public string? StudyLevel { get; set; }
+        public string? Signature { get; set; }
     }
     public class GetMentorDto
     {

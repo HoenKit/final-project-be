@@ -2,6 +2,7 @@
 using final_project_be_Application.Interface;
 using final_project_be_Application.Ultils;
 using final_project_be_Domain.DTOs.Answer;
+using final_project_be_Domain.DTOs.Courses;
 using final_project_be_Domain.DTOs.LearnDto;
 using final_project_be_Domain.Models;
 using final_project_be_Infrastructure.DAO;
@@ -26,9 +27,10 @@ namespace final_project_be_Application.Repository
         private readonly QuestionDAO _questionDAO;
         private readonly Caculator _caculator;
         private readonly IMapper _mapper;
+        private readonly IBlobStorageService _blobStorageService;
         private readonly ILogger<LearningRepository> _logger;
 
-        public LearningRepository(UserCourseDAO usercourseDAO, UserLessonDAO userlessonDAO, UserAnswerDAO userAnswerDAO, LessonDAO lessonDAO, UserModuleDAO userModuleDAO, IMapper mapper, ILogger<LearningRepository> logger,
+        public LearningRepository(UserCourseDAO usercourseDAO, UserLessonDAO userlessonDAO,IBlobStorageService blobStorageService, UserAnswerDAO userAnswerDAO, LessonDAO lessonDAO, UserModuleDAO userModuleDAO, IMapper mapper, ILogger<LearningRepository> logger,
             ModuleDAO moduleDAO,Caculator caculator, QuestionDAO questionDAO)
         {
             _lessonDAO = lessonDAO;
@@ -36,6 +38,7 @@ namespace final_project_be_Application.Repository
             _userlessonDAO = userlessonDAO;
             _userModuleDAO = userModuleDAO;
             _userAnswerDAO = userAnswerDAO;
+            _blobStorageService = blobStorageService;
             _mapper = mapper;
             _logger = logger;
             _moduleDAO = moduleDAO;
@@ -189,5 +192,21 @@ namespace final_project_be_Application.Repository
             }).ToList();
         }
 
+        public async Task<bool> UploadCertificateAndSaveLinkAsync(CertificateUploadDto dto)
+        {
+            var userCourse = await _usercourseDAO.GetCompletedUserCourseAsync(dto.UserId, dto.CourseId);
+            if (userCourse == null)
+                return false;
+
+            var fileName = $"certificates/User{dto.UserId}_Course{dto.CourseId}_{DateTime.UtcNow.Ticks}{Path.GetExtension(dto.CertificateFile.FileName)}";
+
+            using var stream = dto.CertificateFile.OpenReadStream();
+            await _blobStorageService.UploadFileAsync(fileName, stream);
+
+            var fileUrl = $"https://finalprojectbestorage.blob.core.windows.net/phronesisfiles/{fileName}";
+            await _usercourseDAO.UpdateCertificateLinkAsync(dto.UserId, dto.CourseId, fileUrl);
+
+            return true;
+        }
     }
 }

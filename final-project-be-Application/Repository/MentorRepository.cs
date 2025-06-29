@@ -298,5 +298,9 @@ namespace final_project_be_Application.Repository
                 return null;
             }
         }
+        public async Task<MentorbyCourseDto?> GetMentorByCourseIdAsync(int courseId)
+        {
+            return await _mentorDAO.GetMentorByCourseIdAsync(courseId);
+        }
     }
 }

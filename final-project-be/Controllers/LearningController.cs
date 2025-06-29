@@ -1,4 +1,5 @@
 ﻿using final_project_be_Application.Interface;
+using final_project_be_Domain.DTOs.Courses;
 using final_project_be_Domain.DTOs.LearnDto;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -80,6 +81,15 @@ namespace final_project_be.Controllers
             {
                 return StatusCode(500, new { error = ex.Message });
             }
+        }
+        [HttpPost("upload")]
+        public async Task<IActionResult> UploadCertificate([FromForm] CertificateUploadDto dto)
+        {
+            var success = await _learnrepository.UploadCertificateAndSaveLinkAsync(dto);
+            if (!success)
+                return BadRequest("Course is not completed or upload failed.");
+
+            return Ok("Certificate uploaded and link saved.");
         }
     }
 }
