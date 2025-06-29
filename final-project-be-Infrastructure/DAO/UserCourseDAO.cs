@@ -20,7 +20,22 @@ namespace final_project_be_Infrastructure.DAO
                 .Where(uc => uc.UserId == userId)
                 .ToListAsync();
         }
+        public async Task UpdateCertificateLinkAsync(Guid userId, int courseId, string link)
+        {
+            var userCourse = await _context.UserCourses
+                .FirstOrDefaultAsync(uc => uc.UserId == userId && uc.CourseId == courseId);
 
+            if (userCourse != null)
+            {
+                userCourse.CertificateLink = link;
+                await _context.SaveChangesAsync();
+            }
+        }
+        public async Task<UserCourse?> GetCompletedUserCourseAsync(Guid userId, int courseId)
+        {
+            return await _context.UserCourses
+                .FirstOrDefaultAsync(uc => uc.UserId == userId && uc.CourseId == courseId && uc.Status == "completed");
+        }
         public async Task AddUserCourseAsync(UserCourse userCourse)=> await _context.UserCourses.AddAsync(userCourse);
 
         public async Task UpdateUserCourse(UserCourse userCourse)

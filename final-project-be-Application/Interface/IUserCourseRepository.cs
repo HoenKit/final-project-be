@@ -16,6 +16,7 @@ namespace final_project_be_Application.Interface
         public Task<bool> DeleteUserCourse(int id);
         public Task<UserCourse> GetUserCourse(int id);
         public Task<UserCourse> UpdateUserCourse(CommentDto dto);
+
         public Task<List<UserCouponDto>> GetUserCoursesAsync(Guid userId);
     }
 }

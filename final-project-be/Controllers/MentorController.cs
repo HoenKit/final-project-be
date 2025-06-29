@@ -28,6 +28,16 @@ namespace final_project_be.Controllers
             return Ok(pagedNotifications);
         }
 
+        [HttpGet("by-course/{courseId}")]
+        public async Task<IActionResult> GetMentorByCourse(int courseId)
+        {
+            var mentor = await _mentorRepository.GetMentorByCourseIdAsync(courseId);
+            if (mentor == null)
+                return NotFound($"No mentor found for course ID {courseId}");
+
+            return Ok(mentor);
+        }
+
         // GET api/<NotificationController>/5
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id)
