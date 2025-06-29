@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using CloudinaryDotNet;
 using final_project_be_Application.Interface;
+using final_project_be_Application.Ultils;
 using final_project_be_Domain.DTOs.Courses;
 using final_project_be_Domain.DTOs.Lesson;
 using final_project_be_Domain.DTOs.Module;
@@ -20,14 +21,16 @@ namespace final_project_be_Application.Repository
 	{
 		private readonly ModuleDAO _moduleDAO;
 		private readonly UserModuleDAO _userModuleDAO;
+		private readonly Caculator _caculator;
         private readonly UserLessonDAO _userlessonDAO;
         private readonly IMapper _mapper;
 		private readonly ILogger<ModuleRepository> _logger;
-		
-		public ModuleRepository(ModuleDAO moduleDAO, IMapper mapper, ILogger<ModuleRepository> logger, UserLessonDAO userlessonDAO,UserModuleDAO userModuleDAO) : base(moduleDAO)
+
+		public ModuleRepository(ModuleDAO moduleDAO, IMapper mapper, ILogger<ModuleRepository> logger, UserLessonDAO userlessonDAO, UserModuleDAO userModuleDAO, Caculator caculator) : base(moduleDAO)
 		{
             _userlessonDAO = userlessonDAO;
 			_userModuleDAO = userModuleDAO;
+			_caculator = caculator;
             _moduleDAO = moduleDAO;
 			_mapper = mapper;
 			_logger = logger;
@@ -54,19 +57,21 @@ namespace final_project_be_Application.Repository
         public async Task<List<ModuleProgressDto>> GetModuleProgressByCourseAsync(Guid userId, int courseId)
         {
             var modules = await _moduleDAO.GetModulesWithLessonsByCourseIdAsync(courseId);
-            var userModules = await _userModuleDAO.GetUserModulesAsync(userId);
-            var userLessons = await _userlessonDAO.GetUserLessonsAsync(userId);
+            var result = new List<ModuleProgressDto>();
 
-            return modules.Select(module =>
+            foreach (var module in modules)
             {
-                var userModule = userModules.FirstOrDefault(um => um.ModuleId == module.ModuleId);
+                // ✅ Cập nhật lại % và trạng thái trong UserModule
+                float updatedPercentage = await _caculator.CalculateModuleProgress(userId, module.ModuleId);
 
-                return new ModuleProgressDto
+                var userLessons = await _userlessonDAO.GetUserLessonsByModuleAsync(userId, module.ModuleId);
+
+                var moduleDto = new ModuleProgressDto
                 {
                     ModuleId = module.ModuleId,
                     Title = module.Title,
-					Description = module.Description,
-                    Percentage = userModule?.Percentage ?? 0,
+                    Description = module.Description,
+                    Percentage = updatedPercentage,
                     Lessons = module.Lessons.Select(lesson =>
                     {
                         var userLesson = userLessons.FirstOrDefault(ul => ul.LessonId == lesson.LessonId);
@@ -78,7 +83,11 @@ namespace final_project_be_Application.Repository
                         };
                     }).ToList()
                 };
-            }).ToList();
+
+                result.Add(moduleDto);
+            }
+
+            return result;
         }
 
 

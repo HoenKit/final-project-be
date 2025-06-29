@@ -19,6 +19,13 @@ namespace final_project_be_Infrastructure.DAO
             return await _context.UserLessons
                 .FirstOrDefaultAsync(ul => ul.UserId == userId && ul.LessonId == lessonId);
         }
+        public async Task<List<UserLesson>> GetUserLessonsByModuleAsync(Guid userId, int moduleId)
+        {
+            return await _context.UserLessons
+                .Where(ul => ul.UserId == userId && ul.Lesson.ModuleId == moduleId)
+                .Include(ul => ul.Lesson)
+                .ToListAsync();
+        }
         public async Task DeleteUserLessonAsync(UserLesson entity)
         {
             _context.UserLessons.Remove(entity);
