@@ -3,7 +3,6 @@ using Azure;
 using ClosedXML.Excel;
 using DocumentFormat.OpenXml.Bibliography;
 using final_project_be_Application.Interface;
-using final_project_be_Application.Service.AimlService;
 using final_project_be_Application.Ultils;
 using final_project_be_Domain.DTOs.Answer;
 using final_project_be_Domain.DTOs.Question;
@@ -27,14 +26,14 @@ namespace final_project_be_Application.Repository
 		private readonly IMapper _mapper;
 		private readonly ILogger<QuestionRepository> _logger;
 		private readonly IAnswerRepository _answerRepository;
-		private readonly IAimlService _aimlService;
-		public QuestionRepository(QuestionDAO questionDAO, IMapper mapper, ILogger<QuestionRepository> logger, IAnswerRepository answerRepository, IAimlService aimlService) : base(questionDAO)
+		private readonly IOpenAIEmbeddingService _openAIService;
+		public QuestionRepository(QuestionDAO questionDAO, IMapper mapper, ILogger<QuestionRepository> logger, IAnswerRepository answerRepository, IOpenAIEmbeddingService openAIService) : base(questionDAO)
 		{
 			_questionDAO = questionDAO;
 			_mapper = mapper;
 			_logger = logger;
 			_answerRepository = answerRepository;
-			_aimlService = aimlService;
+			_openAIService = openAIService;
 		}
 
 		public async Task<Question> CreateQuestion(QuestionDto dto)
@@ -222,9 +221,9 @@ namespace final_project_be_Application.Repository
 			}
 		}
 
-		public async Task<bool> ImportQuizFromAI(string topic, int lessonId, int number)
-		{
-			var userPrompt = $@"
+        public async Task<bool> ImportQuizFromAI(string topic, int lessonId, int number)
+        {
+            var userPrompt = $@"
 Please generate exactly {number} multiple-choice questions on the topic '{topic}'.
 Each question should include a field 'QuestionType' with one of these values: 'SingleChoice' or 'MultipleChoice'.
 Return ONLY a valid JSON array with the following structure (no explanation, no extra text, no markdown):
@@ -242,75 +241,64 @@ Return ONLY a valid JSON array with the following structure (no explanation, no 
 ]
 ";
 
-			try
-			{
-				string rawResponse = await _aimlService.GetChatResponseAsync(userPrompt);
+            try
+            {
+                string rawResponse = await _openAIService.GetChatCompletionAsync(userPrompt);
 
-				// Handle wrapped code blocks if any
-				var jsonMatch = Regex.Match(rawResponse, @"```json\s*(.+?)\s*```", RegexOptions.Singleline);
-				string jsonToDeserialize = jsonMatch.Success ? jsonMatch.Groups[1].Value : rawResponse;
+                // Nếu OpenAI trả về có markdown thì bóc tách
+                var jsonMatch = Regex.Match(rawResponse, @"```json\s*(.+?)\s*```", RegexOptions.Singleline);
+                string jsonToDeserialize = jsonMatch.Success ? jsonMatch.Groups[1].Value : rawResponse;
 
-				jsonToDeserialize = Regex.Unescape(jsonToDeserialize);
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                var quizQuestions = JsonSerializer.Deserialize<List<QuizQuestion>>(jsonToDeserialize, options);
 
-				var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-				var quizQuestions = JsonSerializer.Deserialize<List<QuizQuestion>>(jsonToDeserialize, options);
+                if (quizQuestions == null || quizQuestions.Count == 0)
+                {
+                    _logger.LogWarning("AI response doesn't contain valid questions.");
+                    return false;
+                }
 
-				if (quizQuestions == null || quizQuestions.Count == 0)
-				{
-					_logger.LogWarning("AI response doesn't contain valid questions.");
-					return false;
-				}
+                foreach (var q in quizQuestions)
+                {
+                    var validTypes = new[] { "SingleChoice", "MultipleChoice" };
+                    if (!validTypes.Contains(q.QuestionType))
+                    {
+                        _logger.LogWarning($"Invalid QuestionType '{q.QuestionType}' for question: {q.QuestionText}");
+                        continue;
+                    }
 
-				foreach (var q in quizQuestions)
-				{
-					// Validate QuestionType
-					var validTypes = new[] { "SingleChoice", "MultipleChoice" };
-					if (!validTypes.Contains(q.QuestionType))
-					{
-						_logger.LogWarning($"Invalid QuestionType '{q.QuestionType}' for question: {q.QuestionText}");
-						continue;
-					}
+                    var questionDto = new QuestionDto
+                    {
+                        LessonId = lessonId,
+                        Question_text = q.QuestionText,
+                        QuestionType = q.QuestionType
+                    };
 
-					var questionDto = new QuestionDto
-					{
-						LessonId = lessonId,
-						Question_text = q.QuestionText,
-						QuestionType = q.QuestionType
-					};
+                    var question = await CreateQuestion(questionDto);
+                    if (question == null) continue;
 
-					var question = await CreateQuestion(questionDto);
-					if (question == null)
-					{
-						_logger.LogWarning($"Cannot create question: {q.QuestionText}");
-						continue;
-					}
+                    foreach (var ans in q.Answers)
+                    {
+                        var answerDto = new AnswerDto
+                        {
+                            QuestionId = question.QuestionId,
+                            Text = ans.Text,
+                            Is_correct = ans.IsCorrect
+                        };
 
-					foreach (var ans in q.Answers)
-					{
-						var answerDto = new AnswerDto
-						{
-							QuestionId = question.QuestionId,
-							Text = ans.Text,
-							Is_correct = ans.IsCorrect
-						};
+                        await _answerRepository.CreateAnswer(answerDto);
+                    }
+                }
 
-						var answer = await _answerRepository.CreateAnswer(answerDto);
-						if (answer == null)
-						{
-							_logger.LogWarning($"Cannot create answer: {ans.Text} for question {q.QuestionText}");
-						}
-					}
-				}
+                _logger.LogInformation("Import quiz from AI success.");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while importing quiz from AI");
+                return false;
+            }
+        }
 
-				_logger.LogInformation("Import quiz from AI success.");
-				return true;
-			}
-			catch (Exception ex)
-			{
-				_logger.LogError(ex, "Error while importing quiz from AI");
-				return false;
-			}
-		}
-
-	}
+    }
 }
