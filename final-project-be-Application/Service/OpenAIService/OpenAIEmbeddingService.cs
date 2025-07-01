@@ -22,6 +22,26 @@ namespace final_project_be_Application.Service.OpenAIService
             _apiKey = config["OpenAI:ApiKey"];
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _apiKey);
         }
+        public async Task<string> GetChatCompletionAsync(string prompt)
+        {
+            var request = new
+            {
+                model = "gpt-3.5-turbo",
+                messages = new[]
+                {
+                new { role = "user", content = prompt }
+            },
+                temperature = 0.7
+            };
+
+            var content = new StringContent(JsonConvert.SerializeObject(request), Encoding.UTF8, "application/json");
+            var response = await _httpClient.PostAsync("https://api.openai.com/v1/chat/completions", content);
+
+            response.EnsureSuccessStatusCode();
+            var json = await response.Content.ReadAsStringAsync();
+            dynamic result = JsonConvert.DeserializeObject(json);
+            return result.choices[0].message.content.ToString();
+        }
 
         public async Task<float[]> GetEmbeddingAsync(string input)
         {
