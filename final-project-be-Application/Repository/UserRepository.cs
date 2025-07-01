@@ -198,5 +198,48 @@ namespace final_project_be_Application.Repository
             }
         }
 
+        public async Task<string> GetUserProfileSummaryAsync(Guid userId)
+        {
+            var user = await _userDAO.GetAll()
+                .Include(u => u.UserMetaData)
+                .FirstOrDefaultAsync(u => u.UserId == userId);
+
+            if (user == null || user.UserMetaData == null)
+                return "Unknown user with no metadata";
+
+            var meta = user.UserMetaData;
+
+            var parts = new List<string>();
+
+            // Age
+            if (meta.Birthday.HasValue)
+            {
+                var age = DateTime.Today.Year - meta.Birthday.Value.Year;
+                if (meta.Birthday.Value > DateTime.Today.AddYears(-age)) age--;
+                parts.Add($"{age}-year-old");
+            }
+
+            // Nationality
+            if (!string.IsNullOrEmpty(meta.Nationality))
+                parts.Add(meta.Nationality);
+
+            // Level
+            if (!string.IsNullOrEmpty(meta.Level))
+                parts.Add(meta.Level.ToLower());
+
+            // Goals
+            if (!string.IsNullOrEmpty(meta.Goals))
+                parts.Add($"who wants to {meta.Goals.ToLower()}");
+
+            // Favourite Subject
+            if (!string.IsNullOrEmpty(meta.FavouriteSubject))
+                parts.Add($"and loves {meta.FavouriteSubject}");
+
+            var summary = string.Join(" ", parts);
+
+            return string.IsNullOrWhiteSpace(summary)
+                ? "User with unspecified profile"
+                : summary;
+        }
     }
 }

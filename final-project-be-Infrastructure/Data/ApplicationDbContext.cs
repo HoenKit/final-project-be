@@ -49,7 +49,8 @@ namespace final_project_be_Infrastructure.Data
 		public DbSet<ReportPost> reportPost { get; set; }
 		public DbSet<ReportUser> reportUser { get; set; }
 		public DbSet<UserMetadata> UserMetadata { get; set; }
-		public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+        public DbSet<CourseEmbedding> CourseEmbeddings { get; set; }
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
 			: base(options)
 		{
 		}

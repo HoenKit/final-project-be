@@ -43,28 +43,35 @@ namespace final_project_be_Tests
             return new ApplicationDbContext(options);
         }
 
-        private CourseRepository CreateRepository(ApplicationDbContext context, out Mock<IBlobStorageService> blobMock)
+        private CourseRepository CreateRepository(ApplicationDbContext context, out Mock<IBlobStorageService> blobMock, out Mock<IOpenAIEmbeddingService> openAIMock)
         {
             blobMock = new Mock<IBlobStorageService>();
             blobMock.Setup(x => x.UploadFileAsync(It.IsAny<string>(), It.IsAny<Stream>()))
                     .Returns(Task.CompletedTask);
             blobMock.Setup(x => x.DeleteFileIfExistsAsync(It.IsAny<string>()))
                     .Returns(Task.CompletedTask);
+            openAIMock = new Mock<IOpenAIEmbeddingService>();
+            openAIMock.Setup(x => x.GetEmbeddingAsync(It.IsAny<string>()))
+                    .ReturnsAsync(new float[] { 0.1f, 0.2f, 0.3f });
 
             var courseDao = new NoTransactionCourseDAO(context);
             var reviewDao = new NoTransactionReviewDAO(context);
             var userCourseDao = new NoTransactionUserCourseDAO(context);
 
             var lessonDao = new NoTransactionLessonDAO(context);
+            var courseEmbeddingDao = new NoTransactionCourseEmbeddingDAO(context);
             var moduleDao = new NoTransactionModuleDAO(context);
             var userModuleDao = new NoTransactionUserModuleDAO(context);
+            var userDao = new NoTransactionUserDAO(context);
 
             var loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
 
             var courseLogger = loggerFactory.CreateLogger<CourseRepository>();
+            var userLogger = loggerFactory.CreateLogger<UserRepository>();
             var calculatorLogger = loggerFactory.CreateLogger<Caculator>();
 
             var calculator = new Caculator(lessonDao, moduleDao, userCourseDao, userModuleDao);
+            var userRepository = new UserRepository(userDao, _mapper, userLogger);   
 
             return new CourseRepository(
                 courseDao,
@@ -73,7 +80,10 @@ namespace final_project_be_Tests
                 reviewDao,
                 _mapper,
                 courseLogger,
-                blobMock.Object
+                blobMock.Object,
+                courseEmbeddingDao,
+                openAIMock.Object,
+                userRepository
             );
         }
 
@@ -81,7 +91,7 @@ namespace final_project_be_Tests
         public async Task CreateCourse_ShouldAddCourse()
         {
             var context = GetInMemoryDbContext();
-            var repo = CreateRepository(context, out var blobMock);
+            var repo = CreateRepository(context, out var blobMock, out var openAIMock);
 
             var image = new FormFile(new MemoryStream(Encoding.UTF8.GetBytes("img")), 0, 3, "Image", "img.jpg");
 
@@ -111,7 +121,7 @@ namespace final_project_be_Tests
             context.Courses.Add(course);
             await context.SaveChangesAsync();
 
-            var repo = CreateRepository(context, out var _);
+            var repo = CreateRepository(context, out var blobMock, out var openAIMock);
             var result = await repo.ToggleIsDeleted(course.CourseId);
 
             Assert.True(result.IsDeleted);
@@ -125,7 +135,7 @@ namespace final_project_be_Tests
             context.Courses.Add(course);
             await context.SaveChangesAsync();
 
-            var repo = CreateRepository(context, out var _);
+            var repo = CreateRepository(context, out var blobMock, out var openAIMock);
             var result = await repo.ToggleStatus(course.CourseId, "Approved");
 
             Assert.Equal("Approved", result.Status);
@@ -139,7 +149,7 @@ namespace final_project_be_Tests
             context.Courses.Add(course);
             await context.SaveChangesAsync();
 
-            var repo = CreateRepository(context, out var blobMock);
+            var repo = CreateRepository(context, out var blobMock, out var openAIMock);
 
             var newImage = new FormFile(new MemoryStream(Encoding.UTF8.GetBytes("newimg")), 0, 6, "NewImage", "new.jpg");
 
@@ -169,7 +179,7 @@ namespace final_project_be_Tests
             );
             context.SaveChanges();
 
-            var repo = CreateRepository(context, out var _);
+            var repo = CreateRepository(context, out var blobMock, out var openAIMock);
 
             var result = repo.GetAllCourses(1, 10, null, null, null, null, null, null, null, null, null, null, null, new List<StatusEnum> { StatusEnum.Approved });
 
@@ -184,7 +194,7 @@ namespace final_project_be_Tests
             context.Courses.Add(course);
             await context.SaveChangesAsync();
 
-            var repository = CreateRepository(context, out var _);
+            var repository = CreateRepository(context, out var blobMock, out var openAIMock);
 
             var result = await repository.GetCourse(course.CourseId);
 

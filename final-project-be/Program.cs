@@ -5,6 +5,7 @@ using final_project_be_Application.Service.AimlService;
 using final_project_be_Application.Service.CloudinaryService;
 using final_project_be_Application.Service.EmailService;
 using final_project_be_Application.Service.Mapping;
+using final_project_be_Application.Service.OpenAIService;
 using final_project_be_Application.Ultils;
 using final_project_be_Infrastructure.DAO;
 using final_project_be_Infrastructure.Data;
@@ -100,6 +101,7 @@ builder.Services.AddScoped<UserModuleDAO>();
 builder.Services.AddScoped<UserScheduleDAO>();
 builder.Services.AddScoped<UserWorshopDAO>();
 builder.Services.AddScoped<WorkshopDAO>();
+builder.Services.AddScoped<CourseEmbeddingDAO>();
 // Config Repository
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
@@ -131,6 +133,7 @@ builder.Services.AddScoped<IScheduleRepository, ScheduleRepository>();
 //Config Service
 builder.Services.AddScoped<IBlobStorageService,BlobStorageService>();
 builder.Services.AddScoped<IAimlService, AimlService>();
+builder.Services.AddScoped<IOpenAIEmbeddingService, OpenAIEmbeddingService>();
 builder.Services.AddHttpClient<AimlService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddSingleton<ICloudinaryService,CloudinaryService>();
