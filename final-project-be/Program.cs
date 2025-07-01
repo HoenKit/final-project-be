@@ -1,7 +1,7 @@
-﻿using DocumentFormat.OpenXml.VariantTypes;
+﻿using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
+using DocumentFormat.OpenXml.VariantTypes;
 using final_project_be_Application.Interface;
 using final_project_be_Application.Repository;
-using final_project_be_Application.Service.AimlService;
 using final_project_be_Application.Service.CloudinaryService;
 using final_project_be_Application.Service.EmailService;
 using final_project_be_Application.Service.Mapping;
@@ -132,9 +132,9 @@ builder.Services.AddScoped<ICouponRepository, CouponRepository>();
 builder.Services.AddScoped<IScheduleRepository, ScheduleRepository>();
 //Config Service
 builder.Services.AddScoped<IBlobStorageService,BlobStorageService>();
-builder.Services.AddScoped<IAimlService, AimlService>();
 builder.Services.AddScoped<IOpenAIEmbeddingService, OpenAIEmbeddingService>();
-builder.Services.AddHttpClient<AimlService>();
+builder.Services.AddHttpClient<IOpenAIEmbeddingService, OpenAIEmbeddingService>();
+
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddSingleton<ICloudinaryService,CloudinaryService>();
 builder.Services.Configure<CloudinarySettings>(

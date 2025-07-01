@@ -9,5 +9,6 @@ namespace final_project_be_Application.Interface
     public interface IOpenAIEmbeddingService
     {
         public Task<float[]> GetEmbeddingAsync(string input);
+        public Task<string> GetChatCompletionAsync(string prompt);
     }
 }
