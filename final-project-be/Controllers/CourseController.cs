@@ -141,5 +141,16 @@ namespace final_project_be.Controllers
 
 		}
 
-	}
+        [HttpGet("recommend-course")]
+        public async Task<IActionResult> RecommendCourses([FromQuery] Guid userId)
+        {
+            if (userId == Guid.Empty)
+                return BadRequest("UserId is required.");
+
+            var recommendations = await _courseRepository.RecommendCoursesAsync(userId);
+
+            return Ok(recommendations);
+        }
+
+    }
 }

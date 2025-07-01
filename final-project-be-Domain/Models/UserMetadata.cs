@@ -17,6 +17,9 @@ namespace final_project_be_Domain.Models
         public string? Avatar { get; set; }
         public string? Address { get; set; }
         public string? Nationality { get; set; }
+        public string? Level { get; set; }
+        public string? Goals { get; set; }
+        public string? FavouriteSubject { get; set; }
         [JsonIgnore]
         public User? User { get; set; }
     }

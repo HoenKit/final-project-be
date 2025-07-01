@@ -13,6 +13,7 @@ namespace final_project_be_Domain.Models
         public string? Title { get; set; }
         public string? Description { get; set; }
         public bool IsPremium { get; set; } = false;
+        [JsonIgnore]
         public Courses? Courses { get; set; }
         [JsonIgnore]
         public ICollection<Lesson> Lessons { get; set; }

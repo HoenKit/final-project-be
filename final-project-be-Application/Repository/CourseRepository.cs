@@ -11,69 +11,89 @@ using Microsoft.EntityFrameworkCore;
 using final_project_be_Domain.DTOs.Comment;
 using final_project_be_Domain.DTOs.Mentor;
 using Azure;
+using DocumentFormat.OpenXml.InkML;
+using Newtonsoft.Json;
 
 namespace final_project_be_Application.Repository
 {
-	public class CourseRepository : Repository<Courses>, ICourseRepository
-	{
-		private readonly CourseDAO _courseDAO;
+    public class CourseRepository : Repository<Courses>, ICourseRepository
+    {
+        private readonly CourseEmbeddingDAO _courseEmbeddingDAO;
+        private readonly IOpenAIEmbeddingService _embeddingService;
+        private readonly CourseDAO _courseDAO;
         private readonly UserCourseDAO _userCourseDAO;
-		private readonly ReviewDAO _reviewDAO;
+        private readonly ReviewDAO _reviewDAO;
         private readonly Caculator _Caculator;
         private readonly IMapper _mapper;
-		private readonly ILogger<CourseRepository> _logger;
+        private readonly ILogger<CourseRepository> _logger;
         private readonly IBlobStorageService _blobStorageService;
- 
-		public CourseRepository(CourseDAO courseDAO, Caculator Caculator,UserCourseDAO userCourseDAO, ReviewDAO reviewDAO, IMapper mapper, ILogger<CourseRepository> logger, IBlobStorageService blobStorageService) : base(courseDAO)
+        private readonly IUserRepository _userRepository;
 
-		{
-			_courseDAO = courseDAO;
+        public CourseRepository(CourseDAO courseDAO, Caculator Caculator, UserCourseDAO userCourseDAO, ReviewDAO reviewDAO, IMapper mapper, ILogger<CourseRepository> logger, IBlobStorageService blobStorageService, CourseEmbeddingDAO courseEmbeddingDAO, IOpenAIEmbeddingService embeddingService, IUserRepository userRepository) : base(courseDAO)
+
+        {
+            _courseDAO = courseDAO;
             _Caculator = Caculator;
             _reviewDAO = reviewDAO;
             _userCourseDAO = userCourseDAO;
-			_mapper = mapper;
-			_logger = logger;
-			_blobStorageService = blobStorageService;
-		}
+            _mapper = mapper;
+            _logger = logger;
+            _blobStorageService = blobStorageService;
+            _courseEmbeddingDAO = courseEmbeddingDAO;
+            _embeddingService = embeddingService;
+            _userRepository = userRepository;
+        }
 
-		public async Task<Courses> CreateCourse(CourseDto dto)
-		{
-			try
-			{
-				await _courseDAO.BeginTransactionAsync();
-				var course = _mapper.Map<Courses>(dto);
-				if (dto.CoursesImage != null && dto.CoursesImage.Length > 0)
-				{
-					// Generate a unique filename using GUID
-					var fileExtension = Path.GetExtension(dto.CoursesImage.FileName);
-					var uniqueFileName = Guid.NewGuid().ToString() + fileExtension;
+        public async Task<Courses> CreateCourse(CourseDto dto)
+        {
+            try
+            {
+                await _courseDAO.BeginTransactionAsync();
+                var course = _mapper.Map<Courses>(dto);
+                if (dto.CoursesImage != null && dto.CoursesImage.Length > 0)
+                {
+                    // Generate a unique filename using GUID
+                    var fileExtension = Path.GetExtension(dto.CoursesImage.FileName);
+                    var uniqueFileName = Guid.NewGuid().ToString() + fileExtension;
 
-					// Upload to Azure Blob Storage
-					using (var stream = dto.CoursesImage.OpenReadStream())
-					{
-						await _blobStorageService.UploadFileAsync(uniqueFileName, stream);
-					}
+                    // Upload to Azure Blob Storage
+                    using (var stream = dto.CoursesImage.OpenReadStream())
+                    {
+                        await _blobStorageService.UploadFileAsync(uniqueFileName, stream);
+                    }
 
-					// Store the full URL in the database (UpdateAsync the blob URL with your storage account name)
-					course.CoursesImage = $"https://finalprojectbestorage.blob.core.windows.net/phronesisfiles/{uniqueFileName}";
-				}
-				course.CreateAt = DateTime.Now;
-				course.UpdateAt = DateTime.Now;
-				course.StudentCount = 0;
+                    // Store the full URL in the database (UpdateAsync the blob URL with your storage account name)
+                    course.CoursesImage = $"https://finalprojectbestorage.blob.core.windows.net/phronesisfiles/{uniqueFileName}";
+                }
+                course.CreateAt = DateTime.Now;
+                course.UpdateAt = DateTime.Now;
+                course.StudentCount = 0;
                 course.Status = "Not Completed";
-				await _courseDAO.AddAsync(course);
-				await _courseDAO.CommitTransactionAsync();
-				_logger.LogInformation("AddAsync Course success");
-				return course;
+                await _courseDAO.AddAsync(course);
 
-			}
-			catch (Exception ex)
-			{
-				await _courseDAO.RollbackTransactionAsync();
-				_logger.LogError(ex, "Error when adding Course");
-				return null;
-			}
-		}
+                if (!string.IsNullOrWhiteSpace(dto.CourseContent))
+                {
+                    var embedding = await _embeddingService.GetEmbeddingAsync(dto.CourseContent);
+                    var embeddingJson = JsonConvert.SerializeObject(embedding);
+
+                    await _courseEmbeddingDAO.AddAsync(new CourseEmbedding
+                    {
+                        CourseId = course.CourseId,
+                        EmbeddingJson = embeddingJson
+                    });
+                }
+                await _courseDAO.CommitTransactionAsync();
+                _logger.LogInformation("AddAsync Course success");
+                return course;
+
+            }
+            catch (Exception ex)
+            {
+                await _courseDAO.RollbackTransactionAsync();
+                _logger.LogError(ex, "Error when adding Course");
+                return null;
+            }
+        }
 
 
 
@@ -174,27 +194,28 @@ namespace final_project_be_Application.Repository
         }
 
         public async Task<CourseResponseDto> GetCourse(int id)
-		{
-			try{
-				await _courseDAO.BeginTransactionAsync();
+        {
+            try
+            {
+                await _courseDAO.BeginTransactionAsync();
 
-				var course = await _courseDAO.GetByIdAsync(id);
-				var courseDto = _mapper.Map<CourseResponseDto>(course);
-				courseDto.CountModule = course.Modules?.Count ?? 0;
-				courseDto.CountLesson = course.Modules?.Sum(m => m.Lessons?.Count ?? 0) ?? 0;
+                var course = await _courseDAO.GetByIdAsync(id);
+                var courseDto = _mapper.Map<CourseResponseDto>(course);
+                courseDto.CountModule = course.Modules?.Count ?? 0;
+                courseDto.CountLesson = course.Modules?.Sum(m => m.Lessons?.Count ?? 0) ?? 0;
 
-				await _courseDAO.CommitTransactionAsync();
+                await _courseDAO.CommitTransactionAsync();
 
-				_logger.LogInformation("Get course success");
-				return courseDto;
-			}
-			catch (Exception ex)
-			{
-				await _courseDAO.RollbackTransactionAsync();
-				_logger.LogError(ex, "Error when getting course");
-				return null;
-			}
-		}
+                _logger.LogInformation("Get course success");
+                return courseDto;
+            }
+            catch (Exception ex)
+            {
+                await _courseDAO.RollbackTransactionAsync();
+                _logger.LogError(ex, "Error when getting course");
+                return null;
+            }
+        }
 
         public async Task<List<UserCourseDto>> GetUserCoursesAsync(Guid userId)
         {
@@ -232,7 +253,7 @@ namespace final_project_be_Application.Repository
             {
                 // Gọi tính tiến độ để cập nhật lại dữ liệu mới nhất
                 await _Caculator.CalculateCourseCompletion(userId, uc.CourseId);
-                
+
                 // Nếu có truyền status thì lọc
                 if (string.IsNullOrEmpty(status) || string.Equals(uc.Status, status, StringComparison.OrdinalIgnoreCase))
                 {
@@ -253,35 +274,35 @@ namespace final_project_be_Application.Repository
         }
 
         public async Task<Courses> ToggleIsDeleted(int id)
-		{
-			try
-			{
-				await _courseDAO.BeginTransactionAsync();
+        {
+            try
+            {
+                await _courseDAO.BeginTransactionAsync();
 
-				var course = await _courseDAO.GetByIdAsync(id);
-				if (course == null)
-				{
-					_logger.LogWarning("Course not found with ID: {Id}", id);
-					await _courseDAO.RollbackTransactionAsync();
-					return null;
-				}
+                var course = await _courseDAO.GetByIdAsync(id);
+                if (course == null)
+                {
+                    _logger.LogWarning("Course not found with ID: {Id}", id);
+                    await _courseDAO.RollbackTransactionAsync();
+                    return null;
+                }
 
-				course.IsDeleted = !course.IsDeleted;
-				course.UpdateAt = DateTime.Now;
+                course.IsDeleted = !course.IsDeleted;
+                course.UpdateAt = DateTime.Now;
 
-				await _courseDAO.UpdateAsync(course);
-				await _courseDAO.CommitTransactionAsync();
+                await _courseDAO.UpdateAsync(course);
+                await _courseDAO.CommitTransactionAsync();
 
-				_logger.LogInformation("Toggle IsDeleted success for course ID: {Id}", id);
-				return course;
-			}
-			catch (Exception ex)
-			{
-				await _courseDAO.RollbackTransactionAsync();
-				_logger.LogError(ex, "Error when toggling IsDeleted for course ID: {Id}", id);
-				return null;
-			}
-		}
+                _logger.LogInformation("Toggle IsDeleted success for course ID: {Id}", id);
+                return course;
+            }
+            catch (Exception ex)
+            {
+                await _courseDAO.RollbackTransactionAsync();
+                _logger.LogError(ex, "Error when toggling IsDeleted for course ID: {Id}", id);
+                return null;
+            }
+        }
 
         public async Task<Courses> ToggleStatus(int id, string statuses)
         {
@@ -328,6 +349,28 @@ namespace final_project_be_Application.Repository
                     return null;
                 }
 
+                if (!string.IsNullOrWhiteSpace(dto.CourseContent)
+                  && !string.Equals(course.CourseContent?.Trim(), dto.CourseContent?.Trim(), StringComparison.InvariantCultureIgnoreCase))
+                {
+                    var embedding = await _embeddingService.GetEmbeddingAsync(dto.CourseContent);
+                    var embeddingJson = JsonConvert.SerializeObject(embedding);
+
+                    var existingEmbedding = await _courseEmbeddingDAO.GetByIdAsync(dto.CourseId);
+                    if (existingEmbedding != null)
+                    {
+                        existingEmbedding.EmbeddingJson = embeddingJson;
+                        await _courseEmbeddingDAO.UpdateAsync(existingEmbedding);
+                    }
+                    else
+                    {
+                        await _courseEmbeddingDAO.AddAsync(new CourseEmbedding
+                        {
+                            CourseId = dto.CourseId,
+                            EmbeddingJson = embeddingJson
+                        });
+                    }
+                }
+
                 string oldImageUrl = course.CoursesImage;
 
                 course.CourseName = dto.CourseName;
@@ -341,7 +384,6 @@ namespace final_project_be_Application.Repository
                 course.Level = dto.Level;
                 course.Language = dto.Language;
                 course.Requirement = dto.Requirement;
-
                 course.Status = "Pending";
 
                 if (dto.CoursesImage != null && dto.CoursesImage.Length > 0)
@@ -365,8 +407,11 @@ namespace final_project_be_Application.Repository
 
                 course.UpdateAt = DateTime.Now;
 
+              
+
                 await _courseDAO.UpdateAsync(course);
                 await _courseDAO.CommitTransactionAsync();
+
                 _logger.LogInformation("UpdateAsync Course success");
                 return course;
             }
@@ -376,6 +421,56 @@ namespace final_project_be_Application.Repository
                 _logger.LogError(ex, "Error when updating Course");
                 return null;
             }
+        }
+
+        public async Task<List<CourseRecommendationDto>> RecommendCoursesAsync(Guid userId)
+        {
+            var profile = await _userRepository.GetUserProfileSummaryAsync(userId);
+
+            var queryVector = await _embeddingService.GetEmbeddingAsync(profile);
+
+            var userCourses = await _userCourseDAO.GetUserCoursesByUserId(userId);
+            var learnedCourseIds = userCourses
+                .Where(uc => uc.Status == "Completed" || uc.Status == "Pending")
+                .Select(uc => uc.CourseId)
+                .ToList();
+
+            var learnedCategories = _courseDAO.GetAll()
+                .Where(c => learnedCourseIds.Contains(c.CourseId))
+                .Select(c => c.CategoryId)
+                .Distinct()
+                .ToList();
+
+            var courseEmbeddings = await _courseEmbeddingDAO.GetAllAsync();
+
+            // cosine similarity + weight if same category
+            var scoredCourses = courseEmbeddings
+                .Select(e =>
+                {
+                    var courseVector = JsonConvert.DeserializeObject<float[]>(e.EmbeddingJson);
+                    var similarity = _Caculator.CosineSimilarity(queryVector, courseVector);
+                    var isSameCategory = learnedCategories.Contains(e.Course.CategoryId);
+                    // plus 0.1 if same category
+                    var weightedScore = isSameCategory ? similarity + 0.1 : similarity; 
+
+                    return new
+                    {
+                        Course = e.Course,
+                        Score = weightedScore
+                    };
+                })
+                .OrderByDescending(x => x.Score)
+                .Take(5)
+                .Select(x => new CourseRecommendationDto
+                {
+                    CourseId = x.Course.CourseId,
+                    CourseName = x.Course.CourseName,
+                    Score = Math.Round(x.Score, 4), 
+                    Image = x.Course.CoursesImage
+                })
+                .ToList();
+
+            return scoredCourses;
         }
 
     }
