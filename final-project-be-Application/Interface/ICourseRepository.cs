@@ -14,6 +14,7 @@ namespace final_project_be_Application.Interface
 		public Task<List<UserCourseDto>> GetUserCoursesByStatusAsync(Guid userId, string? status);
         public Task<Courses> ToggleIsDeleted(int id);
 		public Task<Courses> ToggleStatus(int id, string statuses);
+		public Task<List<CourseRecommendationDto>> RecommendCoursesAsync(Guid userId);
 
     }
 }

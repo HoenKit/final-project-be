@@ -189,6 +189,20 @@ namespace final_project_be_Infrastructure.Data.Migrations
                     b.ToTable("courseCoupons");
                 });
 
+            modelBuilder.Entity("final_project_be_Domain.Models.CourseEmbedding", b =>
+                {
+                    b.Property<int>("CourseId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("EmbeddingJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("CourseId");
+
+                    b.ToTable("CourseEmbeddings");
+                });
+
             modelBuilder.Entity("final_project_be_Domain.Models.Courses", b =>
                 {
                     b.Property<int>("CourseId")
@@ -1135,6 +1149,9 @@ namespace final_project_be_Infrastructure.Data.Migrations
                     b.Property<DateTime?>("Birthday")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("FavouriteSubject")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -1142,8 +1159,14 @@ namespace final_project_be_Infrastructure.Data.Migrations
                     b.Property<string>("Gender")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Goals")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("LastName")
                         .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Level")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Nationality")
@@ -1337,6 +1360,17 @@ namespace final_project_be_Infrastructure.Data.Migrations
                     b.Navigation("Coupons");
 
                     b.Navigation("Courses");
+                });
+
+            modelBuilder.Entity("final_project_be_Domain.Models.CourseEmbedding", b =>
+                {
+                    b.HasOne("final_project_be_Domain.Models.Courses", "Course")
+                        .WithMany()
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Course");
                 });
 
             modelBuilder.Entity("final_project_be_Domain.Models.Courses", b =>

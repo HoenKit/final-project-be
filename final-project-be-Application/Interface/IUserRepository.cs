@@ -15,5 +15,6 @@ namespace final_project_be_Application.Interface
         public Task<User> UpdateUserProfileAsync(UserProfileDto dto);
         public List<MonthlyStatDto> GetUserStatisticsByMonth();
         public Task<User> UpdateUserPoint(decimal point, Guid userId);
+        public Task<string> GetUserProfileSummaryAsync(Guid userId);
     }
 }
