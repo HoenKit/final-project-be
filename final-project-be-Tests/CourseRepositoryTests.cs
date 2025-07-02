@@ -63,6 +63,7 @@ namespace final_project_be_Tests
             var moduleDao = new NoTransactionModuleDAO(context);
             var userModuleDao = new NoTransactionUserModuleDAO(context);
             var userDao = new NoTransactionUserDAO(context);
+            var userEmbeddingDao = new NoTransactionUserEmbeddingDAO(context);
 
             var loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
 
@@ -83,7 +84,8 @@ namespace final_project_be_Tests
                 blobMock.Object,
                 courseEmbeddingDao,
                 openAIMock.Object,
-                userRepository
+                userRepository,
+                userEmbeddingDao
             );
         }
 

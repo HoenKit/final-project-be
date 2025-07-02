@@ -28,8 +28,9 @@ namespace final_project_be_Application.Repository
         private readonly ILogger<CourseRepository> _logger;
         private readonly IBlobStorageService _blobStorageService;
         private readonly IUserRepository _userRepository;
+        private readonly UserEmbeddingDAO _userEmbeddingDAO;
 
-        public CourseRepository(CourseDAO courseDAO, Caculator Caculator, UserCourseDAO userCourseDAO, ReviewDAO reviewDAO, IMapper mapper, ILogger<CourseRepository> logger, IBlobStorageService blobStorageService, CourseEmbeddingDAO courseEmbeddingDAO, IOpenAIEmbeddingService embeddingService, IUserRepository userRepository) : base(courseDAO)
+        public CourseRepository(CourseDAO courseDAO, Caculator Caculator, UserCourseDAO userCourseDAO, ReviewDAO reviewDAO, IMapper mapper, ILogger<CourseRepository> logger, IBlobStorageService blobStorageService, CourseEmbeddingDAO courseEmbeddingDAO, IOpenAIEmbeddingService embeddingService, IUserRepository userRepository, UserEmbeddingDAO userEmbeddingDAO) : base(courseDAO)
 
         {
             _courseDAO = courseDAO;
@@ -42,6 +43,7 @@ namespace final_project_be_Application.Repository
             _courseEmbeddingDAO = courseEmbeddingDAO;
             _embeddingService = embeddingService;
             _userRepository = userRepository;
+            _userEmbeddingDAO = userEmbeddingDAO;
         }
 
         public async Task<Courses> CreateCourse(CourseDto dto)
@@ -407,7 +409,7 @@ namespace final_project_be_Application.Repository
 
                 course.UpdateAt = DateTime.Now;
 
-              
+
 
                 await _courseDAO.UpdateAsync(course);
                 await _courseDAO.CommitTransactionAsync();
@@ -425,9 +427,25 @@ namespace final_project_be_Application.Repository
 
         public async Task<List<CourseRecommendationDto>> RecommendCoursesAsync(Guid userId)
         {
-            var profile = await _userRepository.GetUserProfileSummaryAsync(userId);
+            var userEmbedding = await _userEmbeddingDAO.GetByIdAsync(userId);
+            float[] queryVector;
 
-            var queryVector = await _embeddingService.GetEmbeddingAsync(profile);
+            if (userEmbedding != null && (DateTime.UtcNow - userEmbedding.UpdatedAt).TotalDays < 30)
+            {
+                queryVector = JsonConvert.DeserializeObject<float[]>(userEmbedding.EmbeddingJson);
+            }
+            else
+            {
+                var profile = await _userRepository.GetUserProfileSummaryAsync(userId);
+                queryVector = await _embeddingService.GetEmbeddingAsync(profile);
+
+                await _userEmbeddingDAO.AddAsync(new UserEmbedding
+                {
+                    UserId = userId,
+                    EmbeddingJson = JsonConvert.SerializeObject(queryVector),
+                    UpdatedAt = DateTime.UtcNow
+                });
+            }
 
             var userCourses = await _userCourseDAO.GetUserCoursesByUserId(userId);
             var learnedCourseIds = userCourses
@@ -445,30 +463,31 @@ namespace final_project_be_Application.Repository
 
             // cosine similarity + weight if same category
             var scoredCourses = courseEmbeddings
-                .Select(e =>
-                {
-                    var courseVector = JsonConvert.DeserializeObject<float[]>(e.EmbeddingJson);
-                    var similarity = _Caculator.CosineSimilarity(queryVector, courseVector);
-                    var isSameCategory = learnedCategories.Contains(e.Course.CategoryId);
-                    // plus 0.1 if same category
-                    var weightedScore = isSameCategory ? similarity + 0.1 : similarity; 
+             .Where(e => !learnedCourseIds.Contains(e.Course.CourseId) &&
+              e.Course.Status == "Approved")
+             .Select(e =>
+             {
+                 var courseVector = JsonConvert.DeserializeObject<float[]>(e.EmbeddingJson);
+                 var similarity = _Caculator.CosineSimilarity(queryVector, courseVector);
+                 var isSameCategory = learnedCategories.Contains(e.Course.CategoryId);
+                 var weightedScore = isSameCategory ? similarity + 0.1 : similarity;
 
-                    return new
-                    {
-                        Course = e.Course,
-                        Score = weightedScore
-                    };
-                })
-                .OrderByDescending(x => x.Score)
-                .Take(5)
-                .Select(x => new CourseRecommendationDto
-                {
-                    CourseId = x.Course.CourseId,
-                    CourseName = x.Course.CourseName,
-                    Score = Math.Round(x.Score, 4), 
-                    Image = x.Course.CoursesImage
-                })
-                .ToList();
+                 return new
+                 {
+                     Course = e.Course,
+                     Score = weightedScore
+                 };
+             })
+             .OrderByDescending(x => x.Score)
+             .Take(5)
+             .Select(x => new CourseRecommendationDto
+             {
+                 CourseId = x.Course.CourseId,
+                 CourseName = x.Course.CourseName,
+                 Score = Math.Round(x.Score, 4),
+                 Image = x.Course.CoursesImage
+             })
+             .ToList();
 
             return scoredCourses;
         }
