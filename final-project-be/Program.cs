@@ -102,6 +102,7 @@ builder.Services.AddScoped<UserScheduleDAO>();
 builder.Services.AddScoped<UserWorshopDAO>();
 builder.Services.AddScoped<WorkshopDAO>();
 builder.Services.AddScoped<CourseEmbeddingDAO>();
+builder.Services.AddScoped<UserEmbeddingDAO>();
 // Config Repository
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();

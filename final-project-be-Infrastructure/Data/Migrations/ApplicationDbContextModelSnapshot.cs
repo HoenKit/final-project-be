@@ -1100,6 +1100,23 @@ namespace final_project_be_Infrastructure.Data.Migrations
                     b.ToTable("UserCourses");
                 });
 
+            modelBuilder.Entity("final_project_be_Domain.Models.UserEmbedding", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("EmbeddingJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("UserId");
+
+                    b.ToTable("UserEmbeddings");
+                });
+
             modelBuilder.Entity("final_project_be_Domain.Models.UserLesson", b =>
                 {
                     b.Property<int>("UserLessonId")
@@ -1804,6 +1821,17 @@ namespace final_project_be_Infrastructure.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Courses");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("final_project_be_Domain.Models.UserEmbedding", b =>
+                {
+                    b.HasOne("final_project_be_Domain.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("User");
                 });
