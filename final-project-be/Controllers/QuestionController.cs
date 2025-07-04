@@ -76,12 +76,12 @@ namespace final_project_be.Controllers
 		}
 
         [HttpPost("upload-excel")]
-        public async Task<IActionResult> UploadExcel([FromForm] IFormFile file, [FromForm] int lessonId)
+        public async Task<IActionResult> UploadExcel([FromForm] UploadExcelRequest request)
         {
-            if (file == null || file.Length == 0)
+            if (request.File == null || (request.File.Length == 0))
                 return BadRequest("Invalid file");
 
-            await _questionRepository.ImportQuestionsFromExcel(file, lessonId);
+            await _questionRepository.ImportQuestionsFromExcel(request.File, (request.LessonId));
             return Ok("Imported successfully");
         }
 
