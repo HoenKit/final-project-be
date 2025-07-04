@@ -464,7 +464,7 @@ namespace final_project_be_Application.Repository
             // cosine similarity + weight if same category
             var scoredCourses = courseEmbeddings
              .Where(e => !learnedCourseIds.Contains(e.Course.CourseId) &&
-              e.Course.Status == "Approved")
+              e.Course.Status == "Approved" && !e.Course.IsDeleted)
              .Select(e =>
              {
                  var courseVector = JsonConvert.DeserializeObject<float[]>(e.EmbeddingJson);
