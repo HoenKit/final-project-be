@@ -14,10 +14,12 @@ namespace final_project_be.Controllers
 	{
 		private readonly ICourseRepository _courseRepository;
 		private readonly ICloudinaryService _cloudinaryService;
-		public CourseController(ICourseRepository courseRepository, ICloudinaryService cloudinaryService)
+		private readonly IModuleRepository _moduleRepository;
+		public CourseController(ICourseRepository courseRepository, ICloudinaryService cloudinaryService, IModuleRepository moduleRepository)
 		{
 			_courseRepository = courseRepository;
 			_cloudinaryService = cloudinaryService;
+			_moduleRepository = moduleRepository;
 		}
 		// GET: api/<CourseController>
 		[HttpGet]
@@ -150,6 +152,18 @@ namespace final_project_be.Controllers
             var recommendations = await _courseRepository.RecommendCoursesAsync(userId);
 
             return Ok(recommendations);
+        }
+
+        [HttpPost("generate-structure/{courseId}")]
+        public async Task<IActionResult> GenerateCourseStructure(int courseId)
+        {
+            var success = await _moduleRepository.GenerateAndSaveModulesAsync(courseId);
+            if (!success)
+            {
+                return BadRequest("Could not generate modules and lessons for this course.");
+            }
+
+            return Ok(new { message = "Course structure generated successfully." });
         }
 
     }
