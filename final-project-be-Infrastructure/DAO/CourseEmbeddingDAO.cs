@@ -18,6 +18,11 @@ namespace final_project_be_Infrastructure.DAO
         }
         public Task<List<CourseEmbedding>> GetAllAsync() => _context.CourseEmbeddings
                 .Include(e => e.Course)
+                    .ThenInclude(c => c.Mentor)
+                            .ThenInclude(c => c.User)
+                                .ThenInclude(c => c.UserMetaData)
+                .Include(e => e.Course)
+                    .ThenInclude(c => c.Reviews.Where(r => !r.IsDeleted))
                 .ToListAsync();
         public Task<CourseEmbedding?> GetByIdAsync(int id) => _context.CourseEmbeddings.Include(e => e.Course).Where(c => c.CourseId == id).FirstOrDefaultAsync();
     }

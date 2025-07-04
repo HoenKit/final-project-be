@@ -1,34 +1,39 @@
 
 ﻿using AutoMapper;
-using final_project_be_Infrastructure.DAO;
-using final_project_be_Domain.Models;
-using final_project_be_Domain.DTOs.Users;
+using DocumentFormat.OpenXml.Spreadsheet;
 using final_project_be_Application.Interface;
+using final_project_be_Application.Service.EmailService;
+using final_project_be_Application.Ultils;
+using final_project_be_Domain.DTOs.Users;
+using final_project_be_Domain.Models;
+using final_project_be_Infrastructure.DAO;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
+using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
-using final_project_be_Application.Service.EmailService;
-using final_project_be_Application.Ultils;
-using Microsoft.Extensions.Options;
+using System.Text.Json;
 
 namespace final_project_be_Application.Repository
 {
 	public class UserAuthRepository : IUserAuthRepository
     {
         private readonly UserDAO _UserDAO;
+        private readonly IConfiguration _config;
         private readonly IMapper _mapper;
         private readonly ILogger<UserAuthRepository> _logger;
         private readonly IConfiguration _configuration;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IEmailService _emailService;
         private readonly ClientSettings _clientSettings;
-        public UserAuthRepository(UserDAO userDAO, IMapper mapper, ILogger<UserAuthRepository> logger, IConfiguration configuration, IHttpContextAccessor httpContextAccessor,IEmailService emailService, IOptions<ClientSettings> clientoptions)
+        private readonly GoogleSettings _googlesetting;
+        public UserAuthRepository(UserDAO userDAO, IMapper mapper, ILogger<UserAuthRepository> logger, IConfiguration configuration, IHttpContextAccessor httpContextAccessor, IEmailService emailService, IOptions<ClientSettings> clientoptions, IOptions<GoogleSettings> googlesetting)
         {
             _UserDAO = userDAO;
             _mapper = mapper;
@@ -37,6 +42,7 @@ namespace final_project_be_Application.Repository
             _httpContextAccessor = httpContextAccessor;
             _emailService = emailService;
             _clientSettings = clientoptions.Value;
+            _googlesetting = googlesetting.Value;
         }
 
         public async Task<LoginResultDto> LoginAsync(UserLoginDto dto)
@@ -110,6 +116,8 @@ namespace final_project_be_Application.Repository
                 };
             }
         }
+
+
 
         public async Task LogoutAsync()
         {
@@ -312,9 +320,95 @@ namespace final_project_be_Application.Repository
             await _emailService.SendEmailAsync(dto.Email, "Password reset request", body);
         }
 
+        public async Task<LoginResultDto> HandleGoogleLoginAsync(string code)
+        {
+            var clientId = _googlesetting.ClientId;
+            var clientSecret = _googlesetting.ClientSecret;
+            var redirectUri = _googlesetting.RedirectUri;
+
+            var httpClient = new HttpClient();
+
+            // 1. Get access_token from Google
+            var tokenResponse = await httpClient.PostAsync("https://oauth2.googleapis.com/token",
+                new FormUrlEncodedContent(new Dictionary<string, string>
+                {
+            {"code", code},
+            {"client_id", clientId},
+            {"client_secret", clientSecret},
+            {"redirect_uri", redirectUri},
+            {"grant_type", "authorization_code"}
+                }));
+
+            var tokenContent = await tokenResponse.Content.ReadAsStringAsync();
+            var tokenJson = JsonSerializer.Deserialize<JsonElement>(tokenContent);
+
+            var accessToken = tokenJson.GetProperty("access_token").GetString();
+
+            // 2. Get user info from Google
+            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            var userInfoJson = await httpClient.GetStringAsync("https://www.googleapis.com/oauth2/v2/userinfo");
+            var userInfo = JsonSerializer.Deserialize<JsonElement>(userInfoJson);
+
+            string email = userInfo.GetProperty("email").GetString();
+            var fullName = userInfo.GetProperty("name").GetString();
+            var nameParts = fullName?.Trim().Split(' ', 2);
+            string firstName = nameParts?.Length == 2 ? nameParts[0] : fullName;
+            string lastName = nameParts?.Length == 2 ? nameParts[1] : "";
+            string avatar = userInfo.GetProperty("picture").GetString();
+
+            // 3. Check if user exists
+            var existingUser = _UserDAO.GetUserbyEmail(email);
+            if (existingUser == null)
+            {
+                var newUser = new User
+                {
+                    UserId = Guid.NewGuid(),
+                    Email = email,
+                    Phone = "0000000000",
+                    Password = Guid.NewGuid().ToString(),
+                    IsConfirmed = true,
+                    IsPremium = false,
+                    IsBanned = false,
+                    CreateAt = DateTime.UtcNow
+                };
+                await _UserDAO.CreateUserAsync(newUser);
+                var metadata = new UserMetadata
+                {
+                    UserId = newUser.UserId,
+                    FirstName = firstName,
+                    LastName = lastName,
+                    Avatar = avatar,
+                    Gender = "Other",
+                };
+                await _UserDAO.AddUserMetaData(metadata);
+
+                var defaultRole = await _UserDAO.GetRoleByNameAsync("User");
+                if (defaultRole != null)
+                {
+                    var userRole = new UserRole
+                    {
+                        UserId = newUser.UserId,
+                        RoleId = defaultRole.RoleId
+                    };
+                    await _UserDAO.AddUserRoleAsync(userRole);
+                }
+
+                existingUser = newUser;
+            }
+
+            // 4. Generate token
+            var token = GenerateToken(existingUser);
+
+            return new LoginResultDto
+            {
+                Success = true,
+                Token = token
+            };
+        }
 
 
-         public string ValidateResetToken(string token)
+
+        public string ValidateResetToken(string token)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.UTF8.GetBytes(_configuration["Jwt:SecretKey"]);

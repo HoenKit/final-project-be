@@ -464,7 +464,7 @@ namespace final_project_be_Application.Repository
             // cosine similarity + weight if same category
             var scoredCourses = courseEmbeddings
              .Where(e => !learnedCourseIds.Contains(e.Course.CourseId) &&
-              e.Course.Status == "Approved")
+              e.Course.Status == "Approved" && !e.Course.IsDeleted)
              .Select(e =>
              {
                  var courseVector = JsonConvert.DeserializeObject<float[]>(e.EmbeddingJson);
@@ -485,7 +485,25 @@ namespace final_project_be_Application.Repository
                  CourseId = x.Course.CourseId,
                  CourseName = x.Course.CourseName,
                  Score = Math.Round(x.Score, 4),
-                 Image = x.Course.CoursesImage
+                 CoursesImage = x.Course.CoursesImage,
+                 CourseContent = x.Course.CourseContent,
+                 Cost = x.Course.Cost,
+                 SkillLearn = x.Course.SkillLearn,
+                 Requirement = x.Course.Requirement,
+                 IntendedLearner = x.Course.IntendedLearner,
+                 Language = x.Course.Language,
+                 Level = x.Course.Level,
+                 CourseLength = x.Course.CourseLength,
+                 Status = x.Course.Status,
+                 CreateAt = x.Course.CreateAt,
+                 StudentCount = x.Course.StudentCount,
+                 Mentor = new MentorDto
+                 {
+                     FirstName = x.Course.Mentor.User.UserMetaData.FirstName,
+                     LastName = x.Course.Mentor.User.UserMetaData.LastName
+                 },
+                 AverageRating = x.Course.Reviews.Any() ? Math.Round(x.Course.Reviews.Average(r => r.Rate), 1) : 0,
+                 TotalReviews = x.Course.Reviews.Count(),
              })
              .ToList();
 

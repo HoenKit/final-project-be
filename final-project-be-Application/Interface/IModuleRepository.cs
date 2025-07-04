@@ -18,5 +18,8 @@ namespace final_project_be_Application.Interface
 		public Task<Module> UpdateModule(UpdateModuleDto dto);
 		public Task<List<ModuleProgressDto>> GetModuleProgressByCourseAsync(Guid userId, int courseId);
         public Task<ICollection<ModuleResponseDto>> GetAllModulesByCourseId(int courseId);
-	}
+		public Task<bool> GenerateAndSaveModulesAsync(int courseId);
+		public Task<List<AIGeneratedModule>> GenerateModulesAndLessonsFromDescriptionAsync(string courseDescription);
+
+    }
 }

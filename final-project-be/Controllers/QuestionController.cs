@@ -75,17 +75,17 @@ namespace final_project_be.Controllers
 			return Ok();
 		}
 
-		[HttpPost("upload-excel")]
-		public async Task<IActionResult> UploadExcel(IFormFile file, int lessonId)
-		{
-			if (file == null || file.Length == 0)
-				return BadRequest("Invalid file");
+        [HttpPost("upload-excel")]
+        public async Task<IActionResult> UploadExcel([FromForm] UploadExcelRequest request)
+        {
+            if (request.File == null || (request.File.Length == 0))
+                return BadRequest("Invalid file");
 
-			await _questionRepository.ImportQuestionsFromExcel(file, lessonId);
-			return Ok("Imported successfully");
-		}
+            await _questionRepository.ImportQuestionsFromExcel(request.File, (request.LessonId));
+            return Ok("Imported successfully");
+        }
 
-		[HttpPost("import-AI")]
+        [HttpPost("import-AI")]
 		public async Task<IActionResult> ImportQuizFromAI([FromBody] QuizImportRequest request)
 		{
 			if (string.IsNullOrWhiteSpace(request.Topic) || request.LessonId <= 0)
