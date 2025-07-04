@@ -1,4 +1,6 @@
-﻿namespace final_project_be_Domain.DTOs.Users
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace final_project_be_Domain.DTOs.Users
 {
 	public class UserProfileDto
 	{
@@ -11,5 +13,9 @@
 		public string Gender { get; set; }
 		public string Address { get; set; }
 		public string Avatar { get; set; }
-	}
+        public string? Nationality { get; set; }
+        public string? Level { get; set; }
+        public string? Goals { get; set; }
+        public string? FavouriteSubject { get; set; }
+    }
 }
