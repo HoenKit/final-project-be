@@ -6,6 +6,7 @@ using final_project_be_Domain.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using NuGet.Common;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
@@ -18,10 +19,14 @@ namespace final_project_be.Controllers
     {
         private readonly IUserAuthRepository _userAuthRepository;
         private readonly Validate _validate;
-        public AuthController(IUserAuthRepository userAuthRepository, Validate validate)
+        private readonly GoogleSettings _google;
+        private readonly ClientSettings _clientSettings;
+        public AuthController(IUserAuthRepository userAuthRepository, Validate validate, IOptions<GoogleSettings> googleOptions, IOptions<ClientSettings> clientSettings)
         {
             _userAuthRepository = userAuthRepository;
             _validate = validate;
+            _google = googleOptions.Value;
+            _clientSettings = clientSettings.Value;
         }
 
         [HttpPost("Register")]
@@ -29,6 +34,58 @@ namespace final_project_be.Controllers
             if (!ModelState.IsValid) return BadRequest(ModelState);
             var user = await _userAuthRepository.RegisterAsync(registerDto);
             return Ok("Register Success");
+        }
+
+        [HttpGet("google-login")]
+        public IActionResult GoogleLogin()
+        {
+            var clientId = _google.ClientId;
+            var redirectUri = _google.RedirectUri;
+
+            var url = $"https://accounts.google.com/o/oauth2/v2/auth" +
+                      $"?client_id={clientId}" +
+                      $"&redirect_uri={redirectUri}" +
+                      $"&response_type=code" +
+                      $"&scope=openid%20email%20profile"+
+                      $"&prompt=consent select_account";
+
+            return Ok(new { url });
+        }
+
+
+        [HttpGet("google-callback")]
+        public async Task<IActionResult> GoogleCallback([FromQuery] string? code, [FromQuery] string? error)
+        {
+            if (!string.IsNullOrEmpty(error))
+            {
+                var redirectFrontend = _clientSettings.BaseUrl;
+                return Redirect($"{redirectFrontend}Login"); 
+            }
+
+            if (string.IsNullOrEmpty(code))
+            {
+                return BadRequest(new { message = "Missing code from Google." });
+            }
+
+            var loginResult = await _userAuthRepository.HandleGoogleLoginAsync(code);
+
+            if (!loginResult.Success)
+            {
+                return BadRequest(new { message = loginResult.ErrorMessage });
+            }
+
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = false,
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTime.UtcNow.AddDays(1),
+
+            };
+            Response.Cookies.Append("AccessToken", loginResult.Token, cookieOptions);
+
+            var redirectSuccess = _clientSettings.BaseUrl;
+            return Redirect($"{redirectSuccess}Login?redirectTo=Index");
         }
 
         [HttpPost("Login")]

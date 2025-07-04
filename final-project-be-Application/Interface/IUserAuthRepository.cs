@@ -14,6 +14,7 @@ namespace final_project_be_Application.Interface
         public Task ForgotPasswordAsync(ForgotpasswordDto dto);
         public Task ResetPasswordAsync(string Token, ResetPasswordDto Request);
         public string ValidateResetToken(string token);
+        public Task<LoginResultDto> HandleGoogleLoginAsync(string code);
         public Task LogoutAsync();
     }
 }
