@@ -40,47 +40,6 @@ namespace final_project_be.Controllers
             return Ok(pagedComments);
         }
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> Get(Guid id)
-        {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-
-            var user = await _userRepository.GetUserandUserMetadata(id);
-
-            if (user == null)
-            {
-                return NotFound($"User with ID {id} not found.");
-            }
-
-            var userDto = new UserManagerDto
-            {
-                UserId = user.UserId,
-                Email = user.Email,
-                Phone = user.Phone,
-                Password = user.Password,
-                Point = user.Point,
-                IsBanned = user.IsBanned,
-                CreateAt = user.CreateAt,
-                UpdateAt = user.UpdateAt,
-				UserMetaData = user.UserMetaData != null
-                    ? new UserProfileDto
-                    {
-                        UserId = user.UserId,
-                        Email = user.Email,
-                        Phone = user.Phone,
-                        FirstName = user.UserMetaData.FirstName,
-                        LastName = user.UserMetaData.LastName,
-                        Birthday = user.UserMetaData.Birthday,
-                        Gender = user.UserMetaData.Gender,
-                        Address = user.UserMetaData.Address,
-						Avatar = user.UserMetaData.Avatar
-					}
-                    : null
-            };
-
-            return Ok(userDto);
-        }
-
         [HttpGet("GetUserById/{id}")]
         public async Task<IActionResult> GetUserId(Guid id)
         {
