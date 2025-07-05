@@ -85,7 +85,7 @@ namespace final_project_be.Controllers
             Response.Cookies.Append("AccessToken", loginResult.Token, cookieOptions);
 
             var redirectSuccess = _clientSettings.BaseUrl;
-            return Redirect($"{redirectSuccess}Login?redirectTo=RecommendQuestion");
+            return Redirect($"{redirectSuccess}Login?redirectTo=Index");
         }
 
         [HttpPost("Login")]
