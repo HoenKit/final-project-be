@@ -30,6 +30,10 @@ namespace final_project_be_Infrastructure.DAO
             _context.userRoles.AddAsync(userRole);
             await _context.SaveChangesAsync();
         }
+        public async Task<UserMetadata?> GetByUserIdAsync(Guid userId)
+        {
+            return await _context.UserMetadata.FirstOrDefaultAsync(u => u.UserId == userId);
+        }
         public async Task AddRoleAsync(Role role) => await _context.roles.AddAsync(role);
         public async Task AddUserMetaData(UserMetadata userMetadata) => await _context.UserMetadata.AddAsync(userMetadata);
         public async Task<UserMetadata> GetUserMetadatabyId(Guid UserId) => await _context.UserMetadata.Include(u => u.User).FirstOrDefaultAsync(u => u.UserId == UserId);
@@ -39,6 +43,7 @@ namespace final_project_be_Infrastructure.DAO
             _context.UserMetadata.Update(user);
             await _context.SaveChangesAsync();
         }
+
         public async Task CreateUserAsync(User user)
         {
             _context.users.Add(user);

@@ -16,5 +16,7 @@ namespace final_project_be_Application.Interface
         public List<MonthlyStatDto> GetUserStatisticsByMonth();
         public Task<User> UpdateUserPoint(decimal point, Guid userId);
         public Task<string> GetUserProfileSummaryAsync(Guid userId);
+        public Task<bool> UpdateMetadataAsync(Guid userId, UpdateUserMetadataDto dto);
+        public Task<UserMetadata?> GetMetadataByUserIdAsync(Guid userId);
     }
 }

@@ -1,13 +1,14 @@
 ﻿using AutoMapper;
+using DocumentFormat.OpenXml.Spreadsheet;
+using final_project_be_Application.Interface;
+using final_project_be_Domain.DTOs;
+using final_project_be_Domain.DTOs.Comment;
+using final_project_be_Domain.DTOs.Users;
+using final_project_be_Domain.Models;
 using final_project_be_Infrastructure.DAO;
 using final_project_be_Infrastructure.Data;
-using final_project_be_Domain.Models;
-using final_project_be_Domain.DTOs.Comment;
-using final_project_be_Domain.DTOs;
-using final_project_be_Domain.DTOs.Users;
-using final_project_be_Application.Interface;
-using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace final_project_be_Application.Repository
 {
@@ -198,6 +199,32 @@ namespace final_project_be_Application.Repository
             }
         }
 
+        public async Task<bool> UpdateMetadataAsync(Guid userId, UpdateUserMetadataDto dto)
+        {
+            var metadata = await _userDAO.GetByUserIdAsync(userId);
+            if (metadata == null) return false;
+
+            // Gán lại các field
+            metadata.FirstName = dto.FirstName;
+            metadata.LastName = dto.LastName;
+            metadata.Birthday = dto.Birthday;
+            metadata.Gender = dto.Gender;
+            metadata.Avatar = dto.Avatar;
+            metadata.Address = dto.Address;
+            metadata.Nationality = dto.Nationality;
+            metadata.Level = dto.Level;
+            metadata.Goals = dto.Goals;
+            metadata.FavouriteSubject = dto.FavouriteSubject;
+
+            await _userDAO.UpdateUserMetadataAsync(metadata);
+            return true;
+        }
+
+        public async Task<UserMetadata?> GetMetadataByUserIdAsync(Guid userId)
+        {
+            return await _userDAO.GetByUserIdAsync(userId);
+        }
+
         public async Task<string> GetUserProfileSummaryAsync(Guid userId)
         {
             var user = await _userDAO.GetAll()
@@ -241,5 +268,6 @@ namespace final_project_be_Application.Repository
                 ? "User with unspecified profile"
                 : summary;
         }
+
     }
 }
