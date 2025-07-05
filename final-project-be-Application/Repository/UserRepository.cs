@@ -205,16 +205,16 @@ namespace final_project_be_Application.Repository
             if (metadata == null) return false;
 
             // Gán lại các field
-            metadata.FirstName = dto.FirstName;
-            metadata.LastName = dto.LastName;
-            metadata.Birthday = dto.Birthday;
-            metadata.Gender = dto.Gender;
-            metadata.Avatar = dto.Avatar;
-            metadata.Address = dto.Address;
-            metadata.Nationality = dto.Nationality;
-            metadata.Level = dto.Level;
-            metadata.Goals = dto.Goals;
-            metadata.FavouriteSubject = dto.FavouriteSubject;
+            metadata.FirstName = dto.FirstName ?? metadata.FirstName;
+            metadata.LastName = dto.LastName ?? metadata.LastName;
+            metadata.Birthday = dto.Birthday ?? metadata.Birthday;
+            metadata.Gender = dto.Gender ?? metadata.Gender;
+            metadata.Avatar = dto.Avatar ?? metadata.Avatar;
+            metadata.Address = dto.Address ?? metadata.Address;
+            metadata.Nationality = dto.Nationality ?? metadata.Nationality;
+            metadata.Level = dto.Level ?? metadata.Level;
+            metadata.Goals = dto.Goals ?? metadata.Goals;
+            metadata.FavouriteSubject = dto.FavouriteSubject ?? metadata.FavouriteSubject;
 
             await _userDAO.UpdateUserMetadataAsync(metadata);
             return true;
