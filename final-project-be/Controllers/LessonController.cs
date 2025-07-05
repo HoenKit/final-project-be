@@ -17,7 +17,7 @@ namespace final_project_be.Controllers
 			_lessonRepository = lessonRepository;
 		}
 		// GET: api/<LessonController>
-		[HttpGet("get-all-leson-by-module/{moduleId}")]
+		[HttpGet("get-all-lesson-by-module/{moduleId}")]
 		public async Task<IActionResult> GetAllLessonByModuleId(int moduleId)
 		{
 			var lessons = await _lessonRepository.GetAllLessonByModuleId(moduleId);
