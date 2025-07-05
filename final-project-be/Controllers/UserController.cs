@@ -1,10 +1,11 @@
-﻿using final_project_be_Domain.DTOs.Comment;
-using final_project_be_Domain.DTOs.Users;
-using final_project_be_Application.Interface;
+﻿using final_project_be_Application.Interface;
 using final_project_be_Application.Repository;
+using final_project_be_Domain.DTOs.Comment;
+using final_project_be_Domain.DTOs.Users;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using NuGet.Protocol.Core.Types;
 
 namespace final_project_be.Controllers
 {
@@ -61,6 +62,17 @@ namespace final_project_be.Controllers
             await _userRepository.UpdateUser(usermanagerDto);
             return Ok(usermanagerDto);
         }
+
+        [HttpPut("update/{userId}")]
+        public async Task<IActionResult> Update(Guid userId, [FromBody] UpdateUserMetadataDto dto)
+        {
+            bool success = await _userRepository.UpdateMetadataAsync(userId, dto);
+            if (!success)
+                return NotFound(new { message = "User metadata not found" });
+
+            return Ok(new { message = "User metadata updated successfully" });
+        }
+
 
         [HttpPut("update-user-point")]
         public async Task<IActionResult> UpdateUserPoint(decimal point, Guid userId)
