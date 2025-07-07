@@ -78,8 +78,8 @@ namespace final_project_be.Controllers
             {
                 HttpOnly = false,
                 Secure = true,
-                SameSite = SameSiteMode.Strict,
-                Expires = DateTime.UtcNow.AddDays(1),
+                SameSite = SameSiteMode.None,
+                Expires = DateTime.UtcNow.AddDays(3),
 
             };
             Response.Cookies.Append("AccessToken", loginResult.Token, cookieOptions);
