@@ -78,6 +78,7 @@ namespace final_project_be.Controllers
                 HttpOnly = false,
                 Secure = true,
                 SameSite = SameSiteMode.None,
+                Domain = ".azurewebsites.net",
                 Expires = DateTime.UtcNow.AddDays(3),
             };
 
