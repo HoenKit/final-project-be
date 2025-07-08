@@ -16,5 +16,6 @@ namespace final_project_be_Application.Interface
         public Task<Post> ToggleIsDeleted(int id);
         public List<MonthlyStatDto> GetPostStatisticsByMonth();
         public PageResult<PostDto> GetAllPostsIsDeleted(int page, int pageSize, int? CategoryId, string? title, Guid? userId);
+        public Task<PostDetailDto> GetPostv2(int id);
     }
 }
