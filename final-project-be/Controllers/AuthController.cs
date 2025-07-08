@@ -73,29 +73,7 @@ namespace final_project_be.Controllers
                 return BadRequest(new { message = loginResult.ErrorMessage });
             }
 
-            var cookieOptions = new CookieOptions
-            {
-                HttpOnly = false,
-                Secure = true,
-                SameSite = SameSiteMode.None,
-                Domain = ".azurewebsites.net",
-                Expires = DateTime.UtcNow.AddDays(3),
-            };
-
-            Response.Cookies.Append("AccessToken", loginResult.Token, cookieOptions);
-
-            var redirectSuccess = _clientSettings.BaseUrl;
-            var html = $@"
-            <html>
-            <head>
-                <script>
-                    window.location.href = '{redirectSuccess}Login?redirectTo=Index';
-                </script>
-            </head>
-            <body>Redirecting...</body>
-            </html>";
-
-            return Content(html, "text/html");
+            return Ok(loginResult.Token);
         }
 
 
