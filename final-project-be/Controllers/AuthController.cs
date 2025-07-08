@@ -58,8 +58,7 @@ namespace final_project_be.Controllers
         {
             if (!string.IsNullOrEmpty(error))
             {
-                var redirectFrontend = _clientSettings.BaseUrl;
-                return Redirect($"{redirectFrontend}Login"); 
+                return Content("<script>window.location.href='https://phronesis-fe-esd4fvddb4d8cnc4.eastasia-01.azurewebsites.net/Login';</script>", "text/html");
             }
 
             if (string.IsNullOrEmpty(code))
@@ -80,17 +79,24 @@ namespace final_project_be.Controllers
                 Secure = true,
                 SameSite = SameSiteMode.None,
                 Expires = DateTime.UtcNow.AddDays(3),
-
             };
+
             Response.Cookies.Append("AccessToken", loginResult.Token, cookieOptions);
 
             var redirectSuccess = _clientSettings.BaseUrl;
-            return Ok(new
-            {
-                tokenSet = true,
-                redirectTo = $"{redirectSuccess}Login?redirectTo=Index"
-            });
+            var html = $@"
+            <html>
+            <head>
+                <script>
+                    window.location.href = '{redirectSuccess}Login?redirectTo=Index';
+                </script>
+            </head>
+            <body>Redirecting...</body>
+            </html>";
+
+            return Content(html, "text/html");
         }
+
 
         [HttpPost("Login")]
         public async Task<ActionResult<string>> Login(UserLoginDto loginDto)
