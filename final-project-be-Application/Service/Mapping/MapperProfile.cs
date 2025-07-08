@@ -74,6 +74,7 @@ namespace final_project_be_Application.Service.Mapping
             CreateMap<Transaction, TransactionDto>().ReverseMap();
 			CreateMap<Schedule, ScheduleDto>().ReverseMap();
             CreateMap<Transaction, GetTransactionDto>().ReverseMap();
+            CreateMap<Post, PostDetailDto>().ReverseMap();
         }
 	}
 }
