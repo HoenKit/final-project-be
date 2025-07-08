@@ -6,6 +6,7 @@ using final_project_be_Application.Ultils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using final_project_be_Application.Repository;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -68,6 +69,16 @@ namespace final_project_be.Controllers
             if (!ModelState.IsValid) return BadRequest(ModelState);
             await _commentRepository.DeleteComment(id);
             return Ok();
+        }
+
+        [HttpGet("GetAllComments")]
+        public IActionResult GetAll(int? page, int? pageSize)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            int currentSize = pageSize ?? 100;
+            int currentPage = page ?? 1;
+            var pagedComments = _commentRepository.GetAllComments(currentPage, currentSize);
+            return Ok(pagedComments);
         }
     }
 }
