@@ -7,6 +7,7 @@ using final_project_be_Domain.DTOs.Comment;
 using final_project_be_Application.Interface;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using Microsoft.Extensions.Logging;
+using final_project_be_Domain.DTOs.Users;
 
 namespace final_project_be_Application.Repository
 {
@@ -123,5 +124,26 @@ namespace final_project_be_Application.Repository
 				return null;
 			}
 		}
-	}
+
+        public PageResult<Comment> GetAllComments(int page, int pageSize)
+        {
+            try
+            {
+                var totalCount = _commentDAO.GetAll().Count();
+                var comments = _commentDAO.GetAll()
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToList();
+
+                _logger.LogInformation("Get comments success");
+
+                return new PageResult<Comment>(comments, totalCount, page, pageSize);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error when getting comments");
+                return new PageResult<Comment>(new List<Comment>(), 0, page, pageSize);
+            }
+        }
+    }
 }

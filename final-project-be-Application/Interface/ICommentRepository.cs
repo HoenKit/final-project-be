@@ -11,5 +11,6 @@ namespace final_project_be_Application.Interface
         public Task<Comment> GetComment(int id);
         public Task<Comment> UpdateComment(CommentDto dto);
         public PageResult<Comment> GetAllCommentsByPostId(int page, int pageSize, int postId);
+        public PageResult<Comment> GetAllComments(int page, int pageSize);
     }
 }

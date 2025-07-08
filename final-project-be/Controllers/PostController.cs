@@ -87,5 +87,12 @@ namespace final_project_be.Controllers
             var pagedPosts = _postRepository.GetAllPostsIsDeleted(currentPage, 5, CategoryId, title, userId);
             return Ok(pagedPosts);
         }
+
+        [HttpGet("GetDetail/{id}")]
+        public async Task<IActionResult> GetDetail(int id)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            return Ok(await _postRepository.GetPostv2(id));
+        }
     }
 }

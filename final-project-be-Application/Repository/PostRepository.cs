@@ -360,5 +360,73 @@ namespace final_project_be_Application.Repository
                 return new PageResult<PostDto>(new List<PostDto>(), 0, page, pageSize);
             }
         }
+
+        public async Task<PostDetailDto> GetPostv2(int id)
+        {
+            try
+            {
+                await _postDAO.BeginTransactionAsync();
+
+                var post = _postDAO.GetAll()
+                    .Include(p => p.User)
+                        .ThenInclude(u => u.UserMetaData)
+                    .Include(p => p.PostFiles)
+                    .Include(p => p.Comments)
+                        .ThenInclude(c => c.User)
+                        .ThenInclude(u => u.UserMetaData)
+                    .Include(p => p.Category)
+                    .FirstOrDefault(p => p.PostId == id);
+
+                if (post == null)
+                {
+                    return null;
+                }
+
+                var postDetailDto = new PostDetailDto
+                {
+                    PostId = post.PostId,
+                    UserId = post.UserId,
+                    FirstName = post.User?.UserMetaData.FirstName,
+                    LastName = post.User?.UserMetaData.LastName,
+                    Avatar = post.User?.UserMetaData.Avatar,
+                    ParentPostId = post.ParentPostId,
+                    CategoryName = post.Category.Title,
+                    IsDeleted = post.IsDeleted,
+                    Title = post.Title,
+                    Content = post.Content,
+                    CreateAt = post.CreateAt,
+                    UpdateAt = post.UpdateAt,
+                    PostFiles = post.PostFiles?.Select(pf => new PostFileDto
+                    {
+                        PostFileId = pf.PostFileId,
+                        PostId = pf.PostId,
+                        FileUrl = pf.FileUrl,
+                        PostFileType = pf.PostFileType,
+                        IsDeleted = pf.IsDeleted
+                    }).ToList(),
+                    Comments = post.Comments?.Select(c => new CommentPostDetailDto
+                    {
+                        CommentId = c.CommentId,
+                        PostId = c.PostId,
+                        UserId = c.UserId,
+                        FirstName = c.User?.UserMetaData?.FirstName,
+                        LastName = c.User?.UserMetaData?.LastName,
+                        Avatar = c.User?.UserMetaData?.Avatar,
+                        ParentCommentId = c.ParentCommentId,
+                        Content = c.Content
+                    }).ToList()
+                };
+
+                await _postDAO.CommitTransactionAsync();
+                _logger.LogInformation("Get Post success");
+                return postDetailDto;
+            }
+            catch (Exception ex)
+            {
+                await _postDAO.RollbackTransactionAsync();
+                _logger.LogError(ex, "Error when get Post");
+                return null;
+            }
+        }
     }
 }
