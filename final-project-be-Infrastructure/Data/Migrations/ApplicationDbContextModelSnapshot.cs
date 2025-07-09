@@ -360,6 +360,15 @@ namespace final_project_be_Infrastructure.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MentorId"));
 
+                    b.Property<string>("AccountBank")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("AccountName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("AccountNumber")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("CitizenID")
                         .HasColumnType("nvarchar(max)");
 
@@ -1270,6 +1279,36 @@ namespace final_project_be_Infrastructure.Data.Migrations
                     b.ToTable("UserWorkshop");
                 });
 
+            modelBuilder.Entity("final_project_be_Domain.Models.Withdraw", b =>
+                {
+                    b.Property<int>("WithdrawId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("WithdrawId"));
+
+                    b.Property<decimal?>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("CreateAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("MentorId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal?>("Points")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Status")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("WithdrawId");
+
+                    b.HasIndex("MentorId");
+
+                    b.ToTable("Withdraws");
+                });
+
             modelBuilder.Entity("final_project_be_Domain.Models.WorkShop", b =>
                 {
                     b.Property<int>("WorkShopId")
@@ -1940,6 +1979,17 @@ namespace final_project_be_Infrastructure.Data.Migrations
                     b.Navigation("User");
 
                     b.Navigation("WorkShop");
+                });
+
+            modelBuilder.Entity("final_project_be_Domain.Models.Withdraw", b =>
+                {
+                    b.HasOne("final_project_be_Domain.Models.Mentor", "Mentor")
+                        .WithMany()
+                        .HasForeignKey("MentorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Mentor");
                 });
 
             modelBuilder.Entity("final_project_be_Domain.Models.WorkShop", b =>

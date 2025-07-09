@@ -5,6 +5,7 @@ using final_project_be_Domain.DTOs.Notification;
 using final_project_be_Domain.DTOs;
 using final_project_be_Application.Interface;
 using Microsoft.Extensions.Logging;
+using DocumentFormat.OpenXml.Wordprocessing;
 
 namespace final_project_be_Application.Repository
 {
@@ -99,6 +100,26 @@ namespace final_project_be_Application.Repository
                 return null;
             }
 
+        }
+
+        public async Task<ICollection<Notification>> GetNotificationsByUser(Guid userId)
+        {
+            try
+            {
+                var notifications = _NotificationDAO.GetAll()
+                    .Where(n => n.UserId == userId)
+                    .Take(5)
+                    .ToList();
+
+                _logger.LogInformation("Get Notifications success");
+
+                return await Task.FromResult(notifications);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error when getting Notifications");
+                return new List<Notification>();
+            }
         }
 
         public async Task<Notification> UpdateNotification(NotificationDto dto)

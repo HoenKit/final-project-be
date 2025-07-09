@@ -26,7 +26,12 @@ namespace final_project_be.Controllers
             return Ok(pagedNotifications);
         }
 
-
+        [HttpGet("get-by-user/{userId}")]
+        public async Task<IActionResult> GetByUser(Guid userId)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            return Ok(await _NotificationRepository.GetNotificationsByUser(userId));
+        }
 
         // GET api/<NotificationController>/5
         [HttpGet("{id}")]
