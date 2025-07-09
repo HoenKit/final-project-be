@@ -25,5 +25,8 @@ namespace final_project_be_Domain.Models
         public ICollection<Messages>? Messages { get; set; }
         public ICollection<Courses>? Courses { get; set; }
         public User? User { get; set; }
+        public string? AccountNumber { get; set; }
+        public string? AccountName { get; set; }
+        public string? AccountBank { get; set; }
     }
 }

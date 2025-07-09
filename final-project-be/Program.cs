@@ -103,6 +103,7 @@ builder.Services.AddScoped<UserWorshopDAO>();
 builder.Services.AddScoped<WorkshopDAO>();
 builder.Services.AddScoped<CourseEmbeddingDAO>();
 builder.Services.AddScoped<UserEmbeddingDAO>();
+builder.Services.AddScoped<WithdrawDAO>();
 // Config Repository
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
@@ -131,6 +132,7 @@ builder.Services.AddScoped<IPaymentRepositoty, PaymentRepository>();
 builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
 builder.Services.AddScoped<ICouponRepository, CouponRepository>();
 builder.Services.AddScoped<IScheduleRepository, ScheduleRepository>();
+builder.Services.AddScoped<IWithdrawRepository, WithdrawRepository>();
 //Config Service
 builder.Services.AddScoped<IBlobStorageService,BlobStorageService>();
 builder.Services.AddScoped<IOpenAIEmbeddingService, OpenAIEmbeddingService>();

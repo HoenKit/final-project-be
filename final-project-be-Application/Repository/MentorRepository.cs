@@ -184,6 +184,9 @@ namespace final_project_be_Application.Repository
                     IssueDate = p.IssueDate,
                     CreateAt = p.CreateAt,
                     UpdateAt = p.UpdateAt,
+                    AccountBank = p.AccountBank,
+                    AccountName = p.AccountName,
+                    AccountNumber = p.AccountNumber,
                     MentorCertificates = p.MentorCertificates?.Select(c => new GetMentorCertificateDto
                     {
                         MentorCertificateId = c.MentorCertificateId,
