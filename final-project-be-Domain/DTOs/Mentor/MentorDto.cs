@@ -9,6 +9,7 @@ namespace final_project_be_Domain.DTOs.Mentor
 {
 	public class MentorDto
 	{
+        public Guid UserId { get; set; }
 		public string FirstName { get; set; }
 		public string LastName { get; set; }
 	}
