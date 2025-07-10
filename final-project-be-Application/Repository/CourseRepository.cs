@@ -275,7 +275,7 @@ namespace final_project_be_Application.Repository
             return result;
         }
 
-        public async Task<Courses> ToggleIsDeleted(int id)
+        public async Task<GetCourseDto?> ToggleIsDeleted(int id)
         {
             try
             {
@@ -296,7 +296,29 @@ namespace final_project_be_Application.Repository
                 await _courseDAO.CommitTransactionAsync();
 
                 _logger.LogInformation("Toggle IsDeleted success for course ID: {Id}", id);
-                return course;
+
+                return new GetCourseDto
+                {
+                    CourseId = course.CourseId,
+                    CourseName = course.CourseName,
+                    CourseContent = course.CourseContent,
+                    Cost = course.Cost,
+                    SkillLearn = course.SkillLearn,
+                    Requirement = course.Requirement,
+                    IntendedLearner = course.IntendedLearner,
+                    Language = course.Language,
+                    Level = course.Level,
+                    StudentCount = course.StudentCount,
+                    CoursesImage = course.CoursesImage,
+                    CourseLength = course.CourseLength,
+                    isDeleted = course.IsDeleted,
+                    Status = course.Status,
+                    CreateAt = course.CreateAt,
+                    Mentor = course.Mentor == null ? null : new MentorDto
+                    {
+                        UserId = course.Mentor.UserId
+                    }
+                };
             }
             catch (Exception ex)
             {
@@ -306,7 +328,8 @@ namespace final_project_be_Application.Repository
             }
         }
 
-        public async Task<Courses> ToggleStatus(int id, string statuses)
+
+        public async Task<GetCourseDto?> ToggleStatus(int id, string statuses)
         {
             try
             {
@@ -327,7 +350,29 @@ namespace final_project_be_Application.Repository
                 await _courseDAO.CommitTransactionAsync();
 
                 _logger.LogInformation("Toggle Status success for course ID: {Id}", id);
-                return course;
+
+                return new GetCourseDto
+                {
+                    CourseId = course.CourseId,
+                    CourseName = course.CourseName,
+                    CourseContent = course.CourseContent,
+                    Cost = course.Cost,
+                    SkillLearn = course.SkillLearn,
+                    Requirement = course.Requirement,
+                    IntendedLearner = course.IntendedLearner,
+                    Language = course.Language,
+                    Level = course.Level,
+                    StudentCount = course.StudentCount,
+                    CoursesImage = course.CoursesImage,
+                    CourseLength = course.CourseLength,
+                    isDeleted = course.IsDeleted,
+                    Status = course.Status,
+                    CreateAt = course.CreateAt,
+                    Mentor = course.Mentor == null ? null : new MentorDto
+                    {
+                        UserId = course.Mentor.UserId
+                    }
+                };
             }
             catch (Exception ex)
             {
@@ -336,6 +381,7 @@ namespace final_project_be_Application.Repository
                 return null;
             }
         }
+
 
         public async Task<Courses> UpdateCourse(UpdateCourseDto dto)
         {
