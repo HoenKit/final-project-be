@@ -317,8 +317,6 @@ namespace final_project_be_Application.Repository
                     Mentor = course.Mentor == null ? null : new MentorDto
                     {
                         UserId = course.Mentor.UserId,
-                        FirstName = course.Mentor.User.UserMetaData.FirstName,
-                        LastName = course.Mentor.User.UserMetaData.LastName
                     }
                 };
             }
@@ -373,8 +371,6 @@ namespace final_project_be_Application.Repository
                     Mentor = course.Mentor == null ? null : new MentorDto
                     {
                         UserId = course.Mentor.UserId,
-                        FirstName = course.Mentor.User.UserMetaData.FirstName,
-                        LastName = course.Mentor.User.UserMetaData.LastName
                     }
                 };
             }
