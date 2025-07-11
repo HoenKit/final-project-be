@@ -13,7 +13,11 @@ namespace final_project_be_Infrastructure.DAO
 		}
 		public async Task<Courses?> GetByIdAsync(int id)
 		{
-			return await _context.Courses.Include(c => c.Mentor).Include(c => c.Modules).ThenInclude(m => m.Lessons).FirstOrDefaultAsync(c => c.CourseId == id);
+			return await _context.Courses.Include(c => c.Mentor)
+                        .ThenInclude(c => c.User)
+                            .ThenInclude(c => c.UserMetaData)
+						.Include(c => c.Modules)
+							.ThenInclude(m => m.Lessons).FirstOrDefaultAsync(c => c.CourseId == id);
 		}
 	}
 }

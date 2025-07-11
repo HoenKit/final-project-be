@@ -3,6 +3,7 @@ using final_project_be_Application.Interface;
 using final_project_be_Application.Repository;
 using final_project_be_Application.Ultils;
 using final_project_be_Domain.DTOs.Courses;
+using final_project_be_Domain.DTOs.Mentor;
 using final_project_be_Domain.Models;
 using final_project_be_Infrastructure.DAO;
 using final_project_be_Infrastructure.Data;
@@ -14,6 +15,7 @@ using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -30,6 +32,10 @@ namespace final_project_be_Tests
                 cfg.CreateMap<CourseDto, Courses>();
                 cfg.CreateMap<UpdateCourseDto, Courses>();
                 cfg.CreateMap<Courses, CourseResponseDto>();
+                cfg.CreateMap<Courses, GetCourseDto>();
+                cfg.CreateMap<Mentor, MentorDto>()
+        .ForMember(dest => dest.FirstName, opt => opt.MapFrom(src => src.User.UserMetaData.FirstName))
+        .ForMember(dest => dest.LastName, opt => opt.MapFrom(src => src.User.UserMetaData.LastName));
             });
             _mapper = config.CreateMapper();
         }
@@ -72,7 +78,7 @@ namespace final_project_be_Tests
             var calculatorLogger = loggerFactory.CreateLogger<Caculator>();
 
             var calculator = new Caculator(lessonDao, moduleDao, userCourseDao, userModuleDao);
-            var userRepository = new UserRepository(userDao, _mapper, userLogger);   
+            var userRepository = new UserRepository(userDao, _mapper, userLogger);
 
             return new CourseRepository(
                 courseDao,
@@ -119,7 +125,61 @@ namespace final_project_be_Tests
         public async Task ToggleIsDeleted_ShouldSwitchFlag()
         {
             var context = GetInMemoryDbContext();
-            var course = new Courses { CourseName = "Course A", IsDeleted = false };
+            var mentor = new Mentor
+            {
+                User = new User
+                {
+                    Email = "mentor@example.com",
+                    Password = "password123",
+                    Phone = "0123456789",
+                    UserMetaData = new UserMetadata
+                    {
+                        FirstName = "Hoang",
+                        LastName = "Nguyen"
+                    }
+                }
+            };
+            context.Mentors.Add(mentor);
+            await context.SaveChangesAsync();
+
+            var course = new Courses
+            {
+                CourseName = "Course 1",
+                CourseContent = "Content",
+                CategoryId = 9,
+                MentorId = mentor.MentorId,
+                Requirement = "Requirement",
+                IntendedLearner = "Business executives, political and civic leaders, and students",
+                Language = "English",
+                Level = "AllLevels",
+                Cost = 450,
+                SkillLearn = "Look confident, be understood",
+                CourseLength = 50.1,
+                Status = "Pending",
+                CoursesImage = "https://finalprojectbestorage.blob.core.windows.net/phronesisfiles/sample.png",
+                Modules = new List<final_project_be_Domain.Models.Module>
+        {
+            new final_project_be_Domain.Models.Module
+            {
+                Title = "Module 1",
+                Lessons = new List<Lesson>
+                {
+                    new Lesson { Title = "Lesson 1" },
+                    new Lesson { Title = "Lesson 2" }
+                }
+            },
+            new final_project_be_Domain.Models.Module
+            {
+                Title = "Module 2",
+                Lessons = new List<Lesson>
+                {
+                    new Lesson { Title = "Lesson 3" },
+                    new Lesson { Title = "Lesson 4" },
+                    new Lesson { Title = "Lesson 5" }
+                }
+            }
+        }
+            };
             context.Courses.Add(course);
             await context.SaveChangesAsync();
 
@@ -133,21 +193,132 @@ namespace final_project_be_Tests
         public async Task ToggleStatus_ShouldUpdateStatus()
         {
             var context = GetInMemoryDbContext();
-            var course = new Courses { CourseName = "Course B", Status = "Pending" };
+            var mentor = new Mentor
+            {
+                User = new User
+                {
+                    Email = "mentor@example.com",
+                    Password = "password123",
+                    Phone = "0123456789",
+                    UserMetaData = new UserMetadata
+                    {
+                        FirstName = "Hoang",
+                        LastName = "Nguyen"
+                    }
+                }
+            };
+            context.Mentors.Add(mentor);
+            await context.SaveChangesAsync();
+
+            var course = new Courses
+            {
+                CourseName = "Course 1",
+                CourseContent = "Content",
+                CategoryId = 9,
+                MentorId = mentor.MentorId,
+                Requirement = "Requirement",
+                IntendedLearner = "Business executives, political and civic leaders, and students",
+                Language = "English",
+                Level = "AllLevels",
+                Cost = 450,
+                SkillLearn = "Look confident, be understood",
+                CourseLength = 50.1,
+                Status = "Pending",
+                CoursesImage = "https://finalprojectbestorage.blob.core.windows.net/phronesisfiles/sample.png",
+                Modules = new List<final_project_be_Domain.Models.Module>
+        {
+            new final_project_be_Domain.Models.Module
+            {
+                Title = "Module 1",
+                Lessons = new List<Lesson>
+                {
+                    new Lesson { Title = "Lesson 1" },
+                    new Lesson { Title = "Lesson 2" }
+                }
+            },
+            new final_project_be_Domain.Models.Module
+            {
+                Title = "Module 2",
+                Lessons = new List<Lesson>
+                {
+                    new Lesson { Title = "Lesson 3" },
+                    new Lesson { Title = "Lesson 4" },
+                    new Lesson { Title = "Lesson 5" }
+                }
+            }
+        }
+            };
             context.Courses.Add(course);
             await context.SaveChangesAsync();
 
             var repo = CreateRepository(context, out var blobMock, out var openAIMock);
             var result = await repo.ToggleStatus(course.CourseId, "Approved");
 
+            Assert.NotNull(result);
             Assert.Equal("Approved", result.Status);
+            Assert.Equal("Hoang", result.Mentor.FirstName);
+            Assert.Equal("Nguyen", result.Mentor.LastName);
         }
 
         [Fact]
         public async Task UpdateCourse_ShouldUpdateFieldsAndReplaceImage()
         {
             var context = GetInMemoryDbContext();
-            var course = new Courses { CourseName = "Old", Status = "Approved", CoursesImage = "https://old.img.com/file.jpg" };
+            var mentor = new Mentor
+            {
+                User = new User
+                {
+                    Email = "mentor@example.com",
+                    Password = "password123",
+                    Phone = "0123456789",
+                    UserMetaData = new UserMetadata
+                    {
+                        FirstName = "Hoang",
+                        LastName = "Nguyen"
+                    }
+                }
+            };
+            context.Mentors.Add(mentor);
+            await context.SaveChangesAsync();
+
+            var course = new Courses
+            {
+                CourseName = "Course 1",
+                CourseContent = "Content",
+                CategoryId = 9,
+                MentorId = mentor.MentorId,
+                Requirement = "Requirement",
+                IntendedLearner = "Business executives, political and civic leaders, and students",
+                Language = "English",
+                Level = "AllLevels",
+                Cost = 450,
+                SkillLearn = "Look confident, be understood",
+                CourseLength = 50.1,
+                Status = "Pending",
+                CoursesImage = "https://finalprojectbestorage.blob.core.windows.net/phronesisfiles/sample.png",
+                Modules = new List<final_project_be_Domain.Models.Module>
+                {
+                    new final_project_be_Domain.Models.Module
+                    {
+                        Title = "Module 1",
+                        Lessons = new List<Lesson>
+                        {
+                            new Lesson { Title = "Lesson 1" },
+                            new Lesson { Title = "Lesson 2" }
+                        }
+                    },
+                    new final_project_be_Domain.Models.Module
+                    {
+                        Title = "Module 2",
+                        Lessons = new List<Lesson>
+                        {
+                            new Lesson { Title = "Lesson 3" },
+                            new Lesson { Title = "Lesson 4" },
+                            new Lesson { Title = "Lesson 5" }
+                        }
+                    }
+                }
+            };
             context.Courses.Add(course);
             await context.SaveChangesAsync();
 
@@ -159,15 +330,25 @@ namespace final_project_be_Tests
             {
                 CourseId = course.CourseId,
                 CourseName = "New",
+                CourseContent = "New content here",
                 Cost = 150,
-                CoursesImage = newImage
+                CoursesImage = newImage,
+                CourseLength = 5,
+                SkillLearn = "Skill A",
+                CategoryId = 1,
+                MentorId = 1,
+                IntendedLearner = "Anyone",
+                Level = "Beginner",
+                Language = "English",
+                Requirement = "None"
             };
 
             var result = await repo.UpdateCourse(dto);
 
             Assert.NotNull(result);
             Assert.Equal("New", result.CourseName);
-            Assert.StartsWith("https://", result.CoursesImage);
+            Assert.Equal("Pending", result.Status); // Updated to Pending on update
+            Assert.StartsWith("https://finalprojectbestorage.blob.core.windows.net/phronesisfiles/", result.CoursesImage);
         }
 
         [Fact]
@@ -192,17 +373,78 @@ namespace final_project_be_Tests
         public async Task GetCourse_ShouldReturnCorrectCourse()
         {
             var context = GetInMemoryDbContext();
-            var course = new Courses { CourseName = "Course 1", CategoryId = 1, MentorId = 1 };
+
+            var mentor = new Mentor
+            {
+                User = new User
+                {
+                    Email = "mentor@example.com",
+                    Password = "password123",
+                    Phone = "0123456789",
+                    UserMetaData = new UserMetadata
+                    {
+                        FirstName = "Hoang",
+                        LastName = "Nguyen"
+                    }
+                }
+            };
+            context.Mentors.Add(mentor);
+            await context.SaveChangesAsync();
+
+            var course = new Courses
+            {
+                CourseName = "Course 1",
+                CourseContent = "Content",
+                CategoryId = 9,
+                MentorId = mentor.MentorId,
+                Requirement = "Requirement",
+                IntendedLearner = "Business executives, political and civic leaders, and students",
+                Language = "English",
+                Level = "AllLevels",
+                Cost = 450,
+                SkillLearn = "Look confident, be understood",
+                CourseLength = 50.1,
+                Status = "Pending",
+                CoursesImage = "https://finalprojectbestorage.blob.core.windows.net/phronesisfiles/sample.png",
+                Modules = new List<final_project_be_Domain.Models.Module>
+        {
+            new final_project_be_Domain.Models.Module
+            {
+                Title = "Module 1",
+                Lessons = new List<Lesson>
+                {
+                    new Lesson { Title = "Lesson 1" },
+                    new Lesson { Title = "Lesson 2" }
+                }
+            },
+            new final_project_be_Domain.Models.Module
+            {
+                Title = "Module 2",
+                Lessons = new List<Lesson>
+                {
+                    new Lesson { Title = "Lesson 3" },
+                    new Lesson { Title = "Lesson 4" },
+                    new Lesson { Title = "Lesson 5" }
+                }
+            }
+        }
+            };
+
             context.Courses.Add(course);
             await context.SaveChangesAsync();
 
-            var repository = CreateRepository(context, out var blobMock, out var openAIMock);
 
-            var result = await repository.GetCourse(course.CourseId);
+            var repo = CreateRepository(context, out var blobMock, out var embeddingMock);
+
+            var result = await repo.GetCourse(course.CourseId);
 
             Assert.NotNull(result);
             Assert.Equal("Course 1", result.CourseName);
+            Assert.Equal(2, result.CountModule);
+            Assert.Equal(5, result.CountLesson);
+            Assert.Equal("Hoang", result.Mentor.FirstName);
         }
+
     }
 
 }

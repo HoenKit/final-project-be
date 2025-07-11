@@ -74,5 +74,13 @@ namespace final_project_be.Controllers
             var pagedReportPosts = _ReportCommentRepository.GetGroupedReportComments(currentPage, 5);
             return Ok(pagedReportPosts);
         }
+
+        [HttpDelete("DeleteReportsByCommentId/{commentId}")]
+        public async Task<IActionResult> DeleteReportsByPostId(int commentId)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            await _ReportCommentRepository.DeleteReportsByCommentId(commentId);
+            return Ok();
+        }
     }
 }
