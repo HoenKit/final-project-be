@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
@@ -24,6 +25,7 @@ namespace final_project_be_Domain.DTOs.Courses
         public int? StudentCount { get; set; }
 		public string? CoursesImage { get; set; }
 		public double? CourseLength { get; set; }
+        public bool isDeleted { get; set; }
 		public string? Status { get; set; }
 		public Decimal? AverageRating { get; set; }
 		public decimal? TotalReviews { get; set; }

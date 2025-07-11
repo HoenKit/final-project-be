@@ -12,8 +12,8 @@ namespace final_project_be_Application.Interface
 		public PageResult<GetCourseDto> GetAllCourses(int page, int pageSize, int? CategoryId, string? title, Guid? userId, string? sortOption, int? mentorId, string? Language, string? Level, decimal? MinCost, decimal? MaxCost, decimal? MinRate, decimal? MaxRate, List<StatusEnum>? statuses);
         public Task<List<UserCourseDto>> GetUserCoursesAsync(Guid userId);
 		public Task<List<UserCourseDto>> GetUserCoursesByStatusAsync(Guid userId, string? status);
-        public Task<Courses> ToggleIsDeleted(int id);
-		public Task<Courses> ToggleStatus(int id, string statuses);
+        public Task<GetCourseDto> ToggleIsDeleted(int id);
+        public Task<GetCourseDto?> ToggleStatus(int id, string statuses);
 		public Task<List<CourseRecommendationDto>> RecommendCoursesAsync(Guid userId);
 
     }

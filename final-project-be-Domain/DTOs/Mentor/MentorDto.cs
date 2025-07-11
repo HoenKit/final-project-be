@@ -9,6 +9,7 @@ namespace final_project_be_Domain.DTOs.Mentor
 {
 	public class MentorDto
 	{
+        public Guid UserId { get; set; }
 		public string FirstName { get; set; }
 		public string LastName { get; set; }
 	}
@@ -30,6 +31,9 @@ namespace final_project_be_Domain.DTOs.Mentor
         public DateTime CreateAt { get; set; }
         public DateTime UpdateAt { get; set; }
         public List<MentorCertificateDto>? MentorCertificates { get; set; }
+        public string? AccountNumber { get; set; }
+        public string? AccountName { get; set; }
+        public string? AccountBank { get; set; }
     }
 
     public class MentorbyCourseDto
@@ -63,6 +67,9 @@ namespace final_project_be_Domain.DTOs.Mentor
         public int TotalStudents { get; set; } = 0;
         public int TotalReviews { get; set; } = 0;
         public decimal AverageRating { get; set; } = 0;
+        public string? AccountNumber { get; set; }
+        public string? AccountName { get; set; }
+        public string? AccountBank { get; set; }
     }
 
 }

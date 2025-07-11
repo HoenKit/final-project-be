@@ -1,4 +1,5 @@
-﻿using System;
+﻿using final_project_be_Domain.DTOs.Mentor;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
@@ -23,9 +24,11 @@ namespace final_project_be_Domain.DTOs.Courses
         public int? StudentCount { get; set; }
 		public string? CoursesImage { get; set; }
 		public double? CourseLength { get; set; }
+		public bool isDeleted { get; set; }
         public string? Status { get; set; }
         public DateTime? UpdateAt { get; set; }
 		public int CountModule { get; set; }
 		public int CountLesson { get; set; }
+		public MentorDto Mentor { get; set; }
 	}
 }

@@ -11,5 +11,6 @@ namespace final_project_be_Application.Interface
         public Task<Notification> GetNotification(int id);
         public Task<Notification> UpdateNotification(NotificationDto dto);
         public PageResult<Notification> GetAllNotifications(int page, int pageSize);
+        public Task<ICollection<Notification>> GetNotificationsByUser(Guid userId);
     }
 }
