@@ -311,12 +311,14 @@ namespace final_project_be_Application.Repository
                     StudentCount = course.StudentCount,
                     CoursesImage = course.CoursesImage,
                     CourseLength = course.CourseLength,
-                    isDeleted = course.IsDeleted,
+                    IsDeleted = course.IsDeleted,
                     Status = course.Status,
                     CreateAt = course.CreateAt,
                     Mentor = course.Mentor == null ? null : new MentorDto
                     {
-                        UserId = course.Mentor.UserId
+                        UserId = course.Mentor.UserId,
+                        FirstName = course.Mentor.User.UserMetaData.FirstName,
+                        LastName = course.Mentor.User.UserMetaData.LastName
                     }
                 };
             }
@@ -365,12 +367,14 @@ namespace final_project_be_Application.Repository
                     StudentCount = course.StudentCount,
                     CoursesImage = course.CoursesImage,
                     CourseLength = course.CourseLength,
-                    isDeleted = course.IsDeleted,
+                    IsDeleted = course.IsDeleted,
                     Status = course.Status,
                     CreateAt = course.CreateAt,
                     Mentor = course.Mentor == null ? null : new MentorDto
                     {
-                        UserId = course.Mentor.UserId
+                        UserId = course.Mentor.UserId,
+                        FirstName = course.Mentor.User.UserMetaData.FirstName,
+                        LastName = course.Mentor.User.UserMetaData.LastName
                     }
                 };
             }
