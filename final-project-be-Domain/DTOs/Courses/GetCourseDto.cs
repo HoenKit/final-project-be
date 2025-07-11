@@ -25,7 +25,7 @@ namespace final_project_be_Domain.DTOs.Courses
         public int? StudentCount { get; set; }
 		public string? CoursesImage { get; set; }
 		public double? CourseLength { get; set; }
-        public bool isDeleted { get; set; }
+        public bool IsDeleted { get; set; }
 		public string? Status { get; set; }
 		public Decimal? AverageRating { get; set; }
 		public decimal? TotalReviews { get; set; }
