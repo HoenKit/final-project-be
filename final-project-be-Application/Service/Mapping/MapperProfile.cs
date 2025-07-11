@@ -77,7 +77,10 @@ namespace final_project_be_Application.Service.Mapping
             CreateMap<Transaction, GetTransactionDto>().ReverseMap();
             CreateMap<Post, PostDetailDto>().ReverseMap();
             CreateMap<Withdraw, WithdrawDto>().ReverseMap();
-            CreateMap<Mentor, MentorDto>().ReverseMap();
+            CreateMap<Mentor, MentorDto>()
+                .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.UserId))
+                .ForMember(dest => dest.FirstName, opt => opt.MapFrom(src => src.User.UserMetaData.FirstName))
+				.ForMember(dest => dest.LastName, opt => opt.MapFrom(src => src.User.UserMetaData.LastName));
         }
 	}
 }
