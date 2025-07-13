@@ -1,5 +1,7 @@
 ﻿using final_project_be_Application.Interface;
+using final_project_be_Application.Repository;
 using final_project_be_Domain.DTOs.Payment;
+using final_project_be_Domain.DTOs.Transaction;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -36,6 +38,16 @@ namespace final_project_be.Controllers
 
             await _learnrepository.StartCourseAsync(request.UserId, request.CourseId);
             return Ok("Purchase and course start successful.");
+        }
+
+        [HttpGet]
+        public IActionResult GetAll(int? page, int? pageSize, Guid? userId, string? sortOption, [FromQuery] List<ServiceTypeEnum>? ServiceType)
+        {
+            int currentPage = page ?? 1;
+            int currentSize = pageSize ?? 50;
+
+            var pagedTransactions = _paymentRepositoty.GetAll(currentPage, currentSize, userId, sortOption, ServiceType);
+            return Ok(pagedTransactions);
         }
     }
 }
