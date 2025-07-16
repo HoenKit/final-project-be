@@ -6,6 +6,7 @@ using final_project_be_Application.Ultils;
 using final_project_be_Domain.DTOs.Lesson;
 using final_project_be_Domain.Models;
 using final_project_be_Infrastructure.DAO;
+using final_project_be_Infrastructure.DAO_Interface;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -17,12 +18,12 @@ namespace final_project_be_Application.Repository
 {
 	public class LessonRepository : Repository<Lesson>, ILessonRepository
 	{
-		private readonly LessonDAO _lessonDAO;
+		private readonly ILessonDAO _lessonDAO;
 		private readonly ICloudinaryService _cloudinaryService;
 		private readonly IMapper _mapper;
 		private readonly ILogger<LessonRepository> _logger;
         private readonly IBlobStorageService _blobStorageService;
-        public LessonRepository(LessonDAO lessonDAO, ICloudinaryService cloudinaryService, IMapper mapper, ILogger<LessonRepository> logger, IBlobStorageService blobStorageService) : base(lessonDAO)
+        public LessonRepository(ILessonDAO lessonDAO, ICloudinaryService cloudinaryService, IMapper mapper, ILogger<LessonRepository> logger, IBlobStorageService blobStorageService) : base(lessonDAO)
 		{
 			_lessonDAO = lessonDAO;
 			_cloudinaryService = cloudinaryService;

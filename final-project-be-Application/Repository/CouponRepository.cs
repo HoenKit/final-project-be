@@ -4,6 +4,7 @@ using final_project_be_Application.Interface;
 using final_project_be_Domain.DTOs.Coupon;
 using final_project_be_Domain.Models;
 using final_project_be_Infrastructure.DAO;
+using final_project_be_Infrastructure.DAO_Interface;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
@@ -16,12 +17,12 @@ namespace final_project_be_Application.Repository
 {
     public class CouponRepository : Repository<Coupon>, ICouponRepository
     {
-        private readonly CouponDAO _CouponDAO;
-        private readonly CourseCouponDAO _courseCouponDAO;
+        private readonly ICouponDAO _CouponDAO;
+        private readonly ICourseCouponDAO _courseCouponDAO;
         private readonly IMapper _mapper;
         private readonly ILogger<CouponRepository> _logger;
 
-        public CouponRepository(CouponDAO couponDAO, IMapper mapper, ILogger<CouponRepository> logger, CourseCouponDAO courseCouponDAO) : base(couponDAO)
+        public CouponRepository(ICouponDAO couponDAO, IMapper mapper, ILogger<CouponRepository> logger, ICourseCouponDAO courseCouponDAO) : base(couponDAO)
         {
             _CouponDAO = couponDAO;
             _mapper = mapper;

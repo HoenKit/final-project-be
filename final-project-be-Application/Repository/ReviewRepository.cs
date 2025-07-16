@@ -16,15 +16,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using final_project_be_Infrastructure.DAO_Interface;
 
 namespace final_project_be_Application.Repository
 {
     public class ReviewRepository : Repository<Review>, IReviewRepository
     {
-        private readonly ReviewDAO _reviewDAO;
+        private readonly IReviewDAO _reviewDAO;
         private readonly IMapper _mapper;
         private readonly ILogger<ReviewRepository> _logger;
-        public ReviewRepository(ReviewDAO reviewDAO, IMapper mapper, ILogger<ReviewRepository> logger) : base(reviewDAO)
+        public ReviewRepository(IReviewDAO reviewDAO, IMapper mapper, ILogger<ReviewRepository> logger) : base(reviewDAO)
         {
             _mapper = mapper;
             _logger = logger;

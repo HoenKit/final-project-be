@@ -8,17 +8,18 @@ using final_project_be_Domain.DTOs.Users;
 using final_project_be_Application.Interface;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using final_project_be_Infrastructure.DAO_Interface;
 
 namespace final_project_be_Application.Repository
 {
 	public class PostRepository : Repository<Post>, IPostRepository
     {
-        private readonly PostDAO _postDAO;
-        private readonly PostFileDAO _postFileDAO;
-        private readonly CommentDAO _commentDAO;
+        private readonly IPostDAO _postDAO;
+        private readonly IPostFileDAO _postFileDAO;
+        private readonly ICommentDAO _commentDAO;
         private readonly IMapper _mapper;
         private readonly ILogger<PostRepository> _logger;
-        public PostRepository(PostDAO postDAO,PostFileDAO postFileDAO, CommentDAO commentDAO, IMapper mapper, ILogger<PostRepository> logger) : base(postDAO)
+        public PostRepository(IPostDAO postDAO,IPostFileDAO postFileDAO, ICommentDAO commentDAO, IMapper mapper, ILogger<PostRepository> logger) : base(postDAO)
         {
             _mapper = mapper;
             _logger = logger;

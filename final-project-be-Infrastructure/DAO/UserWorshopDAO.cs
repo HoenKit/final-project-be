@@ -1,12 +1,13 @@
 ﻿using final_project_be_Infrastructure.Data;
 using final_project_be_Domain.Models;
+using final_project_be_Infrastructure.DAO_Interface;
 
 namespace final_project_be_Infrastructure.DAO
 {
-	public class UserWorshopDAO : GenericDAO<UserWorkshop>
-	{
-		public UserWorshopDAO(ApplicationDbContext context) : base(context)
-		{
-		}
-	}
+    public class UserWorshopDAO : GenericDAO<UserWorkshop>, IUserWorshopDAO
+    {
+        public UserWorshopDAO(ApplicationDbContext context) : base(context)
+        {
+        }
+    }
 }

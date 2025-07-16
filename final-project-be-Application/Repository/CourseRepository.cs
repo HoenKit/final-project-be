@@ -13,24 +13,25 @@ using final_project_be_Domain.DTOs.Mentor;
 using Azure;
 using DocumentFormat.OpenXml.InkML;
 using Newtonsoft.Json;
+using final_project_be_Infrastructure.DAO_Interface;
 
 namespace final_project_be_Application.Repository
 {
     public class CourseRepository : Repository<Courses>, ICourseRepository
     {
-        private readonly CourseEmbeddingDAO _courseEmbeddingDAO;
+        private readonly ICourseEmbeddingDAO _courseEmbeddingDAO;
         private readonly IOpenAIEmbeddingService _embeddingService;
-        private readonly CourseDAO _courseDAO;
-        private readonly UserCourseDAO _userCourseDAO;
-        private readonly ReviewDAO _reviewDAO;
+        private readonly ICourseDAO _courseDAO;
+        private readonly IUserCourseDAO _userCourseDAO;
+        private readonly IReviewDAO _reviewDAO;
         private readonly Caculator _Caculator;
         private readonly IMapper _mapper;
         private readonly ILogger<CourseRepository> _logger;
         private readonly IBlobStorageService _blobStorageService;
         private readonly IUserRepository _userRepository;
-        private readonly UserEmbeddingDAO _userEmbeddingDAO;
+        private readonly IUserEmbeddingDAO _userEmbeddingDAO;
 
-        public CourseRepository(CourseDAO courseDAO, Caculator Caculator, UserCourseDAO userCourseDAO, ReviewDAO reviewDAO, IMapper mapper, ILogger<CourseRepository> logger, IBlobStorageService blobStorageService, CourseEmbeddingDAO courseEmbeddingDAO, IOpenAIEmbeddingService embeddingService, IUserRepository userRepository, UserEmbeddingDAO userEmbeddingDAO) : base(courseDAO)
+        public CourseRepository(ICourseDAO courseDAO, Caculator Caculator, IUserCourseDAO userCourseDAO, IReviewDAO reviewDAO, IMapper mapper, ILogger<CourseRepository> logger, IBlobStorageService blobStorageService, ICourseEmbeddingDAO courseEmbeddingDAO, IOpenAIEmbeddingService embeddingService, IUserRepository userRepository, IUserEmbeddingDAO userEmbeddingDAO) : base(courseDAO)
 
         {
             _courseDAO = courseDAO;
@@ -371,6 +372,8 @@ namespace final_project_be_Application.Repository
                     Mentor = course.Mentor == null ? null : new MentorDto
                     {
                         UserId = course.Mentor.UserId,
+                        FirstName = course.Mentor.User.UserMetaData.FirstName,
+                        LastName = course.Mentor.User.UserMetaData.LastName
                     }
                 };
             }

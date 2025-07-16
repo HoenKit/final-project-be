@@ -5,15 +5,16 @@ using final_project_be_Domain.DTOs.PollOption;
 using final_project_be_Domain.DTOs;
 using final_project_be_Application.Interface;
 using Microsoft.Extensions.Logging;
+using final_project_be_Infrastructure.DAO_Interface;
 
 namespace final_project_be_Application.Repository
 {
     public class PollOptionVoteRepository : Repository<PollOptionVote>, IPollOptionVoteRepository
     {
-        private readonly PollOptionVoteDAO _pollOptionVoteDAO;
+        private readonly IPollOptionVoteDAO _pollOptionVoteDAO;
         private readonly IMapper _mapper;
         private readonly ILogger<PollOptionVoteRepository> _logger;
-        public PollOptionVoteRepository(PollOptionVoteDAO pollOptionVoteDAO, IMapper mapper, ILogger<PollOptionVoteRepository> logger) : base(pollOptionVoteDAO)
+        public PollOptionVoteRepository(IPollOptionVoteDAO pollOptionVoteDAO, IMapper mapper, ILogger<PollOptionVoteRepository> logger) : base(pollOptionVoteDAO)
         {
             _mapper = mapper;
             _logger = logger;

@@ -1,12 +1,14 @@
 ﻿using final_project_be_Infrastructure.Data;
 using final_project_be_Domain.Models;
+using final_project_be_Infrastructure.DAO_Interface;
 
 namespace final_project_be_Infrastructure.DAO
 {
-	public class ReviewDAO : GenericDAO<Review>
-	{
-		public ReviewDAO(ApplicationDbContext context) : base(context)
-		{
-		}
-	}
+    public class ReviewDAO : GenericDAO<Review>, IReviewDAO
+    {
+        public ReviewDAO(ApplicationDbContext context) : base(context)
+        {
+        }
+    }
+
 }

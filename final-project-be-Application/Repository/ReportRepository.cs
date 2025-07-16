@@ -5,19 +5,20 @@ using final_project_be_Domain.DTOs.Report;
 using final_project_be_Domain.DTOs;
 using final_project_be_Application.Interface;
 using Microsoft.Extensions.Logging;
+using final_project_be_Infrastructure.DAO_Interface;
 
 namespace final_project_be_Application.Repository
 {
     public class ReportRepository : Repository<Report>, IReportRepository
     {
-        private readonly ReportDAO _ReportDAO;
-        private readonly ReportPostDAO _ReportPostDAO;
-        private readonly ReportUserDAO _ReportUserDAO;
-        private readonly ReportCommentDAO _ReportCommentDAO;
+        private readonly IReportDAO _ReportDAO;
+        private readonly IReportPostDAO _ReportPostDAO;
+        private readonly IReportUserDAO _ReportUserDAO;
+        private readonly IReportCommentDAO _ReportCommentDAO;
         private readonly IMapper _mapper;
         private readonly ILogger<ReportRepository> _logger;
 
-        public ReportRepository(ReportDAO ReportDAO, ReportPostDAO ReportPostDAO, ReportUserDAO ReportUserDAO, ReportCommentDAO ReportCommentDAO, IMapper mapper, ILogger<ReportRepository> logger) : base(ReportDAO)
+        public ReportRepository(IReportDAO ReportDAO, IReportPostDAO ReportPostDAO, IReportUserDAO ReportUserDAO, IReportCommentDAO ReportCommentDAO, IMapper mapper, ILogger<ReportRepository> logger) : base(ReportDAO)
         {
             _mapper = mapper;
             _logger = logger;

@@ -7,6 +7,7 @@ using final_project_be_Application.Ultils;
 using final_project_be_Domain.DTOs.Users;
 using final_project_be_Domain.Models;
 using final_project_be_Infrastructure.DAO;
+using final_project_be_Infrastructure.DAO_Interface;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
@@ -24,7 +25,7 @@ namespace final_project_be_Application.Repository
 {
 	public class UserAuthRepository : IUserAuthRepository
     {
-        private readonly UserDAO _UserDAO;
+        private readonly IUserDAO _UserDAO;
         private readonly IConfiguration _config;
         private readonly IMapper _mapper;
         private readonly ILogger<UserAuthRepository> _logger;
@@ -33,7 +34,7 @@ namespace final_project_be_Application.Repository
         private readonly IEmailService _emailService;
         private readonly ClientSettings _clientSettings;
         private readonly GoogleSettings _googlesetting;
-        public UserAuthRepository(UserDAO userDAO, IMapper mapper, ILogger<UserAuthRepository> logger, IConfiguration configuration, IHttpContextAccessor httpContextAccessor, IEmailService emailService, IOptions<ClientSettings> clientoptions, IOptions<GoogleSettings> googlesetting)
+        public UserAuthRepository(IUserDAO userDAO, IMapper mapper, ILogger<UserAuthRepository> logger, IConfiguration configuration, IHttpContextAccessor httpContextAccessor, IEmailService emailService, IOptions<ClientSettings> clientoptions, IOptions<GoogleSettings> googlesetting)
         {
             _UserDAO = userDAO;
             _mapper = mapper;

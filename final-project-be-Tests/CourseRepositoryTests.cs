@@ -6,8 +6,10 @@ using final_project_be_Domain.DTOs.Courses;
 using final_project_be_Domain.DTOs.Mentor;
 using final_project_be_Domain.Models;
 using final_project_be_Infrastructure.DAO;
+using final_project_be_Infrastructure.DAO_Interface;
 using final_project_be_Infrastructure.Data;
 using final_project_be_Tests.TestDAOs;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -23,7 +25,22 @@ namespace final_project_be_Tests
 {
     public class CourseRepositoryTests
     {
+        private readonly Mock<ICourseDAO> _courseDAOMock = new();
+        private readonly Mock<ICourseEmbeddingDAO> _embeddingDAOMock = new();
+        private readonly Mock<IOpenAIEmbeddingService> _embeddingServiceMock = new();
+        private readonly Mock<IUserCourseDAO> _userCourseDAOMock = new();
+        private readonly Mock<IReviewDAO> _reviewDAOMock = new();
+        private readonly Mock<IBlobStorageService> _blobStorageMock = new();
+        private readonly Mock<IUserRepository> _userRepoMock = new();
+        private readonly Mock<IUserEmbeddingDAO> _userEmbeddingDAOMock = new();
+        private readonly Mock<ILogger<CourseRepository>> _loggerMock = new();
+
+        private readonly Mock<ILessonDAO> _lessonDAOMock = new();
+        private readonly Mock<IModuleDAO> _moduleDAOMock = new();
+        private readonly Mock<IUserModuleDAO> _userModuleDAOMock = new();
+
         private readonly IMapper _mapper;
+        private readonly Caculator _caculator;
 
         public CourseRepositoryTests()
         {
@@ -32,418 +49,366 @@ namespace final_project_be_Tests
                 cfg.CreateMap<CourseDto, Courses>();
                 cfg.CreateMap<UpdateCourseDto, Courses>();
                 cfg.CreateMap<Courses, CourseResponseDto>();
-                cfg.CreateMap<Courses, GetCourseDto>();
                 cfg.CreateMap<Mentor, MentorDto>()
-        .ForMember(dest => dest.FirstName, opt => opt.MapFrom(src => src.User.UserMetaData.FirstName))
-        .ForMember(dest => dest.LastName, opt => opt.MapFrom(src => src.User.UserMetaData.LastName));
+                    .ForMember(dest => dest.FirstName, opt => opt.MapFrom(src => src.User.UserMetaData.FirstName))
+                    .ForMember(dest => dest.LastName, opt => opt.MapFrom(src => src.User.UserMetaData.LastName));
+
+                cfg.CreateMap<Courses, CourseResponseDto>()
+                    .ForMember(dest => dest.Mentor, opt => opt.MapFrom(src => src.Mentor));
+
             });
             _mapper = config.CreateMapper();
-        }
 
-        private ApplicationDbContext GetInMemoryDbContext()
-        {
-            var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-                .UseInMemoryDatabase(Guid.NewGuid().ToString())
-                .Options;
-
-            return new ApplicationDbContext(options);
-        }
-
-        private CourseRepository CreateRepository(ApplicationDbContext context, out Mock<IBlobStorageService> blobMock, out Mock<IOpenAIEmbeddingService> openAIMock)
-        {
-            blobMock = new Mock<IBlobStorageService>();
-            blobMock.Setup(x => x.UploadFileAsync(It.IsAny<string>(), It.IsAny<Stream>()))
-                    .Returns(Task.CompletedTask);
-            blobMock.Setup(x => x.DeleteFileIfExistsAsync(It.IsAny<string>()))
-                    .Returns(Task.CompletedTask);
-            openAIMock = new Mock<IOpenAIEmbeddingService>();
-            openAIMock.Setup(x => x.GetEmbeddingAsync(It.IsAny<string>()))
-                    .ReturnsAsync(new float[] { 0.1f, 0.2f, 0.3f });
-
-            var courseDao = new NoTransactionCourseDAO(context);
-            var reviewDao = new NoTransactionReviewDAO(context);
-            var userCourseDao = new NoTransactionUserCourseDAO(context);
-
-            var lessonDao = new NoTransactionLessonDAO(context);
-            var courseEmbeddingDao = new NoTransactionCourseEmbeddingDAO(context);
-            var moduleDao = new NoTransactionModuleDAO(context);
-            var userModuleDao = new NoTransactionUserModuleDAO(context);
-            var userDao = new NoTransactionUserDAO(context);
-            var userEmbeddingDao = new NoTransactionUserEmbeddingDAO(context);
-
-            var loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
-
-            var courseLogger = loggerFactory.CreateLogger<CourseRepository>();
-            var userLogger = loggerFactory.CreateLogger<UserRepository>();
-            var calculatorLogger = loggerFactory.CreateLogger<Caculator>();
-
-            var calculator = new Caculator(lessonDao, moduleDao, userCourseDao, userModuleDao);
-            var userRepository = new UserRepository(userDao, _mapper, userLogger);
-
-            return new CourseRepository(
-                courseDao,
-                calculator,
-                userCourseDao,
-                reviewDao,
-                _mapper,
-                courseLogger,
-                blobMock.Object,
-                courseEmbeddingDao,
-                openAIMock.Object,
-                userRepository,
-                userEmbeddingDao
+            _caculator = new Caculator(
+                _lessonDAOMock.Object,
+                _moduleDAOMock.Object,
+                _userCourseDAOMock.Object,
+                _userModuleDAOMock.Object
             );
         }
 
         [Fact]
-        public async Task CreateCourse_ShouldAddCourse()
+        public async Task CreateCourse_ShouldUploadImageAndSaveCourse()
         {
-            var context = GetInMemoryDbContext();
-            var repo = CreateRepository(context, out var blobMock, out var openAIMock);
-
-            var image = new FormFile(new MemoryStream(Encoding.UTF8.GetBytes("img")), 0, 3, "Image", "img.jpg");
-
+            // Arrange
             var dto = new CourseDto
             {
                 CourseName = "Test Course",
-                CategoryId = 1,
-                MentorId = 1,
-                CourseContent = "Content",
-                Cost = 100,
-                SkillLearn = "Skill",
-                CoursesImage = image
+                CourseContent = "AI basics",
+                CoursesImage = GetMockFormFile("image.jpg")
             };
 
-            var result = await repo.CreateCourse(dto);
+            var courseRepository = new CourseRepository(
+                _courseDAOMock.Object,
+                _caculator,
+                _userCourseDAOMock.Object,
+                _reviewDAOMock.Object,
+                _mapper,
+                _loggerMock.Object,
+                _blobStorageMock.Object,
+                _embeddingDAOMock.Object,
+                _embeddingServiceMock.Object,
+                _userRepoMock.Object,
+                _userEmbeddingDAOMock.Object
+            );
 
+            _embeddingServiceMock.Setup(s => s.GetEmbeddingAsync(It.IsAny<string>()))
+                .ReturnsAsync(new float[] { 0.1f, 0.2f });
+
+            _courseDAOMock.Setup(d => d.AddAsync(It.IsAny<Courses>())).Returns(Task.CompletedTask);
+            _courseDAOMock.Setup(d => d.BeginTransactionAsync()).Returns(Task.CompletedTask);
+            _courseDAOMock.Setup(d => d.CommitTransactionAsync()).Returns(Task.CompletedTask);
+
+            _blobStorageMock.Setup(b => b.UploadFileAsync(It.IsAny<string>(), It.IsAny<Stream>())).Returns(Task.CompletedTask);
+            _embeddingDAOMock.Setup(e => e.AddAsync(It.IsAny<CourseEmbedding>())).Returns(Task.CompletedTask);
+
+            // Act
+            var result = await courseRepository.CreateCourse(dto);
+
+            // Assert
             Assert.NotNull(result);
             Assert.Equal("Test Course", result.CourseName);
-            Assert.StartsWith("https://", result.CoursesImage);
+            _blobStorageMock.Verify(b => b.UploadFileAsync(It.IsAny<string>(), It.IsAny<Stream>()), Times.Once);
+            _courseDAOMock.Verify(d => d.AddAsync(It.IsAny<Courses>()), Times.Once);
+        }
+
+        private IFormFile GetMockFormFile(string fileName)
+        {
+            var content = "Fake image content";
+            var fileStream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(content));
+            return new FormFile(fileStream, 0, fileStream.Length, "file", fileName)
+            {
+                Headers = new HeaderDictionary(),
+                ContentType = "image/jpeg"
+            };
         }
 
         [Fact]
         public async Task ToggleIsDeleted_ShouldSwitchFlag()
         {
-            var context = GetInMemoryDbContext();
-            var mentor = new Mentor
-            {
-                User = new User
-                {
-                    Email = "mentor@example.com",
-                    Password = "password123",
-                    Phone = "0123456789",
-                    UserMetaData = new UserMetadata
-                    {
-                        FirstName = "Hoang",
-                        LastName = "Nguyen"
-                    }
-                }
-            };
-            context.Mentors.Add(mentor);
-            await context.SaveChangesAsync();
-
+            // Arrange
             var course = new Courses
             {
-                CourseName = "Course 1",
-                CourseContent = "Content",
-                CategoryId = 9,
-                MentorId = mentor.MentorId,
-                Requirement = "Requirement",
-                IntendedLearner = "Business executives, political and civic leaders, and students",
-                Language = "English",
-                Level = "AllLevels",
-                Cost = 450,
-                SkillLearn = "Look confident, be understood",
-                CourseLength = 50.1,
-                Status = "Pending",
-                CoursesImage = "https://finalprojectbestorage.blob.core.windows.net/phronesisfiles/sample.png",
-                Modules = new List<final_project_be_Domain.Models.Module>
-        {
-            new final_project_be_Domain.Models.Module
-            {
-                Title = "Module 1",
-                Lessons = new List<Lesson>
-                {
-                    new Lesson { Title = "Lesson 1" },
-                    new Lesson { Title = "Lesson 2" }
-                }
-            },
-            new final_project_be_Domain.Models.Module
-            {
-                Title = "Module 2",
-                Lessons = new List<Lesson>
-                {
-                    new Lesson { Title = "Lesson 3" },
-                    new Lesson { Title = "Lesson 4" },
-                    new Lesson { Title = "Lesson 5" }
-                }
-            }
-        }
+                CourseId = 1,
+                IsDeleted = false
             };
-            context.Courses.Add(course);
-            await context.SaveChangesAsync();
 
-            var repo = CreateRepository(context, out var blobMock, out var openAIMock);
-            var result = await repo.ToggleIsDeleted(course.CourseId);
+            _courseDAOMock.Setup(d => d.GetByIdAsync(course.CourseId)).ReturnsAsync(course);
+            _courseDAOMock.Setup(d => d.UpdateAsync(course)).Returns(Task.CompletedTask);
 
+            var courseRepo = new CourseRepository(
+                _courseDAOMock.Object,
+                _caculator,
+                _userCourseDAOMock.Object,
+                _reviewDAOMock.Object,
+                _mapper,
+                _loggerMock.Object,
+                _blobStorageMock.Object,
+                _embeddingDAOMock.Object,
+                _embeddingServiceMock.Object,
+                _userRepoMock.Object,
+                _userEmbeddingDAOMock.Object
+            );
+
+            // Act
+            var result = await courseRepo.ToggleIsDeleted(course.CourseId);
+
+            // Assert
             Assert.True(result.IsDeleted);
+            _courseDAOMock.Verify(d => d.UpdateAsync(It.Is<Courses>(c => c.IsDeleted)), Times.Once);
         }
 
         [Fact]
         public async Task ToggleStatus_ShouldUpdateStatus()
         {
-            var context = GetInMemoryDbContext();
-            var mentor = new Mentor
+            // Arrange
+            var course = new Courses
             {
-                User = new User
+                CourseId = 1,
+                Status = "Pending",
+                Mentor = new Mentor
                 {
-                    Email = "mentor@example.com",
-                    Password = "password123",
-                    Phone = "0123456789",
-                    UserMetaData = new UserMetadata
+                    User = new User
                     {
-                        FirstName = "Hoang",
-                        LastName = "Nguyen"
+                        UserMetaData = new UserMetadata { FirstName = "Hoang", LastName = "Nguyen" }
                     }
                 }
             };
-            context.Mentors.Add(mentor);
-            await context.SaveChangesAsync();
 
-            var course = new Courses
-            {
-                CourseName = "Course 1",
-                CourseContent = "Content",
-                CategoryId = 9,
-                MentorId = mentor.MentorId,
-                Requirement = "Requirement",
-                IntendedLearner = "Business executives, political and civic leaders, and students",
-                Language = "English",
-                Level = "AllLevels",
-                Cost = 450,
-                SkillLearn = "Look confident, be understood",
-                CourseLength = 50.1,
-                Status = "Pending",
-                CoursesImage = "https://finalprojectbestorage.blob.core.windows.net/phronesisfiles/sample.png",
-                Modules = new List<final_project_be_Domain.Models.Module>
-        {
-            new final_project_be_Domain.Models.Module
-            {
-                Title = "Module 1",
-                Lessons = new List<Lesson>
-                {
-                    new Lesson { Title = "Lesson 1" },
-                    new Lesson { Title = "Lesson 2" }
-                }
-            },
-            new final_project_be_Domain.Models.Module
-            {
-                Title = "Module 2",
-                Lessons = new List<Lesson>
-                {
-                    new Lesson { Title = "Lesson 3" },
-                    new Lesson { Title = "Lesson 4" },
-                    new Lesson { Title = "Lesson 5" }
-                }
-            }
-        }
-            };
-            context.Courses.Add(course);
-            await context.SaveChangesAsync();
+            _courseDAOMock.Setup(d => d.GetByIdAsync(course.CourseId)).ReturnsAsync(course);
+            _courseDAOMock.Setup(d => d.UpdateAsync(It.IsAny<Courses>())).Returns(Task.CompletedTask);
 
-            var repo = CreateRepository(context, out var blobMock, out var openAIMock);
+            var repo = new CourseRepository(
+                _courseDAOMock.Object,
+                _caculator,
+                _userCourseDAOMock.Object,
+                _reviewDAOMock.Object,
+                _mapper,
+                _loggerMock.Object,
+                _blobStorageMock.Object,
+                _embeddingDAOMock.Object,
+                _embeddingServiceMock.Object,
+                _userRepoMock.Object,
+                _userEmbeddingDAOMock.Object
+            );
+
+            // Act
             var result = await repo.ToggleStatus(course.CourseId, "Approved");
 
-            Assert.NotNull(result);
+            // Assert
             Assert.Equal("Approved", result.Status);
             Assert.Equal("Hoang", result.Mentor.FirstName);
-            Assert.Equal("Nguyen", result.Mentor.LastName);
         }
 
         [Fact]
         public async Task UpdateCourse_ShouldUpdateFieldsAndReplaceImage()
         {
-            var context = GetInMemoryDbContext();
-            var mentor = new Mentor
+            // Arrange
+            var existingCourse = new Courses
             {
-                User = new User
-                {
-                    Email = "mentor@example.com",
-                    Password = "password123",
-                    Phone = "0123456789",
-                    UserMetaData = new UserMetadata
-                    {
-                        FirstName = "Hoang",
-                        LastName = "Nguyen"
-                    }
-                }
+                CourseId = 1,
+                CourseName = "Old Name",
+                CoursesImage = "https://old-url.com/image.png"
             };
-            context.Mentors.Add(mentor);
-            await context.SaveChangesAsync();
 
-            var course = new Courses
+            var newImage = GetMockFormFile("new.jpg");
+
+            var updateDto = new UpdateCourseDto
             {
-                CourseName = "Course 1",
-                CourseContent = "Content",
-                CategoryId = 9,
-                MentorId = mentor.MentorId,
-                Requirement = "Requirement",
-                IntendedLearner = "Business executives, political and civic leaders, and students",
-                Language = "English",
-                Level = "AllLevels",
-                Cost = 450,
-                SkillLearn = "Look confident, be understood",
-                CourseLength = 50.1,
-                Status = "Pending",
-                CoursesImage = "https://finalprojectbestorage.blob.core.windows.net/phronesisfiles/sample.png",
-                Modules = new List<final_project_be_Domain.Models.Module>
-                {
-                    new final_project_be_Domain.Models.Module
-                    {
-                        Title = "Module 1",
-                        Lessons = new List<Lesson>
-                        {
-                            new Lesson { Title = "Lesson 1" },
-                            new Lesson { Title = "Lesson 2" }
-                        }
-                    },
-                    new final_project_be_Domain.Models.Module
-                    {
-                        Title = "Module 2",
-                        Lessons = new List<Lesson>
-                        {
-                            new Lesson { Title = "Lesson 3" },
-                            new Lesson { Title = "Lesson 4" },
-                            new Lesson { Title = "Lesson 5" }
-                        }
-                    }
-                }
-            };
-            context.Courses.Add(course);
-            await context.SaveChangesAsync();
-
-            var repo = CreateRepository(context, out var blobMock, out var openAIMock);
-
-            var newImage = new FormFile(new MemoryStream(Encoding.UTF8.GetBytes("newimg")), 0, 6, "NewImage", "new.jpg");
-
-            var dto = new UpdateCourseDto
-            {
-                CourseId = course.CourseId,
-                CourseName = "New",
-                CourseContent = "New content here",
-                Cost = 150,
+                CourseId = 1,
+                CourseName = "Updated Name",
                 CoursesImage = newImage,
-                CourseLength = 5,
-                SkillLearn = "Skill A",
+                CourseContent = "Updated Content",
+                Cost = 200,
+                CourseLength = 10,
+                SkillLearn = "Updated Skill",
                 CategoryId = 1,
                 MentorId = 1,
-                IntendedLearner = "Anyone",
+                IntendedLearner = "Everyone",
                 Level = "Beginner",
                 Language = "English",
                 Requirement = "None"
             };
 
-            var result = await repo.UpdateCourse(dto);
+            _courseDAOMock.Setup(d => d.GetByIdAsync(updateDto.CourseId)).ReturnsAsync(existingCourse);
+            _courseDAOMock.Setup(d => d.UpdateAsync(It.IsAny<Courses>())).Returns(Task.CompletedTask);
+            _blobStorageMock.Setup(b => b.UploadFileAsync(It.IsAny<string>(), It.IsAny<Stream>())).Returns(Task.CompletedTask);
+            _blobStorageMock.Setup(b => b.DeleteFileIfExistsAsync(It.IsAny<string>())).Returns(Task.CompletedTask);
 
+            var repo = new CourseRepository(
+                _courseDAOMock.Object,
+                _caculator,
+                _userCourseDAOMock.Object,
+                _reviewDAOMock.Object,
+                _mapper,
+                _loggerMock.Object,
+                _blobStorageMock.Object,
+                _embeddingDAOMock.Object,
+                _embeddingServiceMock.Object,
+                _userRepoMock.Object,
+                _userEmbeddingDAOMock.Object
+            );
+
+            // Act
+            var result = await repo.UpdateCourse(updateDto);
+
+            // Assert
             Assert.NotNull(result);
-            Assert.Equal("New", result.CourseName);
-            Assert.Equal("Pending", result.Status); // Updated to Pending on update
-            Assert.StartsWith("https://finalprojectbestorage.blob.core.windows.net/phronesisfiles/", result.CoursesImage);
+            Assert.Equal("Updated Name", result.CourseName);
+            _blobStorageMock.Verify(b => b.UploadFileAsync(It.IsAny<string>(), It.IsAny<Stream>()), Times.Once);
         }
 
         [Fact]
         public void GetAllCourses_ShouldReturnFilteredPaginatedCourses()
         {
-            var context = GetInMemoryDbContext();
-            context.Courses.AddRange(
-                new Courses { CourseName = "A", Cost = 100, Status = "Approved", CreateAt = DateTime.Now },
-                new Courses { CourseName = "B", Cost = 200, Status = "Approved", CreateAt = DateTime.Now },
-                new Courses { CourseName = "C", Cost = 300, Status = "Pending", CreateAt = DateTime.Now }
+            // Arrange
+            var now = DateTime.Now;
+
+            var fakeCourses = new List<Courses>
+    {
+        new Courses
+        {
+            CourseId = 1,
+            CourseName = "A",
+            Cost = 100,
+            Status = "Approved",
+            CreateAt = now,
+            Mentor = new Mentor
+            {
+                User = new User
+                {
+                    UserMetaData = new UserMetadata { FirstName = "Test", LastName = "User" }
+                }
+            },
+            Reviews = new List<Review>(),
+        },
+        new Courses
+        {
+            CourseId = 2,
+            CourseName = "B",
+            Cost = 200,
+            Status = "Approved",
+            CreateAt = now,
+            Mentor = new Mentor
+            {
+                User = new User
+                {
+                    UserMetaData = new UserMetadata { FirstName = "Test", LastName = "User" }
+                }
+            },
+            Reviews = new List<Review>(),
+        },
+        new Courses
+        {
+            CourseId = 3,
+            CourseName = "C",
+            Cost = 300,
+            Status = "Pending",
+            CreateAt = now,
+            Mentor = new Mentor
+            {
+                User = new User
+                {
+                    UserMetaData = new UserMetadata { FirstName = "Test", LastName = "User" }
+                }
+            },
+            Reviews = new List<Review>(),
+        }
+    }.AsQueryable();
+
+            _courseDAOMock.Setup(d => d.GetAll()).Returns(fakeCourses);
+
+            var repo = new CourseRepository(
+                _courseDAOMock.Object,
+                _caculator,
+                _userCourseDAOMock.Object,
+                _reviewDAOMock.Object,
+                _mapper,
+                _loggerMock.Object,
+                _blobStorageMock.Object,
+                _embeddingDAOMock.Object,
+                _embeddingServiceMock.Object,
+                _userRepoMock.Object,
+                _userEmbeddingDAOMock.Object
             );
-            context.SaveChanges();
 
-            var repo = CreateRepository(context, out var blobMock, out var openAIMock);
+            // Act
+            var result = repo.GetAllCourses(
+                page: 1,
+                pageSize: 10,
+                CategoryId: null,
+                title: null,
+                userId: null,
+                sortOption: null,
+                mentorId: null,
+                Language: null,
+                Level: null,
+                MinCost: null,
+                MaxCost: null,
+                MinRate: null,
+                MaxRate: null,
+                statuses: new List<StatusEnum> { StatusEnum.Approved }
+            );
 
-            var result = repo.GetAllCourses(1, 10, null, null, null, null, null, null, null, null, null, null, null, new List<StatusEnum> { StatusEnum.Approved });
-
+            // Assert
+            Assert.NotNull(result);
             Assert.Equal(2, result.TotalCount);
         }
 
         [Fact]
         public async Task GetCourse_ShouldReturnCorrectCourse()
         {
-            var context = GetInMemoryDbContext();
-
-            var mentor = new Mentor
-            {
-                User = new User
-                {
-                    Email = "mentor@example.com",
-                    Password = "password123",
-                    Phone = "0123456789",
-                    UserMetaData = new UserMetadata
-                    {
-                        FirstName = "Hoang",
-                        LastName = "Nguyen"
-                    }
-                }
-            };
-            context.Mentors.Add(mentor);
-            await context.SaveChangesAsync();
-
+            // Arrange
             var course = new Courses
             {
+                CourseId = 1,
                 CourseName = "Course 1",
-                CourseContent = "Content",
-                CategoryId = 9,
-                MentorId = mentor.MentorId,
-                Requirement = "Requirement",
-                IntendedLearner = "Business executives, political and civic leaders, and students",
-                Language = "English",
-                Level = "AllLevels",
-                Cost = 450,
-                SkillLearn = "Look confident, be understood",
-                CourseLength = 50.1,
-                Status = "Pending",
-                CoursesImage = "https://finalprojectbestorage.blob.core.windows.net/phronesisfiles/sample.png",
+                Mentor = new Mentor
+                {
+                    User = new User
+                    {
+                        UserMetaData = new UserMetadata
+                        {
+                            FirstName = "Hoang",
+                            LastName = "Nguyen"
+                        }
+                    }
+                },
                 Modules = new List<final_project_be_Domain.Models.Module>
         {
-            new final_project_be_Domain.Models.Module
-            {
-                Title = "Module 1",
-                Lessons = new List<Lesson>
-                {
-                    new Lesson { Title = "Lesson 1" },
-                    new Lesson { Title = "Lesson 2" }
-                }
-            },
-            new final_project_be_Domain.Models.Module
-            {
-                Title = "Module 2",
-                Lessons = new List<Lesson>
-                {
-                    new Lesson { Title = "Lesson 3" },
-                    new Lesson { Title = "Lesson 4" },
-                    new Lesson { Title = "Lesson 5" }
-                }
-            }
+            new final_project_be_Domain.Models.Module { Lessons = new List<Lesson> { new Lesson(), new Lesson() } },
+            new final_project_be_Domain.Models.Module { Lessons = new List<Lesson> { new Lesson(), new Lesson(), new Lesson() } }
         }
             };
 
-            context.Courses.Add(course);
-            await context.SaveChangesAsync();
+            _courseDAOMock.Setup(d => d.GetByIdAsync(course.CourseId))
+                          .ReturnsAsync(course);
 
+            var repo = new CourseRepository(
+                _courseDAOMock.Object,
+                _caculator,
+                _userCourseDAOMock.Object,
+                _reviewDAOMock.Object,
+                _mapper,
+                _loggerMock.Object,
+                _blobStorageMock.Object,
+                _embeddingDAOMock.Object,
+                _embeddingServiceMock.Object,
+                _userRepoMock.Object,
+                _userEmbeddingDAOMock.Object
+            );
 
-            var repo = CreateRepository(context, out var blobMock, out var embeddingMock);
-
+            // Act
             var result = await repo.GetCourse(course.CourseId);
 
+            // Assert
             Assert.NotNull(result);
             Assert.Equal("Course 1", result.CourseName);
             Assert.Equal(2, result.CountModule);
             Assert.Equal(5, result.CountLesson);
             Assert.Equal("Hoang", result.Mentor.FirstName);
         }
+
 
     }
 
