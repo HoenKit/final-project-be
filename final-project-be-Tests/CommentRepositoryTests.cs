@@ -2,10 +2,12 @@
 using final_project_be_Application.Repository;
 using final_project_be_Domain.DTOs.Comment;
 using final_project_be_Domain.Models;
+using final_project_be_Infrastructure.DAO_Interface;
 using final_project_be_Infrastructure.Data;
 using final_project_be_Tests.TestDAOs;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,125 +25,127 @@ namespace final_project_be_Tests
             var config = new MapperConfiguration(cfg =>
             {
                 cfg.CreateMap<CommentDto, Comment>();
-                cfg.CreateMap<Comment, CommentDto>();
             });
             _mapper = config.CreateMapper();
         }
 
-        private ApplicationDbContext GetInMemoryDbContext()
+        private CommentRepository CreateRepository(Mock<ICommentDAO> mockDao)
         {
-            var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-                .UseInMemoryDatabase(Guid.NewGuid().ToString())
-                .Options;
-
-            return new ApplicationDbContext(options);
+            var logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger<CommentRepository>();
+            return new CommentRepository(mockDao.Object, _mapper, logger);
         }
 
         [Fact]
-        public async Task CreateComment_ShouldAddComment()
+        public async Task CreateComment_ShouldReturnComment()
         {
-            var context = GetInMemoryDbContext();
-            var dao = new NoTransactionCommentDAO(context);
-            var logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger<CommentRepository>();
-            var repository = new CommentRepository(dao, _mapper, logger);
+            // Arrange
+            var mockDao = new Mock<ICommentDAO>();
+            var dto = new CommentDto { Content = "Test", PostId = 1 };
+            var repo = CreateRepository(mockDao);
 
-            var dto = new CommentDto
-            {
-                PostId = 1,
-                UserId = Guid.NewGuid(),
-                Content = "Test comment"
-            };
+            mockDao.Setup(d => d.BeginTransactionAsync()).Returns(Task.CompletedTask);
+            mockDao.Setup(d => d.AddAsync(It.IsAny<Comment>())).Returns(Task.CompletedTask);
+            mockDao.Setup(d => d.CommitTransactionAsync()).Returns(Task.CompletedTask);
 
-            var result = await repository.CreateComment(dto);
+            // Act
+            var result = await repo.CreateComment(dto);
 
+            // Assert
             Assert.NotNull(result);
-            Assert.Equal(dto.Content, result.Content);
+            Assert.Equal("Test", result.Content);
+            Assert.Equal(1, result.PostId);
         }
 
         [Fact]
-        public async Task DeleteComment_ShouldRemoveComment()
+        public async Task DeleteComment_ShouldReturnTrue()
         {
-            var context = GetInMemoryDbContext();
-            var dao = new NoTransactionCommentDAO(context);
-            var logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger<CommentRepository>();
-            var repository = new CommentRepository(dao, _mapper, logger);
+            var mockDao = new Mock<ICommentDAO>();
+            var repo = CreateRepository(mockDao);
 
-            var comment = new Comment { PostId = 1, UserId = Guid.NewGuid(), Content = "To delete" };
-            context.comments.Add(comment);
-            await context.SaveChangesAsync();
+            mockDao.Setup(d => d.BeginTransactionAsync()).Returns(Task.CompletedTask);
+            mockDao.Setup(d => d.DeleteAsync(1)).Returns(Task.CompletedTask);
+            mockDao.Setup(d => d.CommitTransactionAsync()).Returns(Task.CompletedTask);
 
-            var result = await repository.DeleteComment(comment.CommentId);
+            var result = await repo.DeleteComment(1);
 
             Assert.True(result);
-            Assert.Null(await context.comments.FindAsync(comment.CommentId));
         }
 
         [Fact]
         public async Task GetComment_ShouldReturnCorrectComment()
         {
-            var context = GetInMemoryDbContext();
-            var dao = new NoTransactionCommentDAO(context);
-            var logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger<CommentRepository>();
-            var repository = new CommentRepository(dao, _mapper, logger);
+            var mockDao = new Mock<ICommentDAO>();
+            var comment = new Comment { CommentId = 1, Content = "Fetched", PostId = 2 };
+            var repo = CreateRepository(mockDao);
 
-            var comment = new Comment { PostId = 1, UserId = Guid.NewGuid(), Content = "Sample" };
-            context.comments.Add(comment);
-            await context.SaveChangesAsync();
+            mockDao.Setup(d => d.BeginTransactionAsync()).Returns(Task.CompletedTask);
+            mockDao.Setup(d => d.GetByIdAsync(1)).ReturnsAsync(comment);
+            mockDao.Setup(d => d.CommitTransactionAsync()).Returns(Task.CompletedTask);
 
-            var result = await repository.GetComment(comment.CommentId);
+            var result = await repo.GetComment(1);
 
             Assert.NotNull(result);
-            Assert.Equal(comment.Content, result.Content);
+            Assert.Equal("Fetched", result.Content);
+            Assert.Equal(2, result.PostId);
         }
 
         [Fact]
-        public async Task UpdateComment_ShouldModifyComment()
+        public async Task UpdateComment_ShouldUpdateFields()
         {
-            var context = GetInMemoryDbContext();
-            var dao = new NoTransactionCommentDAO(context);
-            var logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger<CommentRepository>();
-            var repository = new CommentRepository(dao, _mapper, logger);
+            var mockDao = new Mock<ICommentDAO>();
+            var dto = new CommentDto { CommentId = 1, Content = "Updated", PostId = 5 };
+            var repo = CreateRepository(mockDao);
 
-            var comment = new Comment { PostId = 1, UserId = Guid.NewGuid(), Content = "Old content" };
-            context.comments.Add(comment);
-            await context.SaveChangesAsync();
+            mockDao.Setup(d => d.BeginTransactionAsync()).Returns(Task.CompletedTask);
+            mockDao.Setup(d => d.UpdateAsync(It.IsAny<Comment>())).Returns(Task.CompletedTask);
+            mockDao.Setup(d => d.CommitTransactionAsync()).Returns(Task.CompletedTask);
 
-            context.ChangeTracker.Clear();
-
-            var dto = new CommentDto
-            {
-                CommentId = comment.CommentId,
-                PostId = comment.PostId,
-                UserId = comment.UserId,
-                Content = "Updated content"
-            };
-
-            var result = await repository.UpdateComment(dto);
+            var result = await repo.UpdateComment(dto);
 
             Assert.NotNull(result);
-            Assert.Equal("Updated content", result.Content);
+            Assert.Equal("Updated", result.Content);
+            Assert.Equal(5, result.PostId);
         }
 
         [Fact]
-        public void GetAllCommentsByPostId_ShouldReturnPaginatedComments()
+        public void GetAllComments_ShouldReturnPagedResult()
         {
-            var context = GetInMemoryDbContext();
-            var dao = new NoTransactionCommentDAO(context);
-            var logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger<CommentRepository>();
-            var repository = new CommentRepository(dao, _mapper, logger);
+            var mockDao = new Mock<ICommentDAO>();
+            var data = new List<Comment>
+        {
+            new Comment { CommentId = 1, PostId = 1 },
+            new Comment { CommentId = 2, PostId = 1 },
+            new Comment { CommentId = 3, PostId = 2 },
+        }.AsQueryable();
 
-            context.comments.AddRange(
-                new Comment { PostId = 1, UserId = Guid.NewGuid(), Content = "C1" },
-                new Comment { PostId = 1, UserId = Guid.NewGuid(), Content = "C2" },
-                new Comment { PostId = 2, UserId = Guid.NewGuid(), Content = "C3" }
-            );
-            context.SaveChanges();
+            mockDao.Setup(d => d.GetAll()).Returns(data);
 
-            var result = repository.GetAllCommentsByPostId(page: 1, pageSize: 2, postId: 1);
+            var repo = CreateRepository(mockDao);
 
-            Assert.Equal(2, result.Items.Count());
+            var result = repo.GetAllComments(1, 2);
+
+            Assert.Equal(3, result.TotalCount);
+        }
+
+        [Fact]
+        public void GetAllCommentsByPostId_ShouldReturnCorrectComments()
+        {
+            var mockDao = new Mock<ICommentDAO>();
+            var data = new List<Comment>
+        {
+            new Comment { CommentId = 1, PostId = 1 },
+            new Comment { CommentId = 2, PostId = 1 },
+            new Comment { CommentId = 3, PostId = 2 },
+        }.AsQueryable();
+
+            mockDao.Setup(d => d.GetAll()).Returns(data);
+
+            var repo = CreateRepository(mockDao);
+
+            var result = repo.GetAllCommentsByPostId(1, 10, 1);
+
+            Assert.Equal(2, result.TotalCount);
             Assert.All(result.Items, c => Assert.Equal(1, c.PostId));
         }
     }
-
 }

@@ -14,6 +14,7 @@ using final_project_be_Domain.DTOs.Review;
 using final_project_be_Domain.DTOs.Users;
 using final_project_be_Domain.Models;
 using final_project_be_Infrastructure.DAO;
+using final_project_be_Infrastructure.DAO_Interface;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
@@ -26,16 +27,16 @@ namespace final_project_be_Application.Repository
 {
     public class MentorRepository : Repository<Mentor>, IMentorRepository
     {
-        private readonly UserDAO _userDAO;
-        private readonly MentorDAO _mentorDAO;
-        private readonly ReviewDAO _reviewDAO;
-        private readonly CourseDAO _courseDAO;
+        private readonly IUserDAO _userDAO;
+        private readonly IMentorDAO _mentorDAO;
+        private readonly IReviewDAO _reviewDAO;
+        private readonly ICourseDAO _courseDAO;
         private readonly IMapper _mapper;
         private readonly ILogger<MentorRepository> _logger;
         private readonly IEmailService _emailService;
         private readonly IBlobStorageService _blobStorageService;
 
-        public MentorRepository(MentorDAO mentorDAO, IBlobStorageService blobStorageService, IMapper mapper, ILogger<MentorRepository> logger, CourseDAO courseDAO, ReviewDAO reviewDAO, UserDAO userDAO, IEmailService emailService) : base(mentorDAO)
+        public MentorRepository(IMentorDAO mentorDAO, IBlobStorageService blobStorageService, IMapper mapper, ILogger<MentorRepository> logger, ICourseDAO courseDAO, IReviewDAO reviewDAO, IUserDAO userDAO, IEmailService emailService) : base(mentorDAO)
         {
             _mentorDAO = mentorDAO;
             _mapper = mapper;

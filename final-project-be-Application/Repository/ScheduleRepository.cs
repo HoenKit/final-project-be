@@ -3,6 +3,7 @@ using final_project_be_Application.Interface;
 using final_project_be_Domain.DTOs.Schedule;
 using final_project_be_Domain.Models;
 using final_project_be_Infrastructure.DAO;
+using final_project_be_Infrastructure.DAO_Interface;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -14,12 +15,12 @@ namespace final_project_be_Application.Repository
 {
     public class ScheduleRepository : Repository<Schedule>, IScheduleRepository
     {
-        private readonly ScheduleDAO _scheduleDAO;
-        private readonly UserScheduleDAO _userScheduleDAO;
+        private readonly IScheduleDAO _scheduleDAO;
+        private readonly IUserScheduleDAO _userScheduleDAO;
         private readonly IMapper _mapper;
         private readonly ILogger<AnswerRepository> _logger;
 
-        public ScheduleRepository(ScheduleDAO scheduleDAO, IMapper mapper, ILogger<AnswerRepository> logger, UserScheduleDAO userScheduleDAO) : base(scheduleDAO)
+        public ScheduleRepository(IScheduleDAO scheduleDAO, IMapper mapper, ILogger<AnswerRepository> logger, IUserScheduleDAO userScheduleDAO) : base(scheduleDAO)
         {
             _scheduleDAO = scheduleDAO;
             _userScheduleDAO = userScheduleDAO;

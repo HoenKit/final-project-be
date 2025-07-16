@@ -1,17 +1,19 @@
 ﻿using final_project_be_Domain.DTOs.Coupon;
 using final_project_be_Domain.Models;
+using final_project_be_Infrastructure.DAO_Interface;
 using final_project_be_Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace final_project_be_Infrastructure.DAO
 {
-	public class CouponDAO : GenericDAO<Coupon>
-	{
-		private readonly ApplicationDbContext _context;
-		public CouponDAO(ApplicationDbContext context) : base(context)
-		{
-			_context = context;
-		}
+    public class CouponDAO : GenericDAO<Coupon>, ICouponDAO
+    {
+        private readonly ApplicationDbContext _context;
+
+        public CouponDAO(ApplicationDbContext context) : base(context)
+        {
+            _context = context;
+        }
 
         public async Task<List<CouponDto>> GetAllCouponsAsync()
         {
@@ -44,7 +46,5 @@ namespace final_project_be_Infrastructure.DAO
                 .Where(cc => cc.CourseId == courseId && cc.ExpiredAt < DateTime.UtcNow)
                 .ToListAsync();
         }
-
-
     }
 }

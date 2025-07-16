@@ -8,6 +8,7 @@ using final_project_be_Domain.DTOs.Answer;
 using final_project_be_Domain.DTOs.Question;
 using final_project_be_Domain.Models;
 using final_project_be_Infrastructure.DAO;
+using final_project_be_Infrastructure.DAO_Interface;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System;
@@ -22,12 +23,12 @@ namespace final_project_be_Application.Repository
 {
 	public class QuestionRepository : Repository<Question>, IQuestionRepository
 	{
-		private readonly QuestionDAO _questionDAO;
+		private readonly IQuestionDAO _questionDAO;
 		private readonly IMapper _mapper;
 		private readonly ILogger<QuestionRepository> _logger;
 		private readonly IAnswerRepository _answerRepository;
 		private readonly IOpenAIEmbeddingService _openAIService;
-		public QuestionRepository(QuestionDAO questionDAO, IMapper mapper, ILogger<QuestionRepository> logger, IAnswerRepository answerRepository, IOpenAIEmbeddingService openAIService) : base(questionDAO)
+		public QuestionRepository(IQuestionDAO questionDAO, IMapper mapper, ILogger<QuestionRepository> logger, IAnswerRepository answerRepository, IOpenAIEmbeddingService openAIService) : base(questionDAO)
 		{
 			_questionDAO = questionDAO;
 			_mapper = mapper;

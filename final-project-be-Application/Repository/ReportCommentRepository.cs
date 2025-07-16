@@ -6,17 +6,18 @@ using final_project_be_Application.Interface;
 using final_project_be_Domain.DTOs.Report;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using final_project_be_Infrastructure.DAO_Interface;
 
 namespace final_project_be_Application.Repository
 {
     public class ReportCommentRepository : Repository<ReportComment>, IReportCommentRepository
     {
-        private readonly ReportCommentDAO _ReportCommentDAO;
+        private readonly IReportCommentDAO _ReportCommentDAO;
         private readonly IMapper _mapper;
         private readonly ILogger<ReportCommentRepository> _logger;
-        private readonly ReportDAO _reportDAO;
+        private readonly IReportDAO _reportDAO;
 
-        public ReportCommentRepository(ReportCommentDAO ReportCommentDAO, IMapper mapper, ILogger<ReportCommentRepository> logger, ReportDAO reportDAO) : base(ReportCommentDAO)
+        public ReportCommentRepository(IReportCommentDAO ReportCommentDAO, IMapper mapper, ILogger<ReportCommentRepository> logger, ReportDAO reportDAO) : base(ReportCommentDAO)
         {
             _mapper = mapper;
             _logger = logger;

@@ -1,25 +1,33 @@
 ﻿using final_project_be_Domain.Models;
+using final_project_be_Infrastructure.DAO_Interface;
 using final_project_be_Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace final_project_be_Infrastructure.DAO
 {
-	public class ScheduleDAO : GenericDAO<Schedule>
-	{
-		private readonly ApplicationDbContext _context;
-		public ScheduleDAO(ApplicationDbContext context) : base(context)
-		{
-			_context = context;
-		}
-        public async Task<Schedule> GetScheduleByIdAsync(int scheduleId)=> await _context.Schedules.FindAsync(scheduleId);
-        public async Task<List<Schedule>> GetSchedulesByMentorIdAsync(int mentorId) => await _context.Schedules
-                                                                                                    .Where(s => s.MentorId == mentorId)
-                                                                                                    .ToListAsync();
+    public class ScheduleDAO : GenericDAO<Schedule>, IScheduleDAO
+    {
+        private readonly ApplicationDbContext _context;
+
+        public ScheduleDAO(ApplicationDbContext context) : base(context)
+        {
+            _context = context;
+        }
+
+        public async Task<Schedule> GetScheduleByIdAsync(int scheduleId)
+            => await _context.Schedules.FindAsync(scheduleId);
+
+        public async Task<List<Schedule>> GetSchedulesByMentorIdAsync(int mentorId)
+            => await _context.Schedules
+                             .Where(s => s.MentorId == mentorId)
+                             .ToListAsync();
+
         public async Task<bool> HasUserEnrolledCourseAsync(int courseId, Guid userId)
         {
             return await _context.Set<UserCourse>()
                 .AnyAsync(cu => cu.CourseId == courseId && cu.UserId == userId);
         }
+
         public async Task<bool> IsUserAlreadyRegisteredAsync(Guid userId, int scheduleId)
         {
             return await _context.UserSchedules
@@ -38,6 +46,6 @@ namespace final_project_be_Infrastructure.DAO
             _context.Schedules.Add(schedule);
             await _context.SaveChangesAsync();
         }
-
     }
+
 }

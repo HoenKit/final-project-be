@@ -6,16 +6,17 @@ using final_project_be_Domain.DTOs;
 using final_project_be_Application.Repository;
 using Microsoft.Extensions.Logging;
 using final_project_be_Application.Interface;
+using final_project_be_Infrastructure.DAO_Interface;
 
 namespace final_project_be_Application.Repository
 {
 	public class CategoryRepository : Repository<Category>, ICategoryRepository
 	{
-		private readonly CategoryDAO _categoryDAO;
+		private readonly ICategoryDAO _categoryDAO;
 		private readonly IMapper _mapper;
 		private readonly ILogger<CategoryRepository> _logger;
 
-		public CategoryRepository(CategoryDAO categoryDAO, IMapper mapper, ILogger<CategoryRepository> logger) : base(categoryDAO)
+		public CategoryRepository(ICategoryDAO categoryDAO, IMapper mapper, ILogger<CategoryRepository> logger) : base(categoryDAO)
 		{
 			_categoryDAO = categoryDAO;
 			_mapper = mapper;

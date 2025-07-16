@@ -1,12 +1,13 @@
 ﻿using final_project_be_Infrastructure.Data;
 using final_project_be_Domain.Models;
+using final_project_be_Infrastructure.DAO_Interface;
 
 namespace final_project_be_Infrastructure.DAO
 {
-	public class EventDAO : GenericDAO<Event>
-	{
-		public EventDAO(ApplicationDbContext context) : base(context)
-		{
-		}
-	}
+    public class EventDAO : GenericDAO<Event>, IEventDAO
+    {
+        public EventDAO(ApplicationDbContext context) : base(context)
+        {
+        }
+    }
 }

@@ -4,16 +4,17 @@ using final_project_be_Domain.Models;
 using final_project_be_Application.Interface;
 using final_project_be_Domain.DTOs.Post;
 using Microsoft.Extensions.Logging;
+using final_project_be_Infrastructure.DAO_Interface;
 
 namespace final_project_be_Application.Repository
 {
 	public class PostFileRepository : Repository<PostFile>, IPostFileRepository
 	{
-		private readonly PostFileDAO _postFileDAO;
+		private readonly IPostFileDAO _postFileDAO;
 		private readonly IMapper _mapper;
 		private readonly ILogger<PostFileRepository> _logger;
 
-		public PostFileRepository(PostFileDAO postFileDAO, IMapper mapper, ILogger<PostFileRepository> logger) : base(postFileDAO)
+		public PostFileRepository(IPostFileDAO postFileDAO, IMapper mapper, ILogger<PostFileRepository> logger) : base(postFileDAO)
 		{
 			_postFileDAO = postFileDAO;
 			_mapper = mapper;

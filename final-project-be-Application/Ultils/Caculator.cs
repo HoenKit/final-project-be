@@ -3,6 +3,7 @@ using final_project_be_Domain.DTOs.Courses;
 using final_project_be_Domain.DTOs.Module;
 using final_project_be_Domain.Models;
 using final_project_be_Infrastructure.DAO;
+using final_project_be_Infrastructure.DAO_Interface;
 using final_project_be_Infrastructure.Data;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -16,12 +17,12 @@ namespace final_project_be_Application.Ultils
 {
     public class Caculator
     {
-        private readonly LessonDAO _lessonDAO;
-        private readonly ModuleDAO _moduleDAO;
-        private readonly UserModuleDAO _userModuleDAO;
-        private readonly UserCourseDAO _userCourseDAO;
+        private readonly ILessonDAO _lessonDAO;
+        private readonly IModuleDAO _moduleDAO;
+        private readonly IUserModuleDAO _userModuleDAO;
+        private readonly IUserCourseDAO _userCourseDAO;
 
-        public Caculator(LessonDAO lessonDAO, ModuleDAO moduleDAO, UserCourseDAO userCourseDAO, UserModuleDAO userModuleDAO)
+        public Caculator(ILessonDAO lessonDAO, IModuleDAO moduleDAO, IUserCourseDAO userCourseDAO, IUserModuleDAO userModuleDAO)
         {
             _lessonDAO = lessonDAO;
             _moduleDAO = moduleDAO;

@@ -6,16 +6,17 @@ using final_project_be_Domain.DTOs;
 using final_project_be_Application.Interface;
 using Microsoft.Extensions.Logging;
 using DocumentFormat.OpenXml.Wordprocessing;
+using final_project_be_Infrastructure.DAO_Interface;
 
 namespace final_project_be_Application.Repository
 {
     public class NotificationRepository : Repository<Notification>, INotificationRepository
     {
-        private readonly NotificationDAO _NotificationDAO;
+        private readonly INotificationDAO _NotificationDAO;
         private readonly IMapper _mapper;
         private readonly ILogger<NotificationRepository> _logger;
 
-        public NotificationRepository(NotificationDAO NotificationDAO, IMapper mapper, ILogger<NotificationRepository> logger) : base(NotificationDAO)
+        public NotificationRepository(INotificationDAO NotificationDAO, IMapper mapper, ILogger<NotificationRepository> logger) : base(NotificationDAO)
         {
             _mapper = mapper;
             _logger = logger;
