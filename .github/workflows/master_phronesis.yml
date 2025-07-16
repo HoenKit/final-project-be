@@ -22,7 +22,13 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.x'
+          
+      - name: Restore dependencies
+        run: dotnet restore
 
+      - name: Run tests
+        run: dotnet test ./final-project-be-Tests/final-project-be-Tests.csproj --configuration Release --no-build --verbosity normal
+        
       - name: Build with dotnet
         run: dotnet build --configuration Release
 
