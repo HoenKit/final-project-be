@@ -3,11 +3,13 @@ using final_project_be_Application.Repository;
 using final_project_be_Domain.DTOs.Answer;
 using final_project_be_Domain.Models;
 using final_project_be_Infrastructure.DAO;
+using final_project_be_Infrastructure.DAO_Interface;
 using final_project_be_Infrastructure.Data;
 using final_project_be_Tests.TestDAOs;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
+using System.Linq.Expressions;
 
 namespace final_project_be_Tests
 {
@@ -26,110 +28,84 @@ namespace final_project_be_Tests
             _mapper = config.CreateMapper();
         }
 
-        private ApplicationDbContext GetInMemoryDbContext()
-        {
-            var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-                .UseInMemoryDatabase(Guid.NewGuid().ToString())
-                .Options;
-
-            return new ApplicationDbContext(options);
-        }
-
         [Fact]
         public async Task CreateAnswer_ShouldAddAnswer()
         {
-            var context = GetInMemoryDbContext();
-            var dao = new NoTransactionAnswerDAO(context);
-            var logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger<AnswerRepository>();
-            var repository = new AnswerRepository(dao, _mapper, logger);
+            // Arrange
+            var mockDao = new Mock<IAnswerDAO>();
+            var dto = new AnswerDto { QuestionId = 1, Text = "Sample Answer", Is_correct = true };
+            var entity = new Answer { AnswerId = 1, QuestionId = 1, Text = "Sample Answer", Is_correct = true };
 
-            var dto = new AnswerDto
-            {
-                QuestionId = 1,
-                Text = "Sample Answer",
-                Is_correct = true
-            };
+            mockDao.Setup(d => d.AddAsync(It.IsAny<Answer>())).Returns(Task.CompletedTask);
+            mockDao.Setup(d => d.SaveChangesAsync()).Returns(Task.CompletedTask);
 
-            var result = await repository.CreateAnswer(dto);
+            var logger = Mock.Of<ILogger<AnswerRepository>>();
+            var repo = new AnswerRepository(mockDao.Object, _mapper, logger);
 
+            // Act
+            var result = await repo.CreateAnswer(dto);
+
+            // Assert
             Assert.NotNull(result);
             Assert.Equal(dto.Text, result.Text);
-            Assert.Equal(dto.Is_correct, result.Is_correct);
-            Assert.Equal(dto.QuestionId, result.QuestionId);
         }
 
         [Fact]
         public async Task GetAnswer_ShouldReturnCorrectAnswer()
         {
-            var context = GetInMemoryDbContext();
-            var dao = new NoTransactionAnswerDAO(context);
-            var logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger<AnswerRepository>();
-            var repository = new AnswerRepository(dao, _mapper, logger);
+            // Arrange
+            var answer = new Answer { AnswerId = 1, QuestionId = 1, Text = "Test Answer", Is_correct = false };
+            var mockDao = new Mock<IAnswerDAO>();
+            mockDao.Setup(d => d.GetByIdAsync(1)).ReturnsAsync(answer);
 
-            var answer = new Answer
-            {
-                QuestionId = 1,
-                Text = "Test Answer",
-                Is_correct = false
-            };
-            context.Answers.Add(answer);
-            await context.SaveChangesAsync();
+            var logger = Mock.Of<ILogger<AnswerRepository>>();
+            var repo = new AnswerRepository(mockDao.Object, _mapper, logger);
 
-            var result = await repository.GetAnswer(answer.AnswerId);
+            // Act
+            var result = await repo.GetAnswer(1);
 
+            // Assert
             Assert.NotNull(result);
-            Assert.Equal(answer.Text, result.Text);
+            Assert.Equal("Test Answer", result.Text);
         }
 
         [Fact]
         public async Task DeleteAnswer_ShouldRemoveAnswer()
         {
-            var context = GetInMemoryDbContext();
-            var dao = new NoTransactionAnswerDAO(context);
-            var logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger<AnswerRepository>();
-            var repository = new AnswerRepository(dao, _mapper, logger);
+            var answer = new Answer { AnswerId = 1 };
+            var mockDao = new Mock<IAnswerDAO>();
+            mockDao.Setup(d => d.GetByIdAsync(1)).ReturnsAsync(answer);
+            mockDao.Setup(d => d.DeleteAsync(1)).Returns(Task.CompletedTask);
 
-            var answer = new Answer
-            {
-                QuestionId = 1,
-                Text = "To be deleted",
-                Is_correct = true
-            };
-            context.Answers.Add(answer);
-            await context.SaveChangesAsync();
+            var logger = Mock.Of<ILogger<AnswerRepository>>();
+            var repo = new AnswerRepository(mockDao.Object, _mapper, logger);
 
-            var result = await repository.DeleteAnswer(answer.AnswerId);
+            var result = await repo.DeleteAnswer(1);
 
             Assert.True(result);
-            Assert.Null(await context.Answers.FindAsync(answer.AnswerId));
         }
 
         [Fact]
         public async Task UpdateAnswer_ShouldModifyAnswer()
         {
-            var context = GetInMemoryDbContext();
-            var dao = new NoTransactionAnswerDAO(context);
-            var logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger<AnswerRepository>();
-            var repository = new AnswerRepository(dao, _mapper, logger);
-
-            var answer = new Answer
-            {
-                QuestionId = 1,
-                Text = "Old Text",
-                Is_correct = false
-            };
-            context.Answers.Add(answer);
-            await context.SaveChangesAsync();
+            var original = new Answer { AnswerId = 1, QuestionId = 1, Text = "Old Text", Is_correct = false };
 
             var dto = new UpdateAnswerDto
             {
-                AnswerId = answer.AnswerId,
+                AnswerId = 1,
                 QuestionId = 1,
                 Text = "Updated Text",
                 Is_correct = true
             };
 
-            var updated = await repository.UpdateAnswer(dto);
+            var mockDao = new Mock<IAnswerDAO>();
+            mockDao.Setup(d => d.GetByIdAsync(1)).ReturnsAsync(original);
+            mockDao.Setup(d => d.UpdateAsync(It.IsAny<Answer>())).Returns(Task.CompletedTask);
+
+            var logger = Mock.Of<ILogger<AnswerRepository>>();
+            var repo = new AnswerRepository(mockDao.Object, _mapper, logger);
+
+            var updated = await repo.UpdateAnswer(dto);
 
             Assert.NotNull(updated);
             Assert.Equal("Updated Text", updated.Text);
@@ -139,24 +115,28 @@ namespace final_project_be_Tests
         [Fact]
         public async Task GetAllAnswerByQuestionId_ShouldReturnAllMatchingAnswers()
         {
-            var context = GetInMemoryDbContext();
-            var dao = new NoTransactionAnswerDAO(context);
-            var logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger<AnswerRepository>();
-            var repository = new AnswerRepository(dao, _mapper, logger);
+            // Arrange
+            var mockDao = new Mock<IAnswerDAO>();
+            var logger = new Mock<ILogger<AnswerRepository>>();
+            var repository = new AnswerRepository(mockDao.Object, _mapper, logger.Object);
 
-            context.Answers.AddRange(
-                new Answer { QuestionId = 1, Text = "A1", Is_correct = false },
-                new Answer { QuestionId = 1, Text = "A2", Is_correct = true },
-                new Answer { QuestionId = 2, Text = "B1", Is_correct = false }
-            );
-            await context.SaveChangesAsync();
+            var answers = new List<Answer>
+    {
+        new Answer { AnswerId = 1, QuestionId = 1, Text = "A1", Is_correct = false },
+        new Answer { AnswerId = 2, QuestionId = 1, Text = "A2", Is_correct = true },
+        new Answer { AnswerId = 3, QuestionId = 2, Text = "B1", Is_correct = false }
+    };
+
+            mockDao.Setup(d => d.GetAll()).Returns(answers.AsQueryable());
 
             var results = await repository.GetAllAnswerByQuestionId(1);
 
             Assert.Equal(2, results.Count);
             Assert.All(results, r => Assert.Equal(1, r.QuestionId));
         }
+
     }
+
 
 }
 

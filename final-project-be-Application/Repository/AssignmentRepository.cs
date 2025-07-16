@@ -6,6 +6,7 @@ using final_project_be_Domain.DTOs.Assignment;
 using final_project_be_Domain.DTOs.Assignment;
 using final_project_be_Domain.Models;
 using final_project_be_Infrastructure.DAO;
+using final_project_be_Infrastructure.DAO_Interface;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -22,11 +23,11 @@ namespace final_project_be_Application.Repository
 {
 	public class AssignmentRepository : Repository<Assignment>, IAssignmentRepository
 	{
-		private readonly AssignmentDAO _assignmentDAO;
+		private readonly IAssignmentDAO _assignmentDAO;
 		private readonly IMapper _mapper;
 		private readonly ILogger<AssignmentRepository> _logger;
         private readonly ClientSettings _clientSettings;
-        public AssignmentRepository(AssignmentDAO assignmentDAO, IMapper mapper, ILogger<AssignmentRepository> logger, IOptions<ClientSettings> clientoptions) : base(assignmentDAO)
+        public AssignmentRepository(IAssignmentDAO assignmentDAO, IMapper mapper, ILogger<AssignmentRepository> logger, IOptions<ClientSettings> clientoptions) : base(assignmentDAO)
 		{
 			_assignmentDAO = assignmentDAO;
 			_mapper = mapper;

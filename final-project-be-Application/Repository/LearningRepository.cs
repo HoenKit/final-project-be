@@ -6,6 +6,7 @@ using final_project_be_Domain.DTOs.Courses;
 using final_project_be_Domain.DTOs.LearnDto;
 using final_project_be_Domain.Models;
 using final_project_be_Infrastructure.DAO;
+using final_project_be_Infrastructure.DAO_Interface;
 using Microsoft.Extensions.Logging;
 using Org.BouncyCastle.Asn1;
 using System;
@@ -18,20 +19,20 @@ namespace final_project_be_Application.Repository
 {
     public class LearningRepository : ILearningRepository
     {
-        private readonly UserCourseDAO _usercourseDAO;
-        private readonly UserLessonDAO _userlessonDAO;
-        private readonly UserModuleDAO _userModuleDAO;
-        private readonly UserAnswerDAO _userAnswerDAO;
-        private readonly ModuleDAO _moduleDAO;
-        private readonly LessonDAO _lessonDAO;
-        private readonly QuestionDAO _questionDAO;
+        private readonly IUserCourseDAO _usercourseDAO;
+        private readonly IUserLessonDAO _userlessonDAO;
+        private readonly IUserModuleDAO _userModuleDAO;
+        private readonly IUserAnswerDAO _userAnswerDAO;
+        private readonly IModuleDAO _moduleDAO;
+        private readonly ILessonDAO _lessonDAO;
+        private readonly IQuestionDAO _questionDAO;
         private readonly Caculator _caculator;
         private readonly IMapper _mapper;
         private readonly IBlobStorageService _blobStorageService;
         private readonly ILogger<LearningRepository> _logger;
 
-        public LearningRepository(UserCourseDAO usercourseDAO, UserLessonDAO userlessonDAO,IBlobStorageService blobStorageService, UserAnswerDAO userAnswerDAO, LessonDAO lessonDAO, UserModuleDAO userModuleDAO, IMapper mapper, ILogger<LearningRepository> logger,
-            ModuleDAO moduleDAO,Caculator caculator, QuestionDAO questionDAO)
+        public LearningRepository(IUserCourseDAO usercourseDAO, IUserLessonDAO userlessonDAO,IBlobStorageService blobStorageService, IUserAnswerDAO userAnswerDAO, ILessonDAO lessonDAO, IUserModuleDAO userModuleDAO, IMapper mapper, ILogger<LearningRepository> logger,
+            IModuleDAO moduleDAO,Caculator caculator, IQuestionDAO questionDAO)
         {
             _lessonDAO = lessonDAO;
             _usercourseDAO = usercourseDAO;

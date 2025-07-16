@@ -1,4 +1,5 @@
-﻿using final_project_be_Infrastructure.Data;
+﻿using final_project_be_Infrastructure.DAO_Interface;
+using final_project_be_Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using System.Collections.Generic;
@@ -6,8 +7,8 @@ using System.Linq.Expressions;
 
 namespace final_project_be_Infrastructure.DAO
 {
-	public class GenericDAO<T> where T : class
-	{
+    public class GenericDAO<T> : IGenericDAO<T> where T : class
+    {
 		private readonly ApplicationDbContext _context;
 		private readonly DbSet<T> _dbSet;
 		private IDbContextTransaction? _transaction;

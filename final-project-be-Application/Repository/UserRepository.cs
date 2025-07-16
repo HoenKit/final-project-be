@@ -6,6 +6,7 @@ using final_project_be_Domain.DTOs.Comment;
 using final_project_be_Domain.DTOs.Users;
 using final_project_be_Domain.Models;
 using final_project_be_Infrastructure.DAO;
+using final_project_be_Infrastructure.DAO_Interface;
 using final_project_be_Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -14,11 +15,11 @@ namespace final_project_be_Application.Repository
 {
     public class UserRepository : Repository<User>, IUserRepository
     {
-        private readonly UserDAO _userDAO;
+        private readonly IUserDAO _userDAO;
         private readonly IMapper _mapper;
         private readonly ILogger<UserRepository> _logger;
 
-        public UserRepository(UserDAO userDAO, IMapper mapper, ILogger<UserRepository> logger)
+        public UserRepository(IUserDAO userDAO, IMapper mapper, ILogger<UserRepository> logger)
             : base(userDAO)
         {
             _userDAO = userDAO;

@@ -8,16 +8,17 @@ using final_project_be_Application.Interface;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using Microsoft.Extensions.Logging;
 using final_project_be_Domain.DTOs.Users;
+using final_project_be_Infrastructure.DAO_Interface;
 
 namespace final_project_be_Application.Repository
 {
 	public class CommentRepository : Repository<Comment>, ICommentRepository
 	{
-		private readonly CommentDAO _commentDAO;
+		private readonly ICommentDAO _commentDAO;
 		private readonly IMapper _mapper;
 		private readonly ILogger<CommentRepository> _logger;
 
-		public CommentRepository(CommentDAO commentDAO, IMapper mapper, ILogger<CommentRepository> logger) : base(commentDAO)
+		public CommentRepository(ICommentDAO commentDAO, IMapper mapper, ILogger<CommentRepository> logger) : base(commentDAO)
 		{
 			_mapper = mapper;
 			_logger = logger;
@@ -63,29 +64,30 @@ namespace final_project_be_Application.Repository
 			}
 		}
 
-		public PageResult<Comment> GetAllCommentsByPostId(int page, int pageSize, int postId)
-		{
-			try
-			{
-				var totalCount = _commentDAO.GetAll().Count();
-				var comments = _commentDAO.GetAll()
-					.Where(p => p.PostId == postId)
-					.Skip((page - 1) * pageSize)
-					.Take(pageSize)
-					.ToList();
+        public PageResult<Comment> GetAllCommentsByPostId(int page, int pageSize, int postId)
+        {
+            try
+            {
+                var query = _commentDAO.GetAll().Where(p => p.PostId == postId);
 
-				_logger.LogInformation("Get comments success");
+                var totalCount = query.Count();
+                var comments = query
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToList();
 
-				return new PageResult<Comment>(comments, totalCount, page, pageSize);
-			}
-			catch (Exception ex)
-			{
-				_logger.LogError(ex, "Error when getting comments");
-				return new PageResult<Comment>(new List<Comment>(), 0, page, pageSize);
-			}
-		}
+                _logger.LogInformation("Get comments success");
 
-		public async Task<Comment> GetComment(int id)
+                return new PageResult<Comment>(comments, totalCount, page, pageSize);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error when getting comments");
+                return new PageResult<Comment>(new List<Comment>(), 0, page, pageSize);
+            }
+        }
+
+        public async Task<Comment> GetComment(int id)
 		{
 			try
 			{

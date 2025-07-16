@@ -8,11 +8,13 @@ using final_project_be_Application.Repository;
 using final_project_be_Application.Ultils;
 using final_project_be_Domain.DTOs.Assignment;
 using final_project_be_Domain.Models;
+using final_project_be_Infrastructure.DAO_Interface;
 using final_project_be_Infrastructure.Data;
 using final_project_be_Tests.TestDAOs;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Moq;
 using Xunit;
 
 namespace final_project_be_Tests
@@ -29,29 +31,31 @@ namespace final_project_be_Tests
                 cfg.CreateMap<UpdateAssignmentDto, Assignment>();
                 cfg.CreateMap<Assignment, AssignmentResponseDto>();
             });
+
             _mapper = config.CreateMapper();
         }
 
-        private ApplicationDbContext GetDbContext()
+        private AssignmentRepository CreateRepository(Mock<IAssignmentDAO> mockDao, List<Assignment> assignments)
         {
-            var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-                .UseInMemoryDatabase(Guid.NewGuid().ToString())
-                .Options;
-            return new ApplicationDbContext(options);
-        }
+            var logger = Mock.Of<ILogger<AssignmentRepository>>();
+            var options = Options.Create(new ClientSettings());
 
-        private AssignmentRepository CreateRepository(ApplicationDbContext context)
-        {
-            var logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger<AssignmentRepository>();
-            var mockOptions = Options.Create(new ClientSettings());
-            return new AssignmentRepository(new NoTransactionAssignmentDAO(context), _mapper, logger, mockOptions);
+            mockDao.Setup(d => d.GetAll()).Returns(assignments.AsQueryable());
+
+            return new AssignmentRepository(mockDao.Object, _mapper, logger, options);
         }
 
         [Fact]
         public async Task CreateAssignment_ShouldAddAssignment()
         {
-            var context = GetDbContext();
-            var repo = CreateRepository(context);
+            var mockDao = new Mock<IAssignmentDAO>();
+            var assignments = new List<Assignment>();
+
+            mockDao.Setup(d => d.AddAsync(It.IsAny<Assignment>()))
+                   .Callback<Assignment>(a => { a.AssignmentId = 1; assignments.Add(a); })
+                   .Returns(Task.CompletedTask);
+
+            var repo = CreateRepository(mockDao, assignments);
 
             var dto = new AssignmentDto
             {
@@ -70,30 +74,44 @@ namespace final_project_be_Tests
         [Fact]
         public async Task DeleteAssignment_ShouldRemoveAssignment()
         {
-            var context = GetDbContext();
-            var assignment = new Assignment { Content = "To Delete", LessonId = 1 };
-            context.Assignment.Add(assignment);
-            await context.SaveChangesAsync();
+            // Arrange
+            var mockDao = new Mock<IAssignmentDAO>();
+            var logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger<AssignmentRepository>();
+            var mockOptions = Options.Create(new ClientSettings());
 
-            var repo = CreateRepository(context);
-            var result = await repo.DeleteAssignment(assignment.AssignmentId);
+            var assignmentId = 1;
+            var deleted = false;
 
+            mockDao.Setup(d => d.BeginTransactionAsync()).Returns(Task.CompletedTask);
+            mockDao.Setup(d => d.DeleteAsync(assignmentId))
+                   .Callback(() => deleted = true)
+                   .Returns(Task.CompletedTask);
+            mockDao.Setup(d => d.CommitTransactionAsync()).Returns(Task.CompletedTask);
+            mockDao.Setup(d => d.RollbackTransactionAsync()).Returns(Task.CompletedTask);
+
+            var repo = new AssignmentRepository(mockDao.Object, _mapper, logger, mockOptions);
+
+            // Act
+            var result = await repo.DeleteAssignment(assignmentId);
+
+            // Assert
             Assert.True(result);
-            Assert.False(context.Assignment.Any(a => a.AssignmentId == assignment.AssignmentId));
+            Assert.True(deleted);
         }
 
         [Fact]
         public async Task GetAllAssignmentByLessonId_ShouldReturnAssignments()
         {
-            var context = GetDbContext();
-            context.Assignment.AddRange(
-                new Assignment { LessonId = 1, Content = "A" },
-                new Assignment { LessonId = 1, Content = "B" },
-                new Assignment { LessonId = 2, Content = "C" }
-            );
-            await context.SaveChangesAsync();
+            var assignments = new List<Assignment>
+        {
+            new Assignment { AssignmentId = 1, LessonId = 1, Content = "A" },
+            new Assignment { AssignmentId = 2, LessonId = 1, Content = "B" },
+            new Assignment { AssignmentId = 3, LessonId = 2, Content = "C" }
+        };
 
-            var repo = CreateRepository(context);
+            var mockDao = new Mock<IAssignmentDAO>();
+            var repo = CreateRepository(mockDao, assignments);
+
             var result = await repo.GetAllAssignmentByLessonId(1);
 
             Assert.Equal(2, result.Count);
@@ -103,13 +121,13 @@ namespace final_project_be_Tests
         [Fact]
         public async Task GetAssignment_ShouldReturnCorrectAssignment()
         {
-            var context = GetDbContext();
-            var assignment = new Assignment { Content = "Fetch Me", LessonId = 1 };
-            context.Assignment.Add(assignment);
-            await context.SaveChangesAsync();
+            var assignment = new Assignment { AssignmentId = 1, LessonId = 1, Content = "Fetch Me" };
+            var mockDao = new Mock<IAssignmentDAO>();
+            mockDao.Setup(d => d.GetByIdAsync(1)).ReturnsAsync(assignment);
 
-            var repo = CreateRepository(context);
-            var result = await repo.GetAssignment(assignment.AssignmentId);
+            var repo = CreateRepository(mockDao, new List<Assignment>());
+
+            var result = await repo.GetAssignment(1);
 
             Assert.NotNull(result);
             Assert.Equal("Fetch Me", result.Content);
@@ -118,17 +136,25 @@ namespace final_project_be_Tests
         [Fact]
         public async Task UpdateAssignment_ShouldUpdateFields()
         {
-            var context = GetDbContext();
-            var assignment = new Assignment { Content = "Old", LessonId = 1 };
-            context.Assignment.Add(assignment);
-            await context.SaveChangesAsync();
+            var assignment = new Assignment { AssignmentId = 1, LessonId = 1, Content = "Old", MeetLink = null };
 
-            var repo = CreateRepository(context);
+            var mockDao = new Mock<IAssignmentDAO>();
+            mockDao.Setup(d => d.GetByIdAsync(1)).ReturnsAsync(assignment);
+            mockDao.Setup(d => d.UpdateAsync(It.IsAny<Assignment>()))
+                   .Callback<Assignment>(a =>
+                   {
+                       assignment.Content = a.Content;
+                       assignment.MeetLink = a.MeetLink;
+                   })
+                   .Returns(Task.CompletedTask);
+
+            var repo = CreateRepository(mockDao, new List<Assignment>());
+
             var dto = new UpdateAssignmentDto
             {
-                AssignmentId = assignment.AssignmentId,
-                Content = "Updated",
+                AssignmentId = 1,
                 LessonId = 1,
+                Content = "Updated",
                 MeetLink = "http://new.meet"
             };
 

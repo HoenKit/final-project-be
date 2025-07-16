@@ -7,6 +7,7 @@ using final_project_be_Domain.DTOs.Transaction;
 using final_project_be_Domain.DTOs.Users;
 using final_project_be_Domain.Models;
 using final_project_be_Infrastructure.DAO;
+using final_project_be_Infrastructure.DAO_Interface;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
@@ -20,15 +21,15 @@ namespace final_project_be_Application.Repository
 
     public class PaymentRepository:  IPaymentRepositoty
     {
-        private readonly CouponDAO _couponDAO;
-        private readonly UserDAO _userDAO;
-        private readonly UserCourseDAO _userCourseDAO;
-        private readonly CourseDAO _courseDAO;
-        private readonly MentorDAO _mentorDAO;
-        private readonly PaymentDAO _paymentDAO;
-        private readonly PaymentCourseDAO _paymentCourseDAO;
+        private readonly ICouponDAO _couponDAO;
+        private readonly IUserDAO _userDAO;
+        private readonly IUserCourseDAO _userCourseDAO;
+        private readonly ICourseDAO _courseDAO;
+        private readonly IMentorDAO _mentorDAO;
+        private readonly IPaymentDAO _paymentDAO;
+        private readonly IPaymentCourseDAO _paymentCourseDAO;
         private readonly ILogger<PaymentRepository> _logger;
-        public PaymentRepository(UserDAO userDAO, CourseDAO courseDAO, PaymentDAO paymentDAO, PaymentCourseDAO paymentCourseDAO, ILogger<PaymentRepository> logger,MentorDAO mentorDAO,CouponDAO couponDAO, UserCourseDAO userCourseDAO) 
+        public PaymentRepository(IUserDAO userDAO, ICourseDAO courseDAO, IPaymentDAO paymentDAO, IPaymentCourseDAO paymentCourseDAO, ILogger<PaymentRepository> logger,IMentorDAO mentorDAO,ICouponDAO couponDAO, IUserCourseDAO userCourseDAO) 
         {
             _mentorDAO = mentorDAO;
             _userDAO = userDAO;

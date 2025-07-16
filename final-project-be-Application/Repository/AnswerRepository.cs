@@ -3,6 +3,7 @@ using final_project_be_Application.Interface;
 using final_project_be_Domain.DTOs.Answer;
 using final_project_be_Domain.Models;
 using final_project_be_Infrastructure.DAO;
+using final_project_be_Infrastructure.DAO_Interface;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -14,10 +15,10 @@ namespace final_project_be_Application.Repository
 {
 	public class AnswerRepository : Repository<Answer>, IAnswerRepository
 	{
-		private readonly AnswerDAO _answerDAO;
+		private readonly IAnswerDAO _answerDAO;
 		private readonly IMapper _mapper;
 		private readonly ILogger<AnswerRepository> _logger;
-		public AnswerRepository(AnswerDAO answerDAO, IMapper mapper, ILogger<AnswerRepository> logger) : base(answerDAO)
+		public AnswerRepository(IAnswerDAO answerDAO, IMapper mapper, ILogger<AnswerRepository> logger) : base(answerDAO)
 		{
 			_answerDAO = answerDAO;
 			_mapper = mapper;

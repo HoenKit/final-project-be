@@ -7,6 +7,7 @@ using final_project_be_Domain.DTOs.Lesson;
 using final_project_be_Domain.DTOs.Module;
 using final_project_be_Domain.Models;
 using final_project_be_Infrastructure.DAO;
+using final_project_be_Infrastructure.DAO_Interface;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
@@ -21,17 +22,17 @@ namespace final_project_be_Application.Repository
 {
     public class ModuleRepository : Repository<Module>, IModuleRepository
     {
-        private readonly ModuleDAO _moduleDAO;
-        private readonly UserModuleDAO _userModuleDAO;
+        private readonly IModuleDAO _moduleDAO;
+        private readonly IUserModuleDAO _userModuleDAO;
         private readonly Caculator _caculator;
-        private readonly UserLessonDAO _userlessonDAO;
+        private readonly IUserLessonDAO _userlessonDAO;
         private readonly IMapper _mapper;
         private readonly ILogger<ModuleRepository> _logger;
         private readonly IOpenAIEmbeddingService _embeddingService;
         private readonly ILessonRepository _lessonRepository;
         private readonly ICourseRepository _courseRepository;
 
-        public ModuleRepository(ModuleDAO moduleDAO, IMapper mapper, ILogger<ModuleRepository> logger, UserLessonDAO userlessonDAO, UserModuleDAO userModuleDAO, Caculator caculator, IOpenAIEmbeddingService embeddingService, ILessonRepository lessonRepository, ICourseRepository courseRepository) : base(moduleDAO)
+        public ModuleRepository(IModuleDAO moduleDAO, IMapper mapper, ILogger<ModuleRepository> logger, IUserLessonDAO userlessonDAO, IUserModuleDAO userModuleDAO, Caculator caculator, IOpenAIEmbeddingService embeddingService, ILessonRepository lessonRepository, ICourseRepository courseRepository) : base(moduleDAO)
         {
             _userlessonDAO = userlessonDAO;
             _userModuleDAO = userModuleDAO;

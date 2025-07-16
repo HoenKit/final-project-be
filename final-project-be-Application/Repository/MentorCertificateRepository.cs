@@ -8,6 +8,7 @@ using final_project_be_Domain.DTOs.Module;
 using final_project_be_Domain.DTOs.Notification;
 using final_project_be_Domain.Models;
 using final_project_be_Infrastructure.DAO;
+using final_project_be_Infrastructure.DAO_Interface;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -19,12 +20,12 @@ namespace final_project_be_Application.Repository
 {
     public class MentorCertificateRepository : Repository<MentorCertificate>, IMentorCertificateRepository
     {
-        private readonly MentorCertificateDAO _mentorCertificateDAO;
+        private readonly IMentorCertificateDAO _mentorCertificateDAO;
         private readonly IMapper _mapper;
         private readonly ILogger<MentorCertificateRepository> _logger;
         private readonly IBlobStorageService _blobStorageService;
 
-        public MentorCertificateRepository(MentorCertificateDAO mentorCertificateDAO, IMapper mapper, ILogger<MentorCertificateRepository> logger, IBlobStorageService blobStorageService) : base(mentorCertificateDAO)
+        public MentorCertificateRepository(IMentorCertificateDAO mentorCertificateDAO, IMapper mapper, ILogger<MentorCertificateRepository> logger, IBlobStorageService blobStorageService) : base(mentorCertificateDAO)
         {
             _mentorCertificateDAO = mentorCertificateDAO;
             _mapper = mapper;

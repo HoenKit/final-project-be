@@ -5,6 +5,7 @@ using final_project_be_Domain.DTOs.Transaction;
 using final_project_be_Domain.DTOs.Users;
 using final_project_be_Domain.Models;
 using final_project_be_Infrastructure.DAO;
+using final_project_be_Infrastructure.DAO_Interface;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
@@ -17,10 +18,10 @@ namespace final_project_be_Application.Repository
 {
     public class TransactionRepository : Repository<Transaction>, ITransactionRepository
     {
-        private readonly TransactionDAO _transactionDAO;
+        private readonly ITransactionDAO _transactionDAO;
         private readonly IMapper _mapper;
         private readonly ILogger<AnswerRepository> _logger;
-        public TransactionRepository(TransactionDAO transactionDAO, IMapper mapper, ILogger<AnswerRepository> logger) : base(transactionDAO)
+        public TransactionRepository(ITransactionDAO transactionDAO, IMapper mapper, ILogger<AnswerRepository> logger) : base(transactionDAO)
         {
             _transactionDAO = transactionDAO;
             _mapper = mapper;

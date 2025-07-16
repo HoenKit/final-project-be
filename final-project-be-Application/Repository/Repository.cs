@@ -1,14 +1,15 @@
 ﻿using final_project_be_Infrastructure.DAO;
 using final_project_be_Application.Interface;
 using System.Linq.Expressions;
+using final_project_be_Infrastructure.DAO_Interface;
 
 namespace final_project_be_Application.Repository
 {
     public class Repository<T> : IRepository<T> where T : class
     {
-        private readonly GenericDAO<T> _dao;
+        private readonly IGenericDAO<T> _dao;
 
-        public Repository(GenericDAO<T> dao)
+        public Repository(IGenericDAO<T> dao)
         {
             _dao = dao;
         }

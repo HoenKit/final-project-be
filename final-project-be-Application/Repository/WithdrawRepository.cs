@@ -5,6 +5,7 @@ using final_project_be_Domain.DTOs.Answer;
 using final_project_be_Domain.DTOs.Withdraw;
 using final_project_be_Domain.Models;
 using final_project_be_Infrastructure.DAO;
+using final_project_be_Infrastructure.DAO_Interface;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -16,10 +17,10 @@ namespace final_project_be_Application.Repository
 {
     public class WithdrawRepository : Repository<Withdraw>, IWithdrawRepository
     {
-        private readonly WithdrawDAO _withdrawDAO;
+        private readonly IWithdrawDAO _withdrawDAO;
         private readonly IMapper _mapper;
         private readonly ILogger<WithdrawRepository> _logger;
-        public WithdrawRepository(WithdrawDAO withdrawDAO, IMapper mapper, ILogger<WithdrawRepository> logger) : base(withdrawDAO)
+        public WithdrawRepository(IWithdrawDAO withdrawDAO, IMapper mapper, ILogger<WithdrawRepository> logger) : base(withdrawDAO)
         {
             _mapper = mapper;
             _logger = logger;
