@@ -18,6 +18,7 @@ using final_project_be_Domain.DTOs.Review;
 using final_project_be_Domain.DTOs.Transaction;
 using final_project_be_Domain.DTOs.Schedule;
 using final_project_be_Domain.DTOs.Withdraw;
+using final_project_be_Domain.DTOs.Payment;
 
 namespace final_project_be_Application.Service.Mapping
 {
@@ -81,6 +82,7 @@ namespace final_project_be_Application.Service.Mapping
                 .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.UserId))
                 .ForMember(dest => dest.FirstName, opt => opt.MapFrom(src => src.User.UserMetaData.FirstName))
 				.ForMember(dest => dest.LastName, opt => opt.MapFrom(src => src.User.UserMetaData.LastName));
+            CreateMap<Payment, GetPaymentDto>().ReverseMap();
         }
 	}
 }

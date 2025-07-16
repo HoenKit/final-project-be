@@ -1,9 +1,13 @@
 ﻿ using final_project_be_Application.Interface;
+using final_project_be_Domain.DTOs;
 using final_project_be_Domain.DTOs.Mentor;
 using final_project_be_Domain.DTOs.Payment;
 using final_project_be_Domain.DTOs.Post;
+using final_project_be_Domain.DTOs.Transaction;
+using final_project_be_Domain.DTOs.Users;
 using final_project_be_Domain.Models;
 using final_project_be_Infrastructure.DAO;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -145,6 +149,53 @@ namespace final_project_be_Application.Repository
             }
         }
 
+        public PageResult<GetPaymentDto> GetAll(int page, int pageSize, Guid? UserId, string? sortOption, List<ServiceTypeEnum>? ServiceType)
+        {
+            try
+            {
+                var query = _paymentDAO.GetAll()
+                    .Include(c => c.User)
+                    .ThenInclude(c => c.UserMetaData)
+                    .Where(p => ServiceType == null || ServiceType.Count == 0 || ServiceType.Select(s => s.ToString()).Contains(p.ServiceType));
+
+
+                if (UserId.HasValue && UserId != Guid.Empty)
+                    query = query.Where(p => p.UserId == UserId.Value);
+
+                query = sortOption?.ToLower() switch
+                {
+                    "asc_date" => query.OrderBy(c => c.CreatedAt),
+                    "desc_date" => query.OrderByDescending(c => c.CreatedAt),
+                    _ => query.OrderByDescending(c => c.CreatedAt)
+                };
+
+                var totalCount = query.Count();
+
+                var payment = query
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToList();
+
+                var paymentDto = payment.Select(p => new GetPaymentDto
+                {
+                    PaymentId = p.PaymentId,
+                    UserId = p.UserId,
+                    Email = p.User.Email,
+                    Amount = p.Amount,
+                    Status = p.Status,
+                    ServiceType = p.ServiceType,
+                    CreatedAt = p.CreatedAt,
+                }).ToList();
+
+                _logger.LogInformation("Get filtered payment success");
+                return new PageResult<GetPaymentDto>(paymentDto, totalCount, page, pageSize);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error when getting filtered payments");
+                return new PageResult<GetPaymentDto>(new List<GetPaymentDto>(), 0, page, pageSize);
+            }
+        }
     }
 
 }
