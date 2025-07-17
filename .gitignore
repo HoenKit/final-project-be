@@ -20,3 +20,5 @@ build/
 *.log
 *.tlog
 *.pdb
+
+Properties/launchSettings.json
