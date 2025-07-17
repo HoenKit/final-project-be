@@ -24,14 +24,14 @@ namespace final_project_be_Application.Repository
         private readonly ICourseDAO _courseDAO;
         private readonly IUserCourseDAO _userCourseDAO;
         private readonly IReviewDAO _reviewDAO;
-        private readonly Caculator _Caculator;
+        private readonly ICaculator _Caculator;
         private readonly IMapper _mapper;
         private readonly ILogger<CourseRepository> _logger;
         private readonly IBlobStorageService _blobStorageService;
         private readonly IUserRepository _userRepository;
         private readonly IUserEmbeddingDAO _userEmbeddingDAO;
 
-        public CourseRepository(ICourseDAO courseDAO, Caculator Caculator, IUserCourseDAO userCourseDAO, IReviewDAO reviewDAO, IMapper mapper, ILogger<CourseRepository> logger, IBlobStorageService blobStorageService, ICourseEmbeddingDAO courseEmbeddingDAO, IOpenAIEmbeddingService embeddingService, IUserRepository userRepository, IUserEmbeddingDAO userEmbeddingDAO) : base(courseDAO)
+        public CourseRepository(ICourseDAO courseDAO, ICaculator Caculator, IUserCourseDAO userCourseDAO, IReviewDAO reviewDAO, IMapper mapper, ILogger<CourseRepository> logger, IBlobStorageService blobStorageService, ICourseEmbeddingDAO courseEmbeddingDAO, IOpenAIEmbeddingService embeddingService, IUserRepository userRepository, IUserEmbeddingDAO userEmbeddingDAO) : base(courseDAO)
 
         {
             _courseDAO = courseDAO;

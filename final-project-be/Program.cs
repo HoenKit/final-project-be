@@ -146,7 +146,7 @@ builder.Configuration.GetSection("Cloudinary"));
 //config class
 builder.Services.AddScoped<Validate>();
 
-builder.Services.AddScoped<Caculator>();
+builder.Services.AddScoped<ICaculator,Caculator>();
 
 //Config Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

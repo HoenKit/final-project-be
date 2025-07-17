@@ -24,7 +24,7 @@ namespace final_project_be_Application.Repository
     {
         private readonly IModuleDAO _moduleDAO;
         private readonly IUserModuleDAO _userModuleDAO;
-        private readonly Caculator _caculator;
+        private readonly ICaculator _caculator;
         private readonly IUserLessonDAO _userlessonDAO;
         private readonly IMapper _mapper;
         private readonly ILogger<ModuleRepository> _logger;
@@ -32,7 +32,7 @@ namespace final_project_be_Application.Repository
         private readonly ILessonRepository _lessonRepository;
         private readonly ICourseRepository _courseRepository;
 
-        public ModuleRepository(IModuleDAO moduleDAO, IMapper mapper, ILogger<ModuleRepository> logger, IUserLessonDAO userlessonDAO, IUserModuleDAO userModuleDAO, Caculator caculator, IOpenAIEmbeddingService embeddingService, ILessonRepository lessonRepository, ICourseRepository courseRepository) : base(moduleDAO)
+        public ModuleRepository(IModuleDAO moduleDAO, IMapper mapper, ILogger<ModuleRepository> logger, IUserLessonDAO userlessonDAO, IUserModuleDAO userModuleDAO, ICaculator caculator, IOpenAIEmbeddingService embeddingService, ILessonRepository lessonRepository, ICourseRepository courseRepository) : base(moduleDAO)
         {
             _userlessonDAO = userlessonDAO;
             _userModuleDAO = userModuleDAO;
