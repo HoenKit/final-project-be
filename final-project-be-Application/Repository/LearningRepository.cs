@@ -26,13 +26,13 @@ namespace final_project_be_Application.Repository
         private readonly IModuleDAO _moduleDAO;
         private readonly ILessonDAO _lessonDAO;
         private readonly IQuestionDAO _questionDAO;
-        private readonly Caculator _caculator;
+        private readonly ICaculator _caculator;
         private readonly IMapper _mapper;
         private readonly IBlobStorageService _blobStorageService;
         private readonly ILogger<LearningRepository> _logger;
 
         public LearningRepository(IUserCourseDAO usercourseDAO, IUserLessonDAO userlessonDAO,IBlobStorageService blobStorageService, IUserAnswerDAO userAnswerDAO, ILessonDAO lessonDAO, IUserModuleDAO userModuleDAO, IMapper mapper, ILogger<LearningRepository> logger,
-            IModuleDAO moduleDAO,Caculator caculator, IQuestionDAO questionDAO)
+            IModuleDAO moduleDAO,ICaculator caculator, IQuestionDAO questionDAO)
         {
             _lessonDAO = lessonDAO;
             _usercourseDAO = usercourseDAO;

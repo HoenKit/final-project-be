@@ -1,4 +1,5 @@
 ﻿using DocumentFormat.OpenXml.InkML;
+using final_project_be_Application.Interface;
 using final_project_be_Domain.DTOs.Courses;
 using final_project_be_Domain.DTOs.Module;
 using final_project_be_Domain.Models;
@@ -15,7 +16,7 @@ using System.Threading.Tasks;
 
 namespace final_project_be_Application.Ultils
 {
-    public class Caculator
+    public class Caculator : ICaculator
     {
         private readonly ILessonDAO _lessonDAO;
         private readonly IModuleDAO _moduleDAO;
