@@ -46,7 +46,7 @@ namespace final_project_be_Application.Repository
             }
         }
 
-        public PageResult<Withdraw> GetAllWithdraw(int page, int pageSize, int? mentorId)
+        public PageResult<Withdraw> GetAllWithdraw(int page, int pageSize, int? mentorId, string? sortOption, List<WithdrawEnum>? status)
         {
             var query = _withdrawDAO.GetAll();
 
@@ -54,6 +54,19 @@ namespace final_project_be_Application.Repository
             {
                 query = query.Where(w => w.MentorId == mentorId.Value);
             }
+
+            if (status != null && status.Any())
+            {
+                var statusStrings = status.Select(s => s.ToString()).ToList();
+                query = query.Where(w => statusStrings.Contains(w.Status));
+            }
+
+            query = sortOption?.ToLower() switch
+            {
+                "asc_date" => query.OrderBy(c => c.CreateAt),
+                "desc_date" => query.OrderByDescending(c => c.CreateAt),
+                _ => query.OrderByDescending(c => c.CreateAt)
+            };
 
             var totalCount = query.Count();
 
