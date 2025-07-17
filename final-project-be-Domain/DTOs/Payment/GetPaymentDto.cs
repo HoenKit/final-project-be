@@ -24,6 +24,6 @@ namespace final_project_be_Domain.DTOs.Payment
     public enum ServiceTypeEnum
     {
         Course,
-        Membership
+        Premium
     }
 }

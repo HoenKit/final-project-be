@@ -24,7 +24,7 @@ namespace final_project_be.Controllers
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
             int currentPage = page ?? 1;
-            var pagedNotifications =  _mentorRepository.GetAllMentors(currentPage, 5);
+            var pagedNotifications =  _mentorRepository.GetAllMentors(currentPage, 100);
             return Ok(pagedNotifications);
         }
 

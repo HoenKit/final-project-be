@@ -164,6 +164,8 @@ namespace final_project_be_Application.Repository
             {
                 var baseQuery = _mentorDAO.GetAll()
                     .Include(c => c.MentorCertificates)
+                    .Include(c => c.User)
+                        .ThenInclude(u => u.UserMetaData)
                     .OrderByDescending(p => p.CreateAt);
 
                 var totalCount = baseQuery.Count();
@@ -175,6 +177,8 @@ namespace final_project_be_Application.Repository
                 {
                     MentorId = p.MentorId,
                     UserId = p.UserId,
+                    FirstName = p.User.UserMetaData.FirstName,
+                    LastName = p.User.UserMetaData.LastName,
                     Introduction = p.Introduction,
                     JobTitle = p.JobTitle,
                     StudyLevel = p.StudyLevel,
