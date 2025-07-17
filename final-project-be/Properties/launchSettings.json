@@ -36,7 +36,8 @@
         "ASPNETCORE_ENVIRONMENT": "Production",
         "Cloudinary__CloudName": "dekki5l9m",
         "Cloudinary__ApiKey": "494829188662622",
-        "Cloudinary__ApiSecret": "eUp1a7w--iNLbwxbbWGrGjMtWAw"
+        "Cloudinary__ApiSecret": "eUp1a7w--iNLbwxbbWGrGjMtWAw",
+        "OpenAI__ApiKey": "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"
       },
       "dotnetRunMessages": true,
       "applicationUrl": "https://localhost:7148;http://localhost:5245"
