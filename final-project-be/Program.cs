@@ -7,6 +7,7 @@ using final_project_be_Application.Service.EmailService;
 using final_project_be_Application.Service.Mapping;
 using final_project_be_Application.Service.OpenAIService;
 using final_project_be_Application.Ultils;
+using final_project_be_Domain.DTOs.Message;
 using final_project_be_Infrastructure.DAO;
 using final_project_be_Infrastructure.DAO_Interface;
 using final_project_be_Infrastructure.Data;
@@ -104,7 +105,8 @@ builder.Services.AddScoped<IWorkshopDAO, WorkshopDAO>();
 builder.Services.AddScoped<ICourseEmbeddingDAO, CourseEmbeddingDAO>();
 builder.Services.AddScoped<IUserEmbeddingDAO, UserEmbeddingDAO>();
 builder.Services.AddScoped<IWithdrawDAO, WithdrawDAO>();
-
+builder.Services.AddScoped<IMessageDAO, MessageDAO>();
+builder.Services.AddScoped<IWorkshopDAO, WorkshopDAO>();
 // Config Repository
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
@@ -134,6 +136,8 @@ builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
 builder.Services.AddScoped<ICouponRepository, CouponRepository>();
 builder.Services.AddScoped<IScheduleRepository, ScheduleRepository>();
 builder.Services.AddScoped<IWithdrawRepository, WithdrawRepository>();
+builder.Services.AddScoped<IMessageRepository, MessagesRepository>();
+builder.Services.AddScoped<IWorkshopRepository, WorkshopRepository>();
 //Config Service
 builder.Services.AddScoped<IBlobStorageService,BlobStorageService>();
 builder.Services.AddScoped<IOpenAIEmbeddingService, OpenAIEmbeddingService>();

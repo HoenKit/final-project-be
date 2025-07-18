@@ -9,6 +9,7 @@ namespace final_project_be_Infrastructure.DAO_Interface
 {
     public interface IWorkshopDAO : IGenericDAO<WorkShop>
     {
+        Task<bool> MentorExists(int mentorId);
     }
 
 }
