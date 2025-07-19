@@ -1,24 +1,25 @@
 ﻿using AutoMapper;
-using final_project_be_Domain.Models;
-using final_project_be_Domain.DTOs.Comment;
-using final_project_be_Domain.DTOs.Notification;
-using final_project_be_Domain.DTOs.PollOption;
-using final_project_be_Domain.DTOs.Report;
-using final_project_be_Domain.DTOs.Users;
-using final_project_be_Domain.DTOs.Post;
-using final_project_be_Domain.DTOs.Category;
-using final_project_be_Domain.DTOs.Courses;
-using final_project_be_Domain.DTOs.Module;
-using final_project_be_Domain.DTOs.Lesson;
-using final_project_be_Domain.DTOs.Question;
 using final_project_be_Domain.DTOs.Answer;
 using final_project_be_Domain.DTOs.Assignment;
+using final_project_be_Domain.DTOs.Category;
+using final_project_be_Domain.DTOs.Comment;
+using final_project_be_Domain.DTOs.Courses;
+using final_project_be_Domain.DTOs.Lesson;
 using final_project_be_Domain.DTOs.Mentor;
-using final_project_be_Domain.DTOs.Review;
-using final_project_be_Domain.DTOs.Transaction;
-using final_project_be_Domain.DTOs.Schedule;
-using final_project_be_Domain.DTOs.Withdraw;
+using final_project_be_Domain.DTOs.Module;
+using final_project_be_Domain.DTOs.Notification;
 using final_project_be_Domain.DTOs.Payment;
+using final_project_be_Domain.DTOs.PollOption;
+using final_project_be_Domain.DTOs.Post;
+using final_project_be_Domain.DTOs.Question;
+using final_project_be_Domain.DTOs.Report;
+using final_project_be_Domain.DTOs.Review;
+using final_project_be_Domain.DTOs.Schedule;
+using final_project_be_Domain.DTOs.Transaction;
+using final_project_be_Domain.DTOs.Users;
+using final_project_be_Domain.DTOs.Withdraw;
+using final_project_be_Domain.DTOs.Workshop;
+using final_project_be_Domain.Models;
 
 namespace final_project_be_Application.Service.Mapping
 {
@@ -83,6 +84,8 @@ namespace final_project_be_Application.Service.Mapping
                 .ForMember(dest => dest.FirstName, opt => opt.MapFrom(src => src.User.UserMetaData.FirstName))
 				.ForMember(dest => dest.LastName, opt => opt.MapFrom(src => src.User.UserMetaData.LastName));
             CreateMap<Payment, GetPaymentDto>().ReverseMap();
+            CreateMap<WorkShop, WorkShopCreateDto>().ReverseMap();
+            CreateMap<WorkShop, WorkShopDto>().ReverseMap();
         }
 	}
 }

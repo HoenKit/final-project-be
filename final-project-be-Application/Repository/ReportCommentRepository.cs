@@ -17,7 +17,7 @@ namespace final_project_be_Application.Repository
         private readonly ILogger<ReportCommentRepository> _logger;
         private readonly IReportDAO _reportDAO;
 
-        public ReportCommentRepository(IReportCommentDAO ReportCommentDAO, IMapper mapper, ILogger<ReportCommentRepository> logger, ReportDAO reportDAO) : base(ReportCommentDAO)
+        public ReportCommentRepository(IReportCommentDAO ReportCommentDAO, IMapper mapper, ILogger<ReportCommentRepository> logger, IReportDAO reportDAO) : base(ReportCommentDAO)
         {
             _mapper = mapper;
             _logger = logger;
