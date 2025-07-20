@@ -15,6 +15,7 @@ namespace final_project_be_Application.Interface
         public Task<GetCourseDto> ToggleIsDeleted(int id);
         public Task<GetCourseDto?> ToggleStatus(int id, string statuses);
 		public Task<List<CourseRecommendationDto>> RecommendCoursesAsync(Guid userId);
+		public Task<List<MonthlyStatCourseDto>> GetStatisticsByMonth(Guid userId, int? year);
 
     }
 }

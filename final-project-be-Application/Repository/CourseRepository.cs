@@ -14,6 +14,8 @@ using Azure;
 using DocumentFormat.OpenXml.InkML;
 using Newtonsoft.Json;
 using final_project_be_Infrastructure.DAO_Interface;
+using Polly;
+using DocumentFormat.OpenXml.Bibliography;
 
 namespace final_project_be_Application.Repository
 {
@@ -22,6 +24,8 @@ namespace final_project_be_Application.Repository
         private readonly ICourseEmbeddingDAO _courseEmbeddingDAO;
         private readonly IOpenAIEmbeddingService _embeddingService;
         private readonly ICourseDAO _courseDAO;
+        private readonly IMentorDAO _mentorDAO;
+        private readonly IPaymentCourseDAO _paymentCourseDAO;
         private readonly IUserCourseDAO _userCourseDAO;
         private readonly IReviewDAO _reviewDAO;
         private readonly ICaculator _Caculator;
@@ -31,10 +35,12 @@ namespace final_project_be_Application.Repository
         private readonly IUserRepository _userRepository;
         private readonly IUserEmbeddingDAO _userEmbeddingDAO;
 
-        public CourseRepository(ICourseDAO courseDAO, ICaculator Caculator, IUserCourseDAO userCourseDAO, IReviewDAO reviewDAO, IMapper mapper, ILogger<CourseRepository> logger, IBlobStorageService blobStorageService, ICourseEmbeddingDAO courseEmbeddingDAO, IOpenAIEmbeddingService embeddingService, IUserRepository userRepository, IUserEmbeddingDAO userEmbeddingDAO) : base(courseDAO)
+        public CourseRepository(ICourseDAO courseDAO, IMentorDAO mentorDAO, IPaymentCourseDAO paymentCourseDAO, ICaculator Caculator, IUserCourseDAO userCourseDAO, IReviewDAO reviewDAO, IMapper mapper, ILogger<CourseRepository> logger, IBlobStorageService blobStorageService, ICourseEmbeddingDAO courseEmbeddingDAO, IOpenAIEmbeddingService embeddingService, IUserRepository userRepository, IUserEmbeddingDAO userEmbeddingDAO) : base(courseDAO)
 
         {
             _courseDAO = courseDAO;
+            _mentorDAO = mentorDAO;
+            _paymentCourseDAO = paymentCourseDAO;
             _Caculator = Caculator;
             _reviewDAO = reviewDAO;
             _userCourseDAO = userCourseDAO;
@@ -559,5 +565,45 @@ namespace final_project_be_Application.Repository
             return scoredCourses;
         }
 
+        public async Task<List<MonthlyStatCourseDto>> GetStatisticsByMonth(Guid userId, int? year)
+        {
+            var mentor = await _mentorDAO.GetMentorByUserId(userId);
+            if (mentor?.MentorId == null || mentor.MentorId <= 0)
+                throw new KeyNotFoundException("Mentor not found or invalid mentor data");
+
+            var paymentCourses = await _paymentCourseDAO.GetAll()
+                .Include(pc => pc.Payment)
+                .Include(pc => pc.Courses)
+                    .ThenInclude(c => c.Modules)
+                .Where(pc => pc.Courses.MentorId == mentor.MentorId &&
+                            !pc.Courses.IsDeleted &&
+                            pc.Payment.Status == "Success")
+                .ToListAsync();
+
+            // Filter by year if specified
+            if (year.HasValue)
+            {
+                paymentCourses = paymentCourses
+                    .Where(pc => pc.Payment.CreatedAt.Year == year.Value)
+                    .ToList();
+            }
+
+            var stats = paymentCourses
+                .GroupBy(pc => new { pc.Payment.CreatedAt.Year, pc.Payment.CreatedAt.Month })
+                .Select(g => new MonthlyStatCourseDto
+                {
+                    Time = $"{g.Key.Month:D2}/{g.Key.Year}",
+                    TotalCoursesCreated = g.Select(pc => pc.CourseId).Distinct().Count(),
+                    TotalStudentsEnrolled = g.Select(pc => pc.Payment.UserId).Distinct().Count(),
+                    TotalEarnings = g.Sum(pc =>
+                        pc.Payment.Amount *
+                        (pc.Courses.Modules?.Any(m => m.IsPremium) == true ? 0.75m : 0.65m))
+        
+                })
+                .OrderBy(s => s.Time)
+                .ToList();
+
+            return stats;
+        }
     }
 }

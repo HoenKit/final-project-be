@@ -31,6 +31,8 @@ namespace final_project_be_Tests
         private readonly Mock<ICourseEmbeddingDAO> _embeddingDAOMock = new();
         private readonly Mock<IOpenAIEmbeddingService> _embeddingServiceMock = new();
         private readonly Mock<IUserCourseDAO> _userCourseDAOMock = new();
+        private readonly Mock<IMentorDAO> _mentorDAOMock = new();
+        private readonly Mock<IPaymentCourseDAO> _paymentCourseDAOMock = new();
         private readonly Mock<IReviewDAO> _reviewDAOMock = new();
         private readonly Mock<IBlobStorageService> _blobStorageMock = new();
         private readonly Mock<IUserRepository> _userRepoMock = new();
@@ -76,6 +78,8 @@ namespace final_project_be_Tests
 
             var courseRepository = new CourseRepository(
                 _courseDAOMock.Object,
+                _mentorDAOMock.Object,
+                _paymentCourseDAOMock.Object,
                 _caculatorMock.Object,
                 _userCourseDAOMock.Object,
                 _reviewDAOMock.Object,
@@ -134,6 +138,8 @@ namespace final_project_be_Tests
 
             var courseRepo = new CourseRepository(
                 _courseDAOMock.Object,
+                _mentorDAOMock.Object,
+                _paymentCourseDAOMock.Object,
                 _caculatorMock.Object,
                 _userCourseDAOMock.Object,
                 _reviewDAOMock.Object,
@@ -176,6 +182,8 @@ namespace final_project_be_Tests
 
             var repo = new CourseRepository(
                 _courseDAOMock.Object,
+                _mentorDAOMock.Object,
+                _paymentCourseDAOMock.Object,
                 _caculatorMock.Object,
                 _userCourseDAOMock.Object,
                 _reviewDAOMock.Object,
@@ -233,6 +241,8 @@ namespace final_project_be_Tests
 
             var repo = new CourseRepository(
                 _courseDAOMock.Object,
+                _mentorDAOMock.Object,
+                _paymentCourseDAOMock.Object,
                 _caculatorMock.Object,
                 _userCourseDAOMock.Object,
                 _reviewDAOMock.Object,
@@ -316,6 +326,8 @@ namespace final_project_be_Tests
 
             var repo = new CourseRepository(
                 _courseDAOMock.Object,
+                _mentorDAOMock.Object,
+                _paymentCourseDAOMock.Object,
                 _caculatorMock.Object,
                 _userCourseDAOMock.Object,
                 _reviewDAOMock.Object,
@@ -382,6 +394,8 @@ namespace final_project_be_Tests
 
             var repo = new CourseRepository(
                 _courseDAOMock.Object,
+                _mentorDAOMock.Object,
+                _paymentCourseDAOMock.Object,
                 _caculatorMock.Object,
                 _userCourseDAOMock.Object,
                 _reviewDAOMock.Object,
@@ -597,6 +611,8 @@ namespace final_project_be_Tests
             // Create repository
             var repository = new CourseRepository(
                 _courseDAOMock.Object,
+                _mentorDAOMock.Object,
+                _paymentCourseDAOMock.Object,
                 _caculatorMock.Object,
                 _userCourseDAOMock.Object,
                 _reviewDAOMock.Object,

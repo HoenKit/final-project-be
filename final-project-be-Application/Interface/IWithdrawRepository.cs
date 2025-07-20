@@ -13,7 +13,7 @@ namespace final_project_be_Application.Interface
     public interface IWithdrawRepository : IRepository<Withdraw>
     {
         public Task<Withdraw> CreateWithdraw (WithdrawDto dto);
-        public PageResult<Withdraw> GetAllWithdraw (int page, int pageSize, int? mentorId, string? sortOption, List<WithdrawEnum>? status);
+        public PageResult<Withdraw> GetAllWithdraw (int page, int pageSize, int? mentorId, string? sortOption, List<WithdrawEnum>? status, bool isCurrentMonth);
         public Task<Withdraw> UpdateStatus (int withdrawId, string status);
     }
 }

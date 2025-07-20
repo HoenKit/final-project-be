@@ -166,5 +166,24 @@ namespace final_project_be.Controllers
             return Ok(new { message = "Course structure generated successfully." });
         }
 
+        [HttpGet("monthly-stats/{userId}")]
+        public async Task<IActionResult> GetStatisticsByMonth(Guid userId, [FromQuery] int? year = null)
+        {
+            try
+            {
+                var stats = await _courseRepository.GetStatisticsByMonth(userId, year);
+                return Ok(stats);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                // Log error here
+                return StatusCode(500, "An error occurred while processing your request");
+            }
+        }
+
     }
 }
