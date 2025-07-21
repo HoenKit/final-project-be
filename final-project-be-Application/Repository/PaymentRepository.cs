@@ -1,5 +1,6 @@
 ﻿ using final_project_be_Application.Interface;
 using final_project_be_Domain.DTOs;
+using final_project_be_Domain.DTOs.Courses;
 using final_project_be_Domain.DTOs.Mentor;
 using final_project_be_Domain.DTOs.Payment;
 using final_project_be_Domain.DTOs.Post;
@@ -196,6 +197,52 @@ namespace final_project_be_Application.Repository
                 _logger.LogError(ex, "Error when getting filtered payments");
                 return new PageResult<GetPaymentDto>(new List<GetPaymentDto>(), 0, page, pageSize);
             }
+        }
+
+        public async Task<List<MothlyStatPaymentDto>> GetStatisticsByMonth(int? year)
+        {
+            var query = _paymentDAO.GetAll()
+                .Include(p => p.PaymentCourses)
+                    .ThenInclude(pc => pc.Courses)
+                        .ThenInclude(c => c.Modules)
+                .Where(p => p.Status == "Success");
+
+            if (year.HasValue)
+            {
+                query = query.Where(p => p.CreatedAt.Year == year.Value);
+            }
+
+            var payments = await query.ToListAsync();
+
+            var stats = payments
+                .GroupBy(p => new { p.CreatedAt.Year, p.CreatedAt.Month })
+                .Select(g => new MothlyStatPaymentDto
+                {
+                    Time = $"{g.Key.Month:D2}/{g.Key.Year}",
+                    TotalPremium = g.Count(p => p.ServiceType == "Premium"),
+                    TotalPoint = g.Sum(p =>
+                    {
+                        // Nếu là Premium thì tính 100%
+                        if (p.ServiceType == "Premium")
+                        {
+                            return p.Amount * 1.0m;
+                        }
+                        // Nếu là Course thì tính 25% hoặc 35% tùy điều kiện
+                        else if (p.ServiceType == "Course")
+                        {
+                            var course = p.PaymentCourses?.FirstOrDefault()?.Courses;
+                            if (course == null || course.IsDeleted) return 0m;
+                            bool hasPremiumModules = course.Modules?.Any(m => m.IsPremium) ?? false;
+                            return p.Amount * (hasPremiumModules ? 0.25m : 0.35m);
+                        }
+
+                        return p.Amount * 1.0m;
+                    })
+                })
+                .OrderBy(s => s.Time)
+                .ToList();
+
+            return stats;
         }
     }
 

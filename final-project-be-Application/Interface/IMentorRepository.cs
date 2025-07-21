@@ -18,6 +18,7 @@ namespace final_project_be_Application.Interface
         public PageResult<GetMentorDto> GetAllMentors(int page, int pageSize);
         public Task<GetMentorDto> GetMentorByUserId(Guid userId);
         public Task<MentorbyCourseDto?> GetMentorByCourseIdAsync(int courseId);
+        public Task<bool> UpdateInfoBankAsync(Guid userId, InfoBank dto);
 
     }
 }

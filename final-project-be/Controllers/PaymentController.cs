@@ -49,5 +49,24 @@ namespace final_project_be.Controllers
             var pagedTransactions = _paymentRepositoty.GetAll(currentPage, currentSize, userId, sortOption, ServiceType);
             return Ok(pagedTransactions);
         }
+
+        [HttpGet("monthly-stats")]
+        public async Task<IActionResult> GetStatisticsByMonth([FromQuery] int? year = null)
+        {
+            try
+            {
+                var stats = await _paymentRepositoty.GetStatisticsByMonth(year);
+                return Ok(stats);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                // Log error here
+                return StatusCode(500, "An error occurred while processing your request");
+            }
+        }
     }
 }

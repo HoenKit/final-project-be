@@ -310,5 +310,19 @@ namespace final_project_be_Application.Repository
         {
             return await _mentorDAO.GetMentorByCourseIdAsync(courseId);
         }
+
+        public async Task<bool> UpdateInfoBankAsync(Guid userId, InfoBank dto)
+        {
+            var infoBank = await _mentorDAO.GetMentorByUserId(userId);
+            if (infoBank == null) return false;
+
+            // Gán lại các field
+            infoBank.AccountBank = dto.AccountBank ?? infoBank.AccountBank;
+            infoBank.AccountName = dto.AccountName?? infoBank.AccountName;
+            infoBank.AccountNumber = dto.AccountNumber ?? infoBank.AccountNumber;
+
+            await _mentorDAO.UpdateAsync(infoBank);
+            return true;
+        }
     }
 }
