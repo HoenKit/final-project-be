@@ -34,9 +34,9 @@ namespace final_project_be.Controllers
         }
         [Authorize(Roles = "Admin,Mentor")]
         [HttpGet]
-        public IActionResult GetAllWithdraw(int page, int pageSize, int? mentorId, string? sortOption, [FromQuery] List<WithdrawEnum>? status)
+        public IActionResult GetAllWithdraw(int page, int pageSize, int? mentorId, string? sortOption, [FromQuery] List<WithdrawEnum>? status, bool isCurrentMonth)
         {
-            var result = _withdrawRepository.GetAllWithdraw(page, pageSize, mentorId, sortOption, status);
+            var result = _withdrawRepository.GetAllWithdraw(page, pageSize, mentorId, sortOption, status, isCurrentMonth);
             return Ok(result);
         }
         [Authorize(Roles = "Admin")]

@@ -46,7 +46,7 @@ namespace final_project_be_Application.Repository
             }
         }
 
-        public PageResult<Withdraw> GetAllWithdraw(int page, int pageSize, int? mentorId, string? sortOption, List<WithdrawEnum>? status)
+        public PageResult<Withdraw> GetAllWithdraw(int page, int pageSize, int? mentorId, string? sortOption, List<WithdrawEnum>? status, bool isCurrentMonth = false)
         {
             var query = _withdrawDAO.GetAll();
 
@@ -59,6 +59,12 @@ namespace final_project_be_Application.Repository
             {
                 var statusStrings = status.Select(s => s.ToString()).ToList();
                 query = query.Where(w => statusStrings.Contains(w.Status));
+            }
+
+            if (isCurrentMonth)
+            {
+                var now = DateTime.UtcNow;
+                query = query.Where(w => w.CreateAt.Month == now.Month && w.CreateAt.Year == now.Year);
             }
 
             query = sortOption?.ToLower() switch
