@@ -2,6 +2,8 @@
 using final_project_be_Application.Interface;
 using final_project_be_Domain.DTOs;
 using final_project_be_Domain.DTOs.Answer;
+using final_project_be_Domain.DTOs.Mentor;
+using final_project_be_Domain.DTOs.Users;
 using final_project_be_Domain.DTOs.Withdraw;
 using final_project_be_Domain.Models;
 using final_project_be_Infrastructure.DAO;
@@ -18,13 +20,17 @@ namespace final_project_be_Application.Repository
     public class WithdrawRepository : Repository<Withdraw>, IWithdrawRepository
     {
         private readonly IWithdrawDAO _withdrawDAO;
+        private readonly IMentorDAO _mentorDAO;
+        private readonly IUserDAO _userDAO;
         private readonly IMapper _mapper;
         private readonly ILogger<WithdrawRepository> _logger;
-        public WithdrawRepository(IWithdrawDAO withdrawDAO, IMapper mapper, ILogger<WithdrawRepository> logger) : base(withdrawDAO)
+        public WithdrawRepository(IWithdrawDAO withdrawDAO, IMentorDAO mentorDAO, IUserDAO userDAO, IMapper mapper, ILogger<WithdrawRepository> logger) : base(withdrawDAO)
         {
             _mapper = mapper;
             _logger = logger;
             _withdrawDAO = withdrawDAO;
+            _mentorDAO = mentorDAO;
+            _userDAO = userDAO;
         }
 
         public async Task<Withdraw> CreateWithdraw(WithdrawDto dto)
@@ -85,7 +91,6 @@ namespace final_project_be_Application.Repository
             return new PageResult<Withdraw>(items, totalCount, page, pageSize);
         }
 
-
         public async Task<Withdraw> UpdateStatus(int withdrawId, string status)
         {
             try
@@ -100,18 +105,33 @@ namespace final_project_be_Application.Repository
                     return null;
                 }
 
+                var oldStatus = withdraw.Status;
                 withdraw.Status = status;
-                await _withdrawDAO.UpdateAsync(withdraw);
 
+                if (status == "Accepted" && oldStatus != "Accepted")
+                {
+                    var user = await _userDAO.GetUserByMentor(withdraw.MentorId);
+
+                    if (user.Point < withdraw.Points)
+                    {
+                        _logger.LogWarning($"User doesn't have enough points for withdraw ID {withdrawId}");
+                        await _withdrawDAO.RollbackTransactionAsync();
+                        return null;
+                    }
+                    user.Point -= withdraw.Points;
+                    await _userDAO.UpdateAsync(user);
+                }
+
+                await _withdrawDAO.UpdateAsync(withdraw);
                 await _withdrawDAO.CommitTransactionAsync();
 
-                _logger.LogInformation("Update withdraw success");
+                _logger.LogInformation("Update withdraw status and user points successfully");
                 return withdraw;
             }
             catch (Exception ex)
             {
                 await _withdrawDAO.RollbackTransactionAsync();
-                _logger.LogError(ex, "Error when updating withdraw");
+                _logger.LogError(ex, "Error when updating withdraw status");
                 return null;
             }
         }

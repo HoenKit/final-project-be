@@ -2,6 +2,7 @@
 using final_project_be_Application.Repository;
 using final_project_be_Domain.DTOs.Mentor;
 using final_project_be_Domain.DTOs.Notification;
+using final_project_be_Domain.DTOs.Users;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -70,6 +71,16 @@ namespace final_project_be.Controllers
             if (!ModelState.IsValid) { return BadRequest(ModelState); }
             await _mentorRepository.UpdateMentor(MentorDto);
             return Ok(MentorDto);
+        }
+
+        [HttpPut("update/{userId}")]
+        public async Task<IActionResult> Update(Guid userId, [FromBody] InfoBank dto)
+        {
+            bool success = await _mentorRepository.UpdateInfoBankAsync(userId, dto);
+            if (!success)
+                return NotFound(new { message = "Mentor not found" });
+
+            return Ok(new { message = "Mentor updated successfully" });
         }
 
         // DeleteAsync api/<NotificationController>/5
