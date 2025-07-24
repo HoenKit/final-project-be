@@ -38,6 +38,8 @@ namespace final_project_be_Application.Repository
                 }
                 dto.StreamingLink = ConvertToEmbedLink(dto.StreamingLink);
                 var workShop = _mapper.Map<WorkShop>(dto);
+                workShop.CreateAt = DateTime.UtcNow;
+                workShop.UpdateAt = DateTime.UtcNow;
                 await _workshopDAO.AddAsync(workShop);
                 await _workshopDAO.CommitTransactionAsync();
                 _logger.LogInformation("Add WorkShop success");
