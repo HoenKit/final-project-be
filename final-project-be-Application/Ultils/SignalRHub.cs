@@ -16,6 +16,7 @@ namespace final_project_be_Application.Ultils
         {
             await Clients.All.SendAsync("ReceiveComment", comment);
         }
+
         public async Task SendMessage(MessageDto message)
         {
             await Clients.User(message.ReceiverId.ToString())
@@ -27,5 +28,6 @@ namespace final_project_be_Application.Ultils
             await Clients.User(receiverId.ToString())
                          .SendAsync("NewChatRoom", partnerId);
         }
+
     }
 }

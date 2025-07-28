@@ -12,6 +12,7 @@ using final_project_be_Infrastructure.DAO;
 using final_project_be_Infrastructure.DAO_Interface;
 using final_project_be_Infrastructure.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.Options;
@@ -149,7 +150,7 @@ builder.Services.Configure<CloudinarySettings>(
 builder.Configuration.GetSection("Cloudinary"));
 //config class
 builder.Services.AddScoped<Validate>();
-
+builder.Services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
 builder.Services.AddScoped<ICaculator,Caculator>();
 
 //Config Authentication

@@ -10,8 +10,9 @@ namespace final_project_be_Domain.DTOs.Users
 		public string Phone { get; set; }
 		public string Password { get; set; }
 		public decimal? Point { get; set; }
-		public bool IsBanned { get; set; } = false;
-		public DateTime CreateAt { get; set; }
+		public bool IsBanned { get; set; }
+        public bool IsPremium { get; set; }
+        public DateTime CreateAt { get; set; }
 		public DateTime? UpdateAt { get; set; } = DateTime.Now;
 		public UserProfileDto UserMetaData { get; set; }
 	}
