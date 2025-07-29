@@ -47,24 +47,6 @@ namespace final_project_be.Controllers
             return Ok(ReportCommentDto);
         }
 
-        // PUT api/<ReportCommentController>/5
-        [HttpPut]
-        public async Task<IActionResult> Put(ReportCommentDto ReportCommentDto)
-        {
-            if (!ModelState.IsValid) { return BadRequest(ModelState); }
-            await _ReportCommentRepository.UpdateReportComment(ReportCommentDto);
-            return Ok(ReportCommentDto);
-        }
-
-        // DeleteAsync api/<ReportCommentController>/5
-        [HttpDelete]
-        public async Task<IActionResult> DeleteAsync(int reportId, int commentId)
-        {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-            await _ReportCommentRepository.DeleteReportComment(reportId, commentId);
-            return Ok();
-        }
-
         [HttpGet("grouped")]
         public IActionResult GetGroupedReports(int? page)
         {

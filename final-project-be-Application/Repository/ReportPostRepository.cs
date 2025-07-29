@@ -61,26 +61,6 @@ namespace final_project_be_Application.Repository
 			}
 		}
 
-
-		public async Task<bool> DeleteReportPost(int reportId, int PostId)
-        {
-            try
-            {
-                await _ReportPostDAO.BeginTransactionAsync();
-                _ReportPostDAO.DeleteByReportAndPostId(reportId, PostId);
-                await _ReportPostDAO.CommitTransactionAsync();
-
-                _logger.LogInformation("DeleteAsync ReportPost success");
-                return true;
-            }
-            catch (Exception ex)
-            {
-				await _ReportPostDAO.RollbackTransactionAsync();
-                _logger.LogError(ex, "Error when delete ReportPost");
-                return false;
-            }
-        }
-
         public PageResult<ReportPost> GetAllReportPosts(int page, int pageSize)
         {
             try
@@ -122,38 +102,6 @@ namespace final_project_be_Application.Repository
                 return null;
             }
         }
-
-        public async Task<ReportPost> UpdateReportPost(ReportPostDto dto)
-        {
-            try
-            {
-				await _ReportPostDAO.BeginTransactionAsync();
-                var report = _mapper.Map<Report>(dto);
-				await _reportDAO.UpdateAsync(report);
-
-                if (report == null || report.ReportId <= 0)
-                {
-                    _logger.LogError("Failed to create Report, cannot proceed with ReportPost.");
-                    await _ReportPostDAO.RollbackTransactionAsync();
-                    return null;
-                }
-
-                dto.ReportId = report.ReportId;
-                var ReportPost = _mapper.Map<ReportPost>(dto);
-                await _ReportPostDAO.UpdateAsync(ReportPost);
-                await _ReportPostDAO.CommitTransactionAsync();
-
-                _logger.LogInformation("UpdateAsync ReportPost success");
-                return ReportPost;
-            }
-            catch (Exception ex)
-            {
-                await _ReportPostDAO.RollbackTransactionAsync();
-                _logger.LogError(ex, "Error when UpdateAsync ReportPost");
-                return null;
-            }
-        }
-
         public PageResult<GroupedReportDto<int, ReportPost>> GetGroupedReportPosts(int page, int pageSize)
         {
             var allReportPosts = _ReportPostDAO.GetAll()

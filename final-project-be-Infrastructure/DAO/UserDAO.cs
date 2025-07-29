@@ -23,9 +23,6 @@ namespace final_project_be_Infrastructure.DAO
         public bool UserRegisterExist(UserRegisterDto registerDto)
             => _context.users.Any(u => u.Email == registerDto.Email);
 
-        public User GetUserbyEmail(UserLoginDto loginDto)
-            => _context.users.FirstOrDefault(u => u.Email == loginDto.Email);
-
         public User GetUserbyEmail(string email)
             => _context.users.FirstOrDefault(u => u.Email == email);
 
@@ -46,9 +43,6 @@ namespace final_project_be_Infrastructure.DAO
             await _context.userRoles.AddAsync(userRole);
             await _context.SaveChangesAsync();
         }
-
-        public async Task<UserMetadata?> GetByUserIdAsync(Guid userId)
-            => await _context.UserMetadata.FirstOrDefaultAsync(u => u.UserId == userId);
 
         public async Task AddRoleAsync(Role role)
             => await _context.roles.AddAsync(role);
@@ -73,9 +67,6 @@ namespace final_project_be_Infrastructure.DAO
             _context.users.Add(user);
             await _context.SaveChangesAsync();
         }
-
-        public User GetUserandUserMetadata(Guid userId)
-            => _context.users.Include(u => u.UserMetaData).FirstOrDefault(u => u.UserId == userId);
     }
 
 }

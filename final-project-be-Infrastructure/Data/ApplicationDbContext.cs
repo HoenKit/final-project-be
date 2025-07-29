@@ -47,7 +47,8 @@ namespace final_project_be_Infrastructure.Data
 		public DbSet<Report> report { get; set; }
 		public DbSet<ReportComment> reportComments { get; set; }
 		public DbSet<ReportPost> reportPost { get; set; }
-		public DbSet<ReportUser> reportUser { get; set; }
+        public DbSet<ReportCourse> ReportCourse { get; set; }
+        public DbSet<ReportUser> reportUser { get; set; }
 		public DbSet<UserMetadata> UserMetadata { get; set; }
         public DbSet<CourseEmbedding> CourseEmbeddings { get; set; }
         public DbSet<UserEmbedding> UserEmbeddings { get; set; }
@@ -383,8 +384,23 @@ namespace final_project_be_Infrastructure.Data
 				.HasForeignKey(rp => rp.EventId)
 				.OnDelete(DeleteBehavior.Restrict);
 
+            builder.Entity<ReportCourse>()
+                .HasKey(rp => new { rp.ReportId, rp.CourseId });
 
-			builder.Entity<ReportUser>()
+            builder.Entity<ReportCourse>()
+                .HasOne(rp => rp.Report)
+                .WithMany(r => r.ReportCourses)
+                .HasForeignKey(rp => rp.ReportId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<ReportCourse>()
+                .HasOne(rp => rp.Course)
+                .WithMany(p => p.ReportCourses)
+                .HasForeignKey(rp => rp.CourseId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+
+            builder.Entity<ReportUser>()
 				.HasKey(ru => new { ru.ReportId, ru.UserId });
 
 			builder.Entity<ReportUser>()

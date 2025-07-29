@@ -116,7 +116,7 @@ namespace final_project_be_Application.Repository
         }
 
         //UpdateAsync Get All Posts
-        public PageResult<PostDto> GetAllPosts(int page, int pageSize, int? CategoryId, string? title, Guid? userId)
+        public PageResult<PostDto> GetAllPosts(int page, int pageSize, int? CategoryId, string? title, Guid? userId, bool? IsDeleted)
         {
             try
             {
@@ -128,6 +128,11 @@ namespace final_project_be_Application.Repository
                     .OrderByDescending(p => p.CreateAt);
 
                 var query = baseQuery.Where(p => p.IsDeleted == false);
+
+                if (IsDeleted == true)
+                {
+                    query = baseQuery.Where(p => p.IsDeleted == true);
+                }
 
                 if (CategoryId != null)
                 {
@@ -297,69 +302,6 @@ namespace final_project_be_Application.Repository
                 .ToList();
 
             return stats;
-        }
-
-        public PageResult<PostDto> GetAllPostsIsDeleted(int page, int pageSize, int? CategoryId, string? title, Guid? userId)
-        {
-            try
-            {
-                var baseQuery = _postDAO.GetAll()
-                    .Include(p => p.User)
-                        .ThenInclude(u => u.UserMetaData)
-                    .Include(p => p.PostFiles);
-
-                var query = baseQuery.Where(p => p.IsDeleted == true);
-
-                query = query.OrderByDescending(p => p.UpdateAt);
-
-                if (CategoryId != null)
-                {
-                    query = query.Where(c => c.CategoryId == CategoryId);
-                }
-
-                if (!string.IsNullOrEmpty(title))
-                {
-                    query = query.Where(c => c.Title.Contains(title));
-                }
-
-                if (userId.HasValue && userId != Guid.Empty)
-                {
-                    query = query.Where(p => p.UserId == userId.Value);
-                }
-
-                var totalCount = query.Count();
-
-                var posts = query
-                    .Skip((page - 1) * pageSize)
-                    .Take(pageSize)
-                    .ToList();
-
-                var postDtos = posts.Select(p => new PostDto
-                {
-                    PostId = p.PostId,
-                    Title = p.Title,
-                    UserId = p.UserId,
-                    Content = p.Content,
-                    CategoryId = p.CategoryId,
-                    CreateAt = p.CreateAt,
-                    PostFiles = p.PostFiles.Select(f => new PostFileDto
-                    {
-                        PostFileId = f.PostFileId,
-                        FileUrl = f.FileUrl,
-                        IsDeleted = f.IsDeleted,
-                        PostFileType = f.PostFileType
-                    }).ToList(),
-                }).ToList();
-
-                _logger.LogInformation("Get Deleted Posts success");
-
-                return new PageResult<PostDto>(postDtos, totalCount, page, pageSize);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error when getting Deleted Posts");
-                return new PageResult<PostDto>(new List<PostDto>(), 0, page, pageSize);
-            }
         }
 
         public async Task<PostDetailDto> GetPostv2(int id)
