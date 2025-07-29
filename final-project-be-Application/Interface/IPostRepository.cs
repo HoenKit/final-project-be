@@ -12,10 +12,9 @@ namespace final_project_be_Application.Interface
         public Task<Post> GetPost(int id);
         public Task<Post> UpdatePost(PostCreateDto dto);
         public Task<Post> GetPostandUser(int id);
-        public PageResult<PostDto> GetAllPosts(int page, int pageSize, int? subCategoryId, string? title, Guid? userId); //UpdateAsync GetAllPosts
+        public PageResult<PostDto> GetAllPosts(int page, int pageSize, int? subCategoryId, string? title, Guid? userId, bool? IsDeleted); //UpdateAsync GetAllPosts
         public Task<Post> ToggleIsDeleted(int id);
         public List<MonthlyStatDto> GetPostStatisticsByMonth();
-        public PageResult<PostDto> GetAllPostsIsDeleted(int page, int pageSize, int? CategoryId, string? title, Guid? userId);
         public Task<PostDetailDto> GetPostv2(int id);
     }
 }

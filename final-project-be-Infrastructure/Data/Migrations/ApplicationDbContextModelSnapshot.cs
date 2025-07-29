@@ -814,6 +814,21 @@ namespace final_project_be_Infrastructure.Data.Migrations
                     b.ToTable("reportComments");
                 });
 
+            modelBuilder.Entity("final_project_be_Domain.Models.ReportCourse", b =>
+                {
+                    b.Property<int>("ReportId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CourseId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ReportId", "CourseId");
+
+                    b.HasIndex("CourseId");
+
+                    b.ToTable("ReportCourse");
+                });
+
             modelBuilder.Entity("final_project_be_Domain.Models.ReportEvent", b =>
                 {
                     b.Property<int>("ReportId")
@@ -1036,6 +1051,9 @@ namespace final_project_be_Infrastructure.Data.Migrations
 
                     b.Property<decimal?>("Point")
                         .HasColumnType("decimal(18,4)");
+
+                    b.Property<int?>("Turns")
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdateAt")
                         .HasColumnType("datetime2");
@@ -1682,6 +1700,25 @@ namespace final_project_be_Infrastructure.Data.Migrations
                     b.Navigation("Report");
                 });
 
+            modelBuilder.Entity("final_project_be_Domain.Models.ReportCourse", b =>
+                {
+                    b.HasOne("final_project_be_Domain.Models.Courses", "Course")
+                        .WithMany("ReportCourses")
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("final_project_be_Domain.Models.Report", "Report")
+                        .WithMany("ReportCourses")
+                        .HasForeignKey("ReportId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Course");
+
+                    b.Navigation("Report");
+                });
+
             modelBuilder.Entity("final_project_be_Domain.Models.ReportEvent", b =>
                 {
                     b.HasOne("final_project_be_Domain.Models.Event", "Event")
@@ -2044,6 +2081,8 @@ namespace final_project_be_Infrastructure.Data.Migrations
 
                     b.Navigation("PaymentCourses");
 
+                    b.Navigation("ReportCourses");
+
                     b.Navigation("Reviews");
 
                     b.Navigation("UserCourses");
@@ -2121,6 +2160,8 @@ namespace final_project_be_Infrastructure.Data.Migrations
             modelBuilder.Entity("final_project_be_Domain.Models.Report", b =>
                 {
                     b.Navigation("ReportComments");
+
+                    b.Navigation("ReportCourses");
 
                     b.Navigation("ReportEvents");
 

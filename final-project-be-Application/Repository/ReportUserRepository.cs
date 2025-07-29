@@ -56,27 +56,6 @@ namespace final_project_be_Application.Repository
             }
         }
 
-
-
-        public async Task<bool> DeleteReportUser(int reportId, Guid userid)
-        {
-            try
-            {
-				await _ReportUserDAO.BeginTransactionAsync();
-                _ReportUserDAO.DeleteByReportAndUserId(reportId, userid);
-                await _ReportUserDAO.CommitTransactionAsync();
-
-                _logger.LogInformation("DeleteAsync ReportComment success");
-                return true;
-            }
-            catch (Exception ex)
-            {
-                await _ReportUserDAO.RollbackTransactionAsync();
-                _logger.LogError(ex, "Error when delete ReportComment");
-                return false;
-            }
-        }
-
         public PageResult<ReportUser> GetAllReportUsers(int page, int pageSize)
         {
             try
@@ -100,8 +79,6 @@ namespace final_project_be_Application.Repository
             }
         }
 
-
-
         public async Task<ReportUser> GetReportUser(int id)
         {
             try
@@ -117,39 +94,6 @@ namespace final_project_be_Application.Repository
             {
                 await _ReportUserDAO.RollbackTransactionAsync();
                 _logger.LogError(ex, "Error when get ReportComment");
-                return null;
-            }
-        }
-
-
-
-        public async Task<ReportUser> UpdateReportUser(ReportUserDto dto)
-        {
-            try
-            {
-                await _ReportUserDAO.BeginTransactionAsync();
-                var report = _mapper.Map<Report>(dto);
-                await _reportDAO.UpdateAsync(report);
-
-                if (report == null || report.ReportId <= 0)
-                {
-                    _logger.LogError("Failed to create Report, cannot proceed with ReportComment.");
-					await _ReportUserDAO.RollbackTransactionAsync();
-                    return null;
-                }
-
-                dto.ReportId = report.ReportId;
-                var ReportUser = _mapper.Map<ReportUser>(dto);
-				await _ReportUserDAO.UpdateAsync(ReportUser);
-                await _ReportUserDAO.CommitTransactionAsync();
-
-                _logger.LogInformation("UpdateAsync ReportComment success");
-                return ReportUser;
-            }
-            catch (Exception ex)
-            {
-                await _ReportUserDAO.RollbackTransactionAsync();
-                _logger.LogError(ex, "Error when UpdateAsync ReportComment");
                 return null;
             }
         }

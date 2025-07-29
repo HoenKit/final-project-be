@@ -25,7 +25,7 @@ namespace final_project_be.Controllers
         {
             int currentPage = page ?? 1;
 
-            var pagedPosts = _postRepository.GetAllPosts(currentPage, 5, CategoryId, title, userId);
+            var pagedPosts = _postRepository.GetAllPosts(currentPage, 5, CategoryId, title, userId, false);
             return Ok(pagedPosts);
         }
 
@@ -84,7 +84,7 @@ namespace final_project_be.Controllers
         {
             int currentPage = page ?? 1;
 
-            var pagedPosts = _postRepository.GetAllPostsIsDeleted(currentPage, 5, CategoryId, title, userId);
+            var pagedPosts = _postRepository.GetAllPosts(currentPage, 5, CategoryId, title, userId, true);
             return Ok(pagedPosts);
         }
 

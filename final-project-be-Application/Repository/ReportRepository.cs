@@ -49,25 +49,6 @@ namespace final_project_be_Application.Repository
             }
         }
 
-        public async Task<bool> DeleteReport(int id)
-        {
-            try
-            {
-                await _ReportDAO.BeginTransactionAsync();
-                await _ReportDAO.DeleteAsync(id);
-				await _ReportDAO.CommitTransactionAsync();
-
-                _logger.LogInformation("DeleteAsync Report success");
-                return true;
-            }
-            catch (Exception ex)
-            {
-                await _ReportDAO.RollbackTransactionAsync();
-                _logger.LogError(ex, "Error when delete Report");
-                return false;
-            }
-        }
-
         public List<ReportPostDto> GetReportsByPost(int postId)
         {
             var reportPosts = _ReportPostDAO.GetByPostId(postId);
@@ -152,26 +133,6 @@ namespace final_project_be_Application.Repository
                 return null;
             }
 
-        }
-
-        public async Task<Report> UpdateReport(ReportDto dto)
-        {
-            try
-            {
-                await _ReportDAO.BeginTransactionAsync();
-                var Report = _mapper.Map<Report>(dto);
-                await _ReportDAO.UpdateAsync(Report);
-				await _ReportDAO.CommitTransactionAsync();
-
-                _logger.LogInformation("UpdateAsync Report success");
-                return Report;
-            }
-            catch (Exception ex)
-            {
-                await _ReportDAO.RollbackTransactionAsync();
-                _logger.LogError(ex, "Error when UpdateAsync Report");
-                return null;
-            }
         }
     }
 }

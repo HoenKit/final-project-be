@@ -75,21 +75,8 @@ namespace final_project_be_Application.Repository
                 await _mentorDAO.SaveChangesAsync();
 
                 var user = await _userDAO.GetUserMetadatabyId(dto.UserId);
-                if (user == null)
-                    throw new Exception("User not found");
-                if (user == null)
-                {
-                    user = new UserMetadata
-                    {
-                        FirstName = dto.FirstName,
-                        LastName = dto.LastName
-                    };
-                }
-                else
-                {
-                    user.FirstName = dto.FirstName;
-                    user.LastName = dto.LastName;
-                }
+                user.FirstName = dto.FirstName;
+                user.LastName = dto.LastName;
 
                 await _userDAO.UpdateUserMetadataAsync(user);
 
