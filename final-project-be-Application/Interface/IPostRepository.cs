@@ -15,6 +15,6 @@ namespace final_project_be_Application.Interface
         public PageResult<PostDto> GetAllPosts(int page, int pageSize, int? subCategoryId, string? title, Guid? userId, bool? IsDeleted); //UpdateAsync GetAllPosts
         public Task<Post> ToggleIsDeleted(int id);
         public List<MonthlyStatDto> GetPostStatisticsByMonth();
-        public Task<PostDetailDto> GetPostv2(int id);
+        public Task<PostDetailDto> GetPostDetail(int id);
     }
 }

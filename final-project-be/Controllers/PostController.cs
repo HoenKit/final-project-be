@@ -92,7 +92,7 @@ namespace final_project_be.Controllers
         public async Task<IActionResult> GetDetail(int id)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            return Ok(await _postRepository.GetPostv2(id));
+            return Ok(await _postRepository.GetPostDetail(id));
         }
     }
 }
