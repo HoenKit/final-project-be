@@ -16,6 +16,7 @@ namespace final_project_be_Domain.Models
         public bool IsConfirmed { get; set; } = false;
         public DateTime CreateAt { get; set; } = DateTime.Now;
         public DateTime? UpdateAt { get; set; } = DateTime.Now;
+        public int? Turns { get; set; } = 0;
         public UserMetadata? UserMetaData { get; set; }
         public Mentor? Mentor { get; set; }
         public ICollection<Review>? Reviews { get; set; }

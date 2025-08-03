@@ -55,14 +55,6 @@ namespace final_project_be.Controllers
             return Ok(user);
         }
 
-        [HttpPut]
-        public async Task<IActionResult> Put(UserManagerDto usermanagerDto)
-        {
-            if (!ModelState.IsValid) { return BadRequest(ModelState); }
-            await _userRepository.UpdateUser(usermanagerDto);
-            return Ok(usermanagerDto);
-        }
-
         [HttpPut("update/{userId}")]
         public async Task<IActionResult> Update(Guid userId, [FromBody] UpdateUserMetadataDto dto)
         {
@@ -80,24 +72,6 @@ namespace final_project_be.Controllers
             if (!ModelState.IsValid) { return BadRequest(ModelState); }
             var user = await _userRepository.UpdateUserPoint(point, userId);
             return Ok(user);
-        }
-
-        [HttpPut("UpdateProfile")]
-        public async Task<IActionResult> UpdateProfile([FromBody] UserProfileDto dto)
-        {
-            if (dto == null || dto.UserId == Guid.Empty)
-            {
-                return BadRequest("Invalid user data.");
-            }
-
-            var updatedUser = await _userRepository.UpdateUserProfileAsync(dto);
-
-            if (updatedUser == null)
-            {
-                return NotFound("User not found.");
-            }
-
-            return Ok(updatedUser);
         }
 
         [HttpGet("monthly-stats")]

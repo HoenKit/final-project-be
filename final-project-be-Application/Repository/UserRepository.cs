@@ -84,7 +84,7 @@ namespace final_project_be_Application.Repository
             try
             {
                 await _userDAO.BeginTransactionAsync();
-                var user = _userDAO.GetUserandUserMetadata(userId);
+                var user = await _userDAO.GetByIdAsync(userId);
 				await _userDAO.CommitTransactionAsync();
 
                 _logger.LogInformation("Get user success");
@@ -99,58 +99,6 @@ namespace final_project_be_Application.Repository
 
         }
 
-        public async Task<User> UpdateUser(UserManagerDto dto)
-        {
-            try
-            {
-				await _userDAO.BeginTransactionAsync();
-                var user = _mapper.Map<User>(dto);
-                await _userDAO.UpdateAsync(user);
-				await _userDAO.CommitTransactionAsync();
-
-                _logger.LogInformation("UpdateAsync user success");
-                return user;
-            }
-            catch (Exception ex)
-            {
-                await _userDAO.RollbackTransactionAsync();
-                _logger.LogError(ex, "Error when UpdateAsync user");
-                return null;
-            }
-        }
-        public async Task<User> UpdateUserProfileAsync(UserProfileDto dto)
-        {
-            try
-            {
-                var user = _userDAO.GetUserandUserMetadata(dto.UserId);
-            if (user == null)
-            {
-                return null;
-            }
-
-            _mapper.Map(dto, user);
-
-            if (user.UserMetaData == null)
-            {
-                user.UserMetaData = new UserMetadata();
-            }
-
-            _mapper.Map(dto, user.UserMetaData);
-
-                await _userDAO.UpdateAsync(user);
-
-                await _userDAO.SaveChangesAsync();
-
-            _logger.LogInformation("User profile and metadata updated successfully for UserId: {UserId}", dto.UserId);
-
-            return user;}
-            catch (Exception ex)
-            {
-                await _userDAO.RollbackTransactionAsync();
-                _logger.LogError(ex, "Error when UpdateAsync user");
-                return null;
-            }
-        }
         public List<MonthlyStatDto> GetUserStatisticsByMonth()
         {
             var allUsers = _userDAO.GetAll()
@@ -202,7 +150,7 @@ namespace final_project_be_Application.Repository
 
         public async Task<bool> UpdateMetadataAsync(Guid userId, UpdateUserMetadataDto dto)
         {
-            var metadata = await _userDAO.GetByUserIdAsync(userId);
+            var metadata = await _userDAO.GetUserMetadatabyId(userId);
             if (metadata == null) return false;
 
             // Gán lại các field
@@ -219,11 +167,6 @@ namespace final_project_be_Application.Repository
 
             await _userDAO.UpdateUserMetadataAsync(metadata);
             return true;
-        }
-
-        public async Task<UserMetadata?> GetMetadataByUserIdAsync(Guid userId)
-        {
-            return await _userDAO.GetByUserIdAsync(userId);
         }
 
         public async Task<string> GetUserProfileSummaryAsync(Guid userId)

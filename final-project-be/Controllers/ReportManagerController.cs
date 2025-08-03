@@ -52,23 +52,5 @@ namespace final_project_be.Controllers
             await _reportRepository.CreateReport(dto);
             return Ok(dto);
         }
-
-        // PUT api/<ReportPostController>/5
-        [HttpPut]
-        public async Task<IActionResult> Put(ReportDto dto)
-        {
-            if (!ModelState.IsValid) { return BadRequest(ModelState); }
-            await _reportRepository.UpdateReport(dto);
-            return Ok(dto);
-        }
-
-        // DeleteAsync api/<ReportPostController>/5
-        [HttpDelete]
-        public async Task<IActionResult> DeleteAsync(int Id)
-        {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-            await _reportRepository.DeleteReport(Id);
-            return Ok();
-        }
     }
 }

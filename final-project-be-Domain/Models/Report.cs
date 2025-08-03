@@ -17,6 +17,8 @@ namespace final_project_be_Domain.Models
         [JsonIgnore]
         public ICollection<ReportEvent>? ReportEvents { get; set; }
         [JsonIgnore]
+        public ICollection<ReportCourse>? ReportCourses { get; set; }
+        [JsonIgnore]
         public ICollection<ReportWorkShop>? ReportWorkShops { get; set; }
         [JsonIgnore]
         public ICollection<ReportUser>? ReportUsers { get; set; }

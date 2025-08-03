@@ -50,7 +50,7 @@ namespace final_project_be_Application.Repository
         {
             try
             {
-                var user = _UserDAO.GetUserbyEmail(dto);
+                var user = _UserDAO.GetUserbyEmail(dto.Email);
                 if (user == null)
                 {
                     _logger.LogWarning("Login attempt failed: No user found with email '{Email}'.", dto.Email);
