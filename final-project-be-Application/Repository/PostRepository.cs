@@ -304,7 +304,7 @@ namespace final_project_be_Application.Repository
             return stats;
         }
 
-        public async Task<PostDetailDto> GetPostv2(int id)
+        public async Task<PostDetailDto> GetPostDetail(int id)
         {
             try
             {

@@ -1,6 +1,7 @@
 ﻿using final_project_be_Application.Interface;
 using final_project_be_Application.Repository;
 using final_project_be_Domain.DTOs.Report;
+using final_project_be_Domain.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace final_project_be.Controllers
@@ -33,6 +34,13 @@ namespace final_project_be.Controllers
         public IActionResult GetReportsByComment(int commentId)
         {
             var data = _reportRepository.GetReportsByComment(commentId);
+            return Ok(data);
+        }
+
+        [HttpGet("by-Course/{courseId}")]
+        public IActionResult GetReportsByCourse(int courseId)
+        {
+            var data = _reportRepository.GetReportsByCourse(courseId);
             return Ok(data);
         }
 
