@@ -21,7 +21,7 @@ namespace final_project_be_Infrastructure.DAO
                 .FirstOrDefaultAsync(m => m.MentorId == id);
 
         public async Task<Mentor> GetMentorByUserId(Guid userId)
-            => await _context.Mentors.FirstOrDefaultAsync(m => m.UserId == userId);
+            => await _context.Mentors.Include(u => u.User).ThenInclude(u => u.UserMetaData).FirstOrDefaultAsync(m => m.UserId == userId);
 
         public async Task<Mentor> GetMentorinCourseAsync(int mentorId)
             => await _context.Mentors.Include(u => u.User).FirstOrDefaultAsync(m => m.MentorId == mentorId);
