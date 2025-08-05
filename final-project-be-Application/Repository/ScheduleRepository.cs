@@ -71,5 +71,29 @@ namespace final_project_be_Application.Repository
             var schedules = await _scheduleDAO.GetSchedulesByCourseIdAsync(courseId);
             return _mapper.Map<List<ScheduleDto>>(schedules);
         }
+
+        public async Task<List<ScheduleDto>> GetSchedulesByMentorAsync(int mentorId)
+        {
+            var schedules = await _scheduleDAO.GetSchedulesByMentorIdAsync(mentorId);
+            return _mapper.Map<List<ScheduleDto>>(schedules);
+        }
+
+        public async Task<bool> DeleteSchedule(int id)
+        {
+            try
+            {
+                await _scheduleDAO.BeginTransactionAsync();
+                await _scheduleDAO.DeleteAsync(id);
+                await _scheduleDAO.CommitTransactionAsync();
+                _logger.LogInformation("Delete Schedule success");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                await _scheduleDAO.RollbackTransactionAsync();
+                _logger.LogError(ex, "Error when delete Schedule");
+                return false;
+            }
+        }
     }
 }
