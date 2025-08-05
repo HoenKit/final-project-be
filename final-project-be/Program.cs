@@ -4,6 +4,7 @@ using final_project_be_Application.Interface;
 using final_project_be_Application.Repository;
 using final_project_be_Application.Service.CloudinaryService;
 using final_project_be_Application.Service.EmailService;
+using final_project_be_Application.Service.GoogleMeetService;
 using final_project_be_Application.Service.Mapping;
 using final_project_be_Application.Service.OpenAIService;
 using final_project_be_Application.Ultils;
@@ -145,6 +146,7 @@ builder.Services.AddScoped<IReportCourseRepository, ReportCourseRepository>();
 builder.Services.AddScoped<IBlobStorageService,BlobStorageService>();
 builder.Services.AddScoped<IOpenAIEmbeddingService, OpenAIEmbeddingService>();
 builder.Services.AddHttpClient<IOpenAIEmbeddingService, OpenAIEmbeddingService>();
+builder.Services.AddScoped<IGoogleMeetService, GoogleMeetService>();
 
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddSingleton<ICloudinaryService,CloudinaryService>();

@@ -10,11 +10,11 @@ namespace final_project_be.Controllers
     [ApiController]
     public class ProgressController : ControllerBase
     {
-        private readonly Caculator _caculator;
+        private readonly ICaculator _caculator;
         private readonly ICourseRepository _courseRepository;
         private readonly IModuleRepository _moduleRepository;
 
-        public ProgressController(Caculator caculator, ICourseRepository courseRepository, IModuleRepository moduleRepository)
+        public ProgressController(ICaculator caculator, ICourseRepository courseRepository, IModuleRepository moduleRepository)
         {
             _caculator = caculator;
             _courseRepository = courseRepository;

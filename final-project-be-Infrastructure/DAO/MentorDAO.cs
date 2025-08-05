@@ -17,6 +17,8 @@ namespace final_project_be_Infrastructure.DAO
 
         public async Task<Mentor> GetMentorandcertificate(int id)
             => await _context.Mentors
+                .Include(u => u.User)
+                .Include(um => um.User.UserMetaData)
                 .Include(m => m.MentorCertificates)
                 .FirstOrDefaultAsync(m => m.MentorId == id);
 

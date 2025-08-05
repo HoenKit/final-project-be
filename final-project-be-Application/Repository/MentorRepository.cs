@@ -206,7 +206,8 @@ namespace final_project_be_Application.Repository
                 if (mentor == null)
                     return null;
                 var mentorDto = _mapper.Map<GetMentorDto>(mentor);
-
+                mentorDto.FirstName = mentor.User.UserMetaData.FirstName;
+                mentorDto.LastName = mentor.User.UserMetaData.LastName;
                 var courses = _courseDAO.GetAll().Where(c => c.MentorId == id).ToList();
                 var courseIds = courses.Select(c => c.CourseId).ToList();
 
