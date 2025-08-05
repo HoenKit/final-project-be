@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
 using final_project_be_Application.Interface;
+using final_project_be_Application.Repository;
+using final_project_be_Domain.DTOs.Category;
 using final_project_be_Domain.DTOs.Workshop;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -38,20 +40,30 @@ namespace final_project_be.Controllers
             var result = _workshopRepository.GetAllWorkshop(page, pageSize);
             return Ok(result);
         }
-
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateWorkshop(int id, [FromBody] WorkShopDto dto)
+        // GET api/<LessonController>/5
+        [HttpGet("{id}")]
+        public async Task<IActionResult> Get(int id)
         {
-            if (dto == null || dto.WorkShopId != id)
-                return BadRequest("Workshop information is invalid.");
+            var lesson = await _workshopRepository.GetWorkshop(id);
+            return Ok(lesson);
+        }
 
-            var updated = await _workshopRepository.UpdateWorkshop(dto);
 
-            if (updated == null)
-                return NotFound($"No Workshop found with ID: {id}");
-
-            var returnDto = _mapper.Map<WorkShopDto>(updated);
-            return Ok(returnDto);
+        // PUT api/<CategoryController>/5
+        [HttpPut]
+        public async Task<IActionResult> Put(WorkShopDto dto)
+        {
+            if (!ModelState.IsValid) { return BadRequest(ModelState); }
+            await _workshopRepository.UpdateWorkshop(dto);
+            return Ok(dto);
+        }
+        // DeleteAsync api/<CategoryController>/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteAsync(int id)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            await _workshopRepository.DeleteCategory(id);
+            return Ok();
         }
     }
 }

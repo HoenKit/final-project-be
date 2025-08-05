@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using final_project_be_Application.Interface;
 using final_project_be_Application.Service.EmailService;
+using final_project_be_Application.Service.GoogleMeetService;
 using final_project_be_Application.Ultils;
 using final_project_be_Domain.DTOs.Assignment;
 using final_project_be_Domain.DTOs.Assignment;
@@ -27,34 +28,60 @@ namespace final_project_be_Application.Repository
 		private readonly IMapper _mapper;
 		private readonly ILogger<AssignmentRepository> _logger;
         private readonly ClientSettings _clientSettings;
-        public AssignmentRepository(IAssignmentDAO assignmentDAO, IMapper mapper, ILogger<AssignmentRepository> logger, IOptions<ClientSettings> clientoptions) : base(assignmentDAO)
+        private readonly IGoogleMeetService _googleMeetService;
+        public AssignmentRepository(IAssignmentDAO assignmentDAO, IMapper mapper, IGoogleMeetService googleMeetService, ILogger<AssignmentRepository> logger, IOptions<ClientSettings> clientoptions) : base(assignmentDAO)
 		{
 			_assignmentDAO = assignmentDAO;
 			_mapper = mapper;
 			_clientSettings = clientoptions.Value;
             _logger = logger;
-		}
+            _googleMeetService = googleMeetService;
+        }
 
-		public async Task<Assignment> CreateAssignment(AssignmentDto dto)
-		{
-			try
-			{
-				await _assignmentDAO.BeginTransactionAsync();
-				var assignment = _mapper.Map<Assignment>(dto);
-				await _assignmentDAO.AddAsync(assignment);
-				await _assignmentDAO.CommitTransactionAsync();
-				_logger.LogInformation("AddAsync Assignment success");
-				return assignment;
-			}
-			catch (Exception ex)
-			{
-				await _assignmentDAO.RollbackTransactionAsync();
-				_logger.LogError(ex, "Error when adding Assignment");
-				return null;
-			}
-		}
+        public async Task<Assignment> CreateAssignment(AssignmentDto dto)
+        {
+            try
+            {
+                await _assignmentDAO.BeginTransactionAsync();
 
-		public async Task<bool> DeleteAssignment(int id)
+                var assignment = _mapper.Map<Assignment>(dto);
+
+                // Tạo Google Meet link nếu không có link
+                if (string.IsNullOrEmpty(assignment.MeetLink))
+                {
+                    // Tạo meeting link kéo dài 1 giờ từ thời điểm hiện tại
+                    var startTime = DateTime.Now.AddHours(1);
+                    var endTime = startTime.AddHours(1);
+
+                    var meetTitle = $"Assignment Meeting - {assignment.LessonId}";
+                    var meetDescription = assignment.Content;
+
+                    var meetLink = await _googleMeetService.CreateGoogleMeetLinkAsync(
+                        meetTitle,
+                        startTime,
+                        endTime,
+                        meetDescription);
+
+                    if (!string.IsNullOrEmpty(meetLink))
+                    {
+                        assignment.MeetLink = meetLink;
+                    }
+                }
+
+                await _assignmentDAO.AddAsync(assignment);
+                await _assignmentDAO.CommitTransactionAsync();
+                _logger.LogInformation("AddAsync Assignment success");
+                return assignment;
+            }
+            catch (Exception ex)
+            {
+                await _assignmentDAO.RollbackTransactionAsync();
+                _logger.LogError(ex, "Error when adding Assignment");
+                return null;
+            }
+        }
+
+        public async Task<bool> DeleteAssignment(int id)
 		{
 			try
 			{
