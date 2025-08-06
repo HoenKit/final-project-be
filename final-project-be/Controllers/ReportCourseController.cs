@@ -1,13 +1,13 @@
-﻿using final_project_be_Application.Interface;
-using final_project_be_Domain.DTOs.Report;
-using final_project_be_Domain.Models;
+﻿using final_project_be_Domain.DTOs.Report;
+using final_project_be_Application.Interface;
 using Microsoft.AspNetCore.Mvc;
+using final_project_be_Domain.Models;
 
 namespace final_project_be.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ReportCourseController : ControllerBase
+    public class ReportCourseController : Controller
     {
         private readonly IReportCourseRepository _ReportCourseRepository;
         public ReportCourseController(IReportCourseRepository ReportCourseRepository)
@@ -24,8 +24,6 @@ namespace final_project_be.Controllers
             var pagedReportCourses = _ReportCourseRepository.GetAllReportCourses(currentPage, 5);
             return Ok(pagedReportCourses);
         }
-
-
 
         // GET api/<ReportCourseController>/5
         [HttpGet("{id}")]

@@ -9,7 +9,7 @@ namespace final_project_be_Infrastructure.DAO_Interface
 {
     public interface IReportCourseDAO : IGenericDAO<ReportCourse>
     {
-        List<ReportCourse> GetByCoursedId(int courseId);
+        List<ReportCourse> GetByCourseId(int courseId);
         ReportCourse GetByReportId(int id);
         void DeleteByReportAndCourseId(int reportId, int courseId);
     }
