@@ -119,7 +119,7 @@ namespace final_project_be_Application.Repository
 
         public List<ReportCourseDto> GetReportsByCourse(int courseId)
         {
-            var reportCourses = _ReportCourseDAO.GetByCoursedId(courseId);
+            var reportCourses = _ReportCourseDAO.GetByCourseId(courseId);
 
             // Truy vấn Report hoặc Course
             var reportIds = reportCourses.Select(x => x.ReportId).ToList();

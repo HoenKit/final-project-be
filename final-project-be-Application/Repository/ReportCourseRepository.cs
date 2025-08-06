@@ -1,17 +1,13 @@
-﻿using AutoMapper;
-using final_project_be_Application.Interface;
-using final_project_be_Domain.DTOs.Report;
-using final_project_be_Domain.DTOs;
-using final_project_be_Domain.Models;
-using final_project_be_Infrastructure.DAO_Interface;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.Design;
+using AutoMapper;
 using final_project_be_Infrastructure.DAO;
+using final_project_be_Domain.Models;
+using final_project_be_Domain.DTOs;
+using final_project_be_Domain.DTOs.Report;
+using final_project_be_Application.Interface;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using final_project_be_Infrastructure.DAO_Interface;
 
 namespace final_project_be_Application.Repository
 {
@@ -136,7 +132,7 @@ namespace final_project_be_Application.Repository
             {
                 await _reportDAO.BeginTransactionAsync();
 
-                var reportCourses = _ReportCourseDAO.GetByCoursedId(courseId);
+                var reportCourses = _ReportCourseDAO.GetByCourseId(courseId);
 
                 if (reportCourses == null || !reportCourses.Any())
                 {
@@ -162,7 +158,7 @@ namespace final_project_be_Application.Repository
 
                 await _reportDAO.CommitTransactionAsync();
 
-                _logger.LogInformation($"Successfully deleted all reports for CourseId: {courseId}");
+                _logger.LogInformation($"Successfully deleted all reports for courseId: {courseId}");
                 return true;
             }
             catch (Exception ex)

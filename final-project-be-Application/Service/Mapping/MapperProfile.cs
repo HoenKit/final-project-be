@@ -86,7 +86,9 @@ namespace final_project_be_Application.Service.Mapping
             CreateMap<Payment, GetPaymentDto>().ReverseMap();
             CreateMap<WorkShop, WorkShopCreateDto>().ReverseMap();
             CreateMap<WorkShop, WorkShopDto>().ReverseMap();
-            CreateMap<ReportCourse, ReportCourseDto>().ReverseMap();
+            CreateMap<ReportCourseDto, ReportCourse>().ReverseMap();
+            CreateMap<ReportCourseDto, Report>().ReverseMap();
+            CreateMap<ReportCourseDto, ReportDto>().ReverseMap();
         }
 	}
 }

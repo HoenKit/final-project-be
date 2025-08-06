@@ -1,11 +1,7 @@
 ﻿using final_project_be_Domain.Models;
 using final_project_be_Infrastructure.DAO_Interface;
 using final_project_be_Infrastructure.Data;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace final_project_be_Infrastructure.DAO
 {
@@ -18,7 +14,7 @@ namespace final_project_be_Infrastructure.DAO
             _context = context;
         }
 
-        public List<ReportCourse> GetByCoursedId(int courseId)
+        public List<ReportCourse> GetByCourseId(int courseId)
         {
             return _context.ReportCourse
                 .Where(rp => rp.CourseId == courseId)
@@ -44,4 +40,5 @@ namespace final_project_be_Infrastructure.DAO
             }
         }
     }
+
 }
