@@ -14,6 +14,7 @@ namespace final_project_be_Domain.Models
         public bool IsBanned { get; set; } = false;
         public bool IsPremium { get; set; } = false;
         public bool IsConfirmed { get; set; } = false;
+        public DateTime? LastDailyLogin { get; set; } = null;
         public DateTime CreateAt { get; set; } = DateTime.Now;
         public DateTime? UpdateAt { get; set; } = DateTime.Now;
         public int? Turns { get; set; } = 0;
