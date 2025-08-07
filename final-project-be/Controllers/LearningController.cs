@@ -1,4 +1,5 @@
 ﻿using final_project_be_Application.Interface;
+using final_project_be_Application.Repository;
 using final_project_be_Domain.DTOs.Courses;
 using final_project_be_Domain.DTOs.LearnDto;
 using Microsoft.AspNetCore.Http;
@@ -11,6 +12,7 @@ namespace final_project_be.Controllers
     public class LearningController : ControllerBase
     {
         private readonly ILearningRepository _learnrepository;
+
         public LearningController(ILearningRepository learnrepository)
         {
             _learnrepository = learnrepository;
@@ -90,6 +92,56 @@ namespace final_project_be.Controllers
                 return BadRequest("Course is not completed or upload failed.");
 
             return Ok("Certificate uploaded and link saved.");
+        }
+        [HttpGet("submissions")]
+        public async Task<ActionResult> GetUserAssignmentsByAssignmentId(int assignmentId)
+        {
+            var result = await _learnrepository.GetUserAssignmentsByAssignmentIdAsync(assignmentId);
+            if (result == null || result.Count == 0)
+                return NotFound("No user submissions found for this assignment.");
+
+            return Ok(result);
+        }
+        [HttpGet("user")]
+        public async Task<ActionResult> GetUserAssignment(int assignmentId, Guid userId)
+        {
+            var result = await _learnrepository.GetUserAssignmentAsync(userId, assignmentId);
+            if (result == null)
+                return NotFound("No assignment submission found for this user and assignment.");
+
+            return Ok(result);
+        }
+
+        [HttpPut("submitAssignment")]
+        public async Task<IActionResult> UpdateUserAssignment([FromBody] submitAssignmentDto dto)
+        {
+            var success = await _learnrepository.UpdateUserAssignmentAsync(dto);
+            if (!success)
+                return NotFound("User assignment not found.");
+
+            return Ok("User assignment updated successfully.");
+        }
+
+        [HttpPut("mark-present")]
+        public async Task<IActionResult> MarkUsersAsPresent([FromBody] MarkPresentDto dto)
+        {
+            var success = await _learnrepository.MarkUsersAsPresentAsync(dto);
+            if (!success)
+                return NotFound("No matching user assignments found.");
+
+            return Ok("Users marked as present successfully.");
+        }
+        [HttpPut("grade")]
+        public async Task<IActionResult> GradeSubmission([FromBody] GradeAssignmentDto dto)
+        {
+            if (dto.Mark < 0 || dto.Mark > 100)
+                return BadRequest("Mark must be between 0 and 10.");
+
+            var success = await _learnrepository.GradeSubmissionAsync(dto);
+            if (!success)
+                return NotFound("UserLesson or UserAssignment not found.");
+
+            return Ok("Graded successfully.");
         }
     }
 }

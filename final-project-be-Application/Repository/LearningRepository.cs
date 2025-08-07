@@ -23,6 +23,7 @@ namespace final_project_be_Application.Repository
         private readonly IUserLessonDAO _userlessonDAO;
         private readonly IUserModuleDAO _userModuleDAO;
         private readonly IUserAnswerDAO _userAnswerDAO;
+        private readonly IUserAssignmentDAO _userAssignmentDAO;
         private readonly IModuleDAO _moduleDAO;
         private readonly ILessonDAO _lessonDAO;
         private readonly IQuestionDAO _questionDAO;
@@ -31,7 +32,7 @@ namespace final_project_be_Application.Repository
         private readonly IBlobStorageService _blobStorageService;
         private readonly ILogger<LearningRepository> _logger;
 
-        public LearningRepository(IUserCourseDAO usercourseDAO, IUserLessonDAO userlessonDAO,IBlobStorageService blobStorageService, IUserAnswerDAO userAnswerDAO, ILessonDAO lessonDAO, IUserModuleDAO userModuleDAO, IMapper mapper, ILogger<LearningRepository> logger,
+        public LearningRepository(IUserCourseDAO usercourseDAO, IUserAssignmentDAO userAssignmentDAO, IUserLessonDAO userlessonDAO,IBlobStorageService blobStorageService, IUserAnswerDAO userAnswerDAO, ILessonDAO lessonDAO, IUserModuleDAO userModuleDAO, IMapper mapper, ILogger<LearningRepository> logger,
             IModuleDAO moduleDAO,ICaculator caculator, IQuestionDAO questionDAO)
         {
             _lessonDAO = lessonDAO;
@@ -40,6 +41,7 @@ namespace final_project_be_Application.Repository
             _userModuleDAO = userModuleDAO;
             _userAnswerDAO = userAnswerDAO;
             _blobStorageService = blobStorageService;
+            _userAssignmentDAO = userAssignmentDAO;
             _mapper = mapper;
             _logger = logger;
             _moduleDAO = moduleDAO;
@@ -207,6 +209,63 @@ namespace final_project_be_Application.Repository
             var fileUrl = $"https://finalprojectbestorage.blob.core.windows.net/phronesisfiles/{fileName}";
             await _usercourseDAO.UpdateCertificateLinkAsync(dto.UserId, dto.CourseId, fileUrl);
 
+            return true;
+        }
+        public async Task<List<UserAssignmentDto>> GetUserAssignmentsByAssignmentIdAsync(int assignmentId)
+        {
+            var submissions = await _userAssignmentDAO.GetUserAssignmentsByAssignmentIdAsync(assignmentId);
+            return _mapper.Map<List<UserAssignmentDto>>(submissions);
+        }
+        public async Task<UserAssignmentDto?> GetUserAssignmentAsync(Guid userId, int assignmentId)
+        {
+            var assignment = await _userAssignmentDAO.GetUserAssignmentAsync(userId, assignmentId);
+            if (assignment == null)
+                return null;
+
+            return _mapper.Map<UserAssignmentDto>(assignment);
+        }
+
+        public async Task<bool> UpdateUserAssignmentAsync(submitAssignmentDto dto)
+        {
+            var assignment = await _userAssignmentDAO.GetUserAssignmentAsync(dto.UserId, dto.AssignmentId);
+            if (assignment == null)
+                return false;
+
+            assignment.Content = dto.Content;
+             await _userAssignmentDAO.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> MarkUsersAsPresentAsync(MarkPresentDto dto)
+        {
+            var assignments = await _userAssignmentDAO.GetUserAssignmentsByUserIdsAndAssignmentIdAsync(dto.UserIds, dto.AssignmentId);
+
+            if (assignments == null || assignments.Count == 0)
+                return false;
+
+            foreach (var assignment in assignments)
+            {
+                assignment.IsPresented = true;
+            }
+
+             await _userAssignmentDAO.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> GradeSubmissionAsync(GradeAssignmentDto grade)
+        {
+            var userLesson = await _userlessonDAO.GetUserLessonbyuserandlessonAsync(grade.UserId, grade.LessonId);
+            var userAssignment = await _userAssignmentDAO.GetUserAssignmentAsync(grade.UserId, grade.AssignmentId);
+
+            if (userLesson == null || userAssignment == null)
+                return false;
+
+            userLesson.Mark = grade.Mark;
+            userLesson.CompletedAt = DateTime.UtcNow;
+            userLesson.IsPassed = grade.Mark >= 80; // hoặc tuỳ điều kiện
+            userAssignment.IsScored = true;
+
+             await _lessonDAO.SaveChangesAsync();
             return true;
         }
     }

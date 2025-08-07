@@ -16,6 +16,11 @@ namespace final_project_be_Application.Interface
         public Task<float> SubmitQuizAsync(SubmitQuizDto dto);
         public Task<List<QuizDto>> GetQuizByLessonIdAsync(int lessonId);
         public Task<bool> UploadCertificateAndSaveLinkAsync(CertificateUploadDto dto);
+        public Task<List<UserAssignmentDto>> GetUserAssignmentsByAssignmentIdAsync(int assignmentId);
+        public Task<UserAssignmentDto?> GetUserAssignmentAsync(Guid userId, int assignmentId);
+        public Task<bool> UpdateUserAssignmentAsync(submitAssignmentDto dto);
+        public Task<bool> MarkUsersAsPresentAsync(MarkPresentDto dto);
+        public Task<bool> GradeSubmissionAsync(GradeAssignmentDto grade);
     }
 
 }
