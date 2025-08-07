@@ -9,6 +9,7 @@ namespace final_project_be_Infrastructure.DAO_Interface
 {
     public interface IPostFileDAO : IGenericDAO<PostFile>
     {
+        public Task<List<PostFile>> GetByPostIdAsync(int postId);
     }
 
 }
