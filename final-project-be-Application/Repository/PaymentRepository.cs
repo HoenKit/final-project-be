@@ -158,6 +158,10 @@ namespace final_project_be_Application.Repository
                 var query = _paymentDAO.GetAll()
                     .Include(c => c.User)
                     .ThenInclude(c => c.UserMetaData)
+                    .Include(c => c.PaymentCourses)
+                    .ThenInclude(pc => pc.Courses)
+                    .Include(c => c.PaymentPlans)
+                    .ThenInclude(pp => pp.MembershipPlan)
                     .Where(p => ServiceType == null || ServiceType.Count == 0 || ServiceType.Select(s => s.ToString()).Contains(p.ServiceType));
 
 
@@ -183,7 +187,10 @@ namespace final_project_be_Application.Repository
                     PaymentId = p.PaymentId,
                     UserId = p.UserId,
                     Email = p.User.Email,
-                    Amount = p.Amount,
+					CourseId = p.PaymentCourses?.FirstOrDefault()?.CourseId ?? 0,
+					CourseName = p.PaymentCourses?.FirstOrDefault()?.Courses?.CourseName ?? string.Empty,
+                    PlanName = p.PaymentPlans?.FirstOrDefault()?.MembershipPlan?.Name ?? string.Empty,
+					Amount = p.Amount,
                     Status = p.Status,
                     ServiceType = p.ServiceType,
                     CreatedAt = p.CreatedAt,
