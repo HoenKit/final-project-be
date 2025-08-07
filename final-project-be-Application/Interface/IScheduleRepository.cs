@@ -14,6 +14,7 @@ namespace final_project_be_Application.Interface
         public Task<bool> RegisterUserToScheduleAsync(UserScheduleDto dto);
         public Task<List<ScheduleDto>> GetSchedulesByCourseAsync(int courseId);
         public Task<List<ScheduleDto>> GetSchedulesByMentorAsync(int mentorId);
+        public Task<List<UserScheduleDto>> GetUserSchedulesAsync(Guid userId);
         public Task<bool> DeleteSchedule(int id);
     }
 }

@@ -68,6 +68,35 @@ namespace final_project_be.Controllers
             }
         }
 
+        [HttpPost("DoAssignment")]
+        public async Task<IActionResult> CreateUserAssignment([FromBody] CreateUserAssignmentDto dto)
+        {
+            if (dto.UserId == Guid.Empty || dto.AssignmentId <= 0)
+                return BadRequest("Invalid input.");
+
+            try
+            {
+                var result = await _learnrepository.CreateUserAssignmentAsync(dto);
+
+                if (result == null)
+                    return Conflict("Cannot create or update assignment: Conditions not met.");
+                var response = new UserAssignmentDto
+                {
+                    UserId = result.UserId,
+                    AssignmentId = result.AssignmentId,
+                    IsPresented = result.IsPresented,
+                    IsScored = result.IsScored
+                };
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                // Log lỗi ra console hoặc file
+                Console.WriteLine($"Error: {ex.Message}");
+                return StatusCode(500, "Internal server error occurred.");
+            }
+        }
+
         [HttpGet("{lessonId}")]
         public async Task<IActionResult> GetQuizByLessonId(int lessonId)
         {
@@ -120,6 +149,17 @@ namespace final_project_be.Controllers
                 return NotFound("User assignment not found.");
 
             return Ok("User assignment updated successfully.");
+        }
+
+        [HttpGet("not-presented")]
+        public async Task<IActionResult> GetNotPresentedAssignments(int assignmentId)
+        {
+            var assignments = await _learnrepository.ListAssignmentsNotPresentAsync(assignmentId);
+
+            if (assignments == null || !assignments.Any())
+                return NotFound("No user assignments found that are not presented.");
+
+            return Ok(assignments);
         }
 
         [HttpPut("mark-present")]

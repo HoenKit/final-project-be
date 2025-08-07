@@ -20,6 +20,7 @@ namespace final_project_be_Application.Repository
         private readonly IMapper _mapper;
         private readonly ILogger<AnswerRepository> _logger;
 
+
         public ScheduleRepository(IScheduleDAO scheduleDAO, IMapper mapper, ILogger<AnswerRepository> logger, IUserScheduleDAO userScheduleDAO) : base(scheduleDAO)
         {
             _scheduleDAO = scheduleDAO;
@@ -64,6 +65,12 @@ namespace final_project_be_Application.Repository
 
             await _scheduleDAO.SaveChangesAsync();
             return true;
+        }
+
+        public async Task<List<UserScheduleDto>> GetUserSchedulesAsync(Guid userId)
+        {
+            var schedules = await _userScheduleDAO.GetSchedulesByUserIdAsync(userId);
+            return _mapper.Map<List<UserScheduleDto>>(schedules);
         }
 
         public async Task<List<ScheduleDto>> GetSchedulesByCourseAsync(int courseId)

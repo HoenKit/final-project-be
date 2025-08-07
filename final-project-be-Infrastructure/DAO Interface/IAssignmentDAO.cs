@@ -9,6 +9,7 @@ namespace final_project_be_Infrastructure.DAO_Interface
 {
     public interface IAssignmentDAO : IGenericDAO<Assignment>
     {
+        public Task<List<Assignment>> GetAssignmentsByUserIdAsync(Guid userId);
     }
 
 }
