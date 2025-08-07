@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using final_project_be_Domain.DTOs.Comment;
+using Microsoft.AspNetCore.Http;
 
 namespace final_project_be_Domain.DTOs.Post
 {
@@ -18,7 +19,6 @@ namespace final_project_be_Domain.DTOs.Post
         public List<CommentDto>? Comments { get; set; }
     }
 
-    //UpdateAsync CreatePost
     public class PostCreateDto
     {
         public int PostId { get; set; }
@@ -27,6 +27,6 @@ namespace final_project_be_Domain.DTOs.Post
         public int CategoryId { get; set; }
         public string Title { get; set; }
         public string Content { get; set; }
-        public List<PostFileCreateDto>? PostFileCreate { get; set; }
+        public List<IFormFile>? PostFileLinks { get; set; }
     }
 }

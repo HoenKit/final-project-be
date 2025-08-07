@@ -12,55 +12,82 @@ using final_project_be_Infrastructure.DAO_Interface;
 
 namespace final_project_be_Application.Repository
 {
-	public class PostRepository : Repository<Post>, IPostRepository
+    public class PostRepository : Repository<Post>, IPostRepository
     {
         private readonly IPostDAO _postDAO;
         private readonly IPostFileDAO _postFileDAO;
         private readonly ICommentDAO _commentDAO;
+        private readonly IBlobStorageService _blobStorageService;
         private readonly IMapper _mapper;
         private readonly ILogger<PostRepository> _logger;
-        public PostRepository(IPostDAO postDAO,IPostFileDAO postFileDAO, ICommentDAO commentDAO, IMapper mapper, ILogger<PostRepository> logger) : base(postDAO)
+        public PostRepository(IPostDAO postDAO, IPostFileDAO postFileDAO, ICommentDAO commentDAO, IMapper mapper, ILogger<PostRepository> logger, IBlobStorageService blobStorageService) : base(postDAO)
         {
             _mapper = mapper;
             _logger = logger;
             _postDAO = postDAO;
             _postFileDAO = postFileDAO;
             _commentDAO = commentDAO;
+            _blobStorageService = blobStorageService;
         }
-        //UpdateAsync Creat Post
+
         public async Task<Post> CreatePost(PostCreateDto dto)
         {
             try
             {
                 await _postDAO.BeginTransactionAsync();
+
                 if (dto.ParentPostId == 0)
                 {
                     dto.ParentPostId = null;
                 }
-                var Post = _mapper.Map<Post>(dto);
-                Post.PostFiles = null;
-                await _postDAO.AddAsync(Post);
 
-                if (dto.PostFileCreate != null && dto.PostFileCreate.Count > 0)
+                var post = _mapper.Map<Post>(dto);
+                post.PostFiles = null;
+
+                await _postDAO.AddAsync(post);
+
+                if (dto.PostFileLinks != null && dto.PostFileLinks.Count > 0)
                 {
-                    Post.PostFiles = dto.PostFileCreate.Select(f => new PostFile
-                    {
-                        FileUrl = f.FileUrl,
-                        PostFileType = f.PostFileType,
-                        IsDeleted = f.IsDeleted ?? false,
-                        PostId = Post.PostId
-                    }).ToList();
+                    post.PostFiles = new List<PostFile>();
 
-                    foreach (var file in Post.PostFiles)
+                    foreach (var formFile in dto.PostFileLinks)
                     {
-                        await _postFileDAO.AddAsync(file);
+                        if (formFile.Length > 0)
+                        {
+                            var fileExtension = Path.GetExtension(formFile.FileName);
+                            var uniqueFileName = Guid.NewGuid().ToString() + fileExtension;
+
+                            using (var stream = formFile.OpenReadStream())
+                            {
+                                await _blobStorageService.UploadFileAsync(uniqueFileName, stream);
+                            }
+
+                            string postFileType = fileExtension.ToLower() switch
+                            {
+                                ".jpg" or ".jpeg" or ".png" or ".gif" => "Image",
+                                ".mp4" or ".mov" or ".avi" or ".mkv" => "Video",
+                                _ => "Unknown"
+                            };
+
+                            var fileUrl = $"https://finalprojectbestorage.blob.core.windows.net/phronesisfiles/{uniqueFileName}";
+
+                            var postFile = new PostFile
+                            {
+                                FileUrl = fileUrl,
+                                PostFileType = postFileType,
+                                IsDeleted = false,
+                                PostId = post.PostId
+                            };
+
+                            await _postFileDAO.AddAsync(postFile);
+                        }
                     }
                 }
 
-				await _postDAO.CommitTransactionAsync();
+                await _postDAO.CommitTransactionAsync();
 
                 _logger.LogInformation("AddAsync Post success");
-                return Post;
+                return post;
             }
             catch (Exception ex)
             {
@@ -70,7 +97,6 @@ namespace final_project_be_Application.Repository
             }
         }
 
-        //UpdateAsync DeleteAsync Post
         public async Task<bool> DeletePost(int id)
         {
             try
@@ -89,7 +115,7 @@ namespace final_project_be_Application.Repository
                 {
                     foreach (var file in post.PostFiles.ToList())
                     {
-						await _postFileDAO.DeleteAsync(file.PostFileId);
+                        await _postFileDAO.DeleteAsync(file.PostFileId);
                     }
                 }
 
@@ -102,7 +128,7 @@ namespace final_project_be_Application.Repository
                 }
 
                 await _postDAO.DeleteAsync(id);
-				await _postDAO.CommitTransactionAsync();
+                await _postDAO.CommitTransactionAsync();
 
                 _logger.LogInformation("DeleteAsync Post success.");
                 return true;
@@ -115,7 +141,6 @@ namespace final_project_be_Application.Repository
             }
         }
 
-        //UpdateAsync Get All Posts
         public PageResult<PostDto> GetAllPosts(int page, int pageSize, int? CategoryId, string? title, Guid? userId, bool? IsDeleted)
         {
             try
@@ -230,22 +255,80 @@ namespace final_project_be_Application.Repository
 
         }
 
-        //UpdateAsync UpdatePost
         public async Task<Post> UpdatePost(PostCreateDto dto)
         {
             try
             {
                 await _postDAO.BeginTransactionAsync();
+
                 if (dto.ParentPostId == 0)
                 {
                     dto.ParentPostId = null;
                 }
-                var Post = _mapper.Map<Post>(dto);
-                await _postDAO.UpdateAsync(Post);
+
+                var existingPost = await _postDAO.GetByIdAsync(dto.PostId);
+                if (existingPost == null)
+                {
+                    throw new Exception("Post not found.");
+                }
+
+                existingPost.Content = dto.Content;
+                existingPost.Title = dto.Title;
+                existingPost.ParentPostId = dto.ParentPostId;
+                existingPost.CategoryId = dto.CategoryId;
+                existingPost.UpdateAt = DateTime.Now;
+
+                await _postDAO.UpdateAsync(existingPost);
+
+
+                var existingFiles = await _postFileDAO.GetByPostIdAsync(dto.PostId);
+                foreach (var file in existingFiles)
+                {
+                    var fileName = Path.GetFileName(new Uri(file.FileUrl).LocalPath);
+                    await _blobStorageService.DeleteFileIfExistsAsync(fileName);
+                    await _postFileDAO.DeleteAsync(file.PostFileId);
+                }
+
+                if (dto.PostFileLinks != null && dto.PostFileLinks.Count > 0)
+                {
+                    foreach (var formFile in dto.PostFileLinks)
+                    {
+                        if (formFile.Length > 0)
+                        {
+                            var fileExtension = Path.GetExtension(formFile.FileName);
+                            var uniqueFileName = Guid.NewGuid().ToString() + fileExtension;
+
+                            using (var stream = formFile.OpenReadStream())
+                            {
+                                await _blobStorageService.UploadFileAsync(uniqueFileName, stream);
+                            }
+
+                            string postFileType = fileExtension.ToLower() switch
+                            {
+                                ".jpg" or ".jpeg" or ".png" or ".gif" => "Image",
+                                ".mp4" or ".mov" or ".avi" or ".mkv" => "Video",
+                                _ => "Unknown"
+                            };
+
+                            var fileUrl = $"https://finalprojectbestorage.blob.core.windows.net/phronesisfiles/{uniqueFileName}";
+
+                            var postFile = new PostFile
+                            {
+                                FileUrl = fileUrl,
+                                PostFileType = postFileType,
+                                IsDeleted = false,
+                                PostId = existingPost.PostId
+                            };
+
+                            await _postFileDAO.AddAsync(postFile);
+                        }
+                    }
+                }
+
                 await _postDAO.CommitTransactionAsync();
 
                 _logger.LogInformation("UpdateAsync Post success");
-                return Post;
+                return existingPost;
             }
             catch (Exception ex)
             {
