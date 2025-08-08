@@ -269,11 +269,22 @@ namespace final_project_be_Application.Repository
 
             return true;
         }
+
         public async Task<List<UserAssignmentDto>> GetUserAssignmentsByAssignmentIdAsync(int assignmentId)
         {
             var submissions = await _userAssignmentDAO.ListUserAssignmentNotScoresAsync(assignmentId);
-            return _mapper.Map<List<UserAssignmentDto>>(submissions);
+            return submissions.Select(ua => new UserAssignmentDto
+            {
+                UserId = ua.UserId,
+                AssignmentId = ua.AssignmentId,
+                IsScored = ua.IsScored,
+                Content = ua.Content,
+                IsPresented = ua.IsPresented,
+                FirstName = ua.User?.UserMetaData?.FirstName,
+                LastName = ua.User?.UserMetaData?.LastName
+            }).ToList();
         }
+
         public async Task<UserAssignmentDto?> GetUserAssignmentAsync(Guid userId, int assignmentId)
         {
             var assignment = await _userAssignmentDAO.GetUserAssignmentAsync(userId, assignmentId);
