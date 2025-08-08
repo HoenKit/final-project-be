@@ -2,11 +2,13 @@
 using final_project_be_Application.Interface;
 using final_project_be_Application.Ultils;
 using final_project_be_Domain.DTOs.Answer;
+using final_project_be_Domain.DTOs.Assignment;
 using final_project_be_Domain.DTOs.Courses;
 using final_project_be_Domain.DTOs.LearnDto;
 using final_project_be_Domain.Models;
 using final_project_be_Infrastructure.DAO;
 using final_project_be_Infrastructure.DAO_Interface;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Org.BouncyCastle.Asn1;
 using System;
@@ -24,6 +26,7 @@ namespace final_project_be_Application.Repository
         private readonly IUserModuleDAO _userModuleDAO;
         private readonly IUserAnswerDAO _userAnswerDAO;
         private readonly IUserAssignmentDAO _userAssignmentDAO;
+        private readonly IAssignmentDAO _assignmentDAO;
         private readonly IModuleDAO _moduleDAO;
         private readonly ILessonDAO _lessonDAO;
         private readonly IQuestionDAO _questionDAO;
@@ -33,10 +36,11 @@ namespace final_project_be_Application.Repository
         private readonly ILogger<LearningRepository> _logger;
 
         public LearningRepository(IUserCourseDAO usercourseDAO, IUserAssignmentDAO userAssignmentDAO, IUserLessonDAO userlessonDAO,IBlobStorageService blobStorageService, IUserAnswerDAO userAnswerDAO, ILessonDAO lessonDAO, IUserModuleDAO userModuleDAO, IMapper mapper, ILogger<LearningRepository> logger,
-            IModuleDAO moduleDAO,ICaculator caculator, IQuestionDAO questionDAO)
+            IModuleDAO moduleDAO,IAssignmentDAO assignmentDAO,ICaculator caculator, IQuestionDAO questionDAO)
         {
             _lessonDAO = lessonDAO;
             _usercourseDAO = usercourseDAO;
+            _assignmentDAO = assignmentDAO;
             _userlessonDAO = userlessonDAO;
             _userModuleDAO = userModuleDAO;
             _userAnswerDAO = userAnswerDAO;
@@ -136,6 +140,39 @@ namespace final_project_be_Application.Repository
             return userLesson;
         }
 
+        public async Task<UserAssignment?> CreateUserAssignmentAsync(CreateUserAssignmentDto dto)
+        {
+            var existing = await _userAssignmentDAO.GetUserAssignmentAsync(dto.UserId, dto.AssignmentId);
+
+            // Nếu chưa có thì tạo mới (Yêu cầu 4)
+            if (existing == null)
+            {
+                return await _userAssignmentDAO.CreateUserAssignmentAsync(dto);
+            }
+
+            // ✅ Lấy assignment tách biệt thay vì dùng existing.Assignment
+            var assignment = await _assignmentDAO.GetByIdAsync(dto.AssignmentId);
+            if (assignment == null || assignment.LessonId == 0) return null;
+
+            var userLesson = await _userlessonDAO.GetUserLessonbyuserandlessonAsync(dto.UserId, assignment.LessonId);
+
+            if (userLesson != null && userLesson.IsPassed == false)
+            {
+                // TH1: IsPresented = true && IsScored = true → Update lại
+                if (existing.IsPresented && existing.IsScored)
+                {
+                    await _userAssignmentDAO.UpdateUserAssignmentAsync(existing);
+                    return existing;
+                }
+
+                // TH2 & TH3: Không được tạo lại
+                return null;
+            }
+
+            // TH4: Đã pass rồi → không tạo lại
+            return null;
+        }
+
         public async Task<float> SubmitQuizAsync(SubmitQuizDto dto)
         {
             var lesson = await _lessonDAO.GetLessonByIdAsync(dto.LessonId);
@@ -213,7 +250,7 @@ namespace final_project_be_Application.Repository
         }
         public async Task<List<UserAssignmentDto>> GetUserAssignmentsByAssignmentIdAsync(int assignmentId)
         {
-            var submissions = await _userAssignmentDAO.GetUserAssignmentsByAssignmentIdAsync(assignmentId);
+            var submissions = await _userAssignmentDAO.ListUserAssignmentNotScoresAsync(assignmentId);
             return _mapper.Map<List<UserAssignmentDto>>(submissions);
         }
         public async Task<UserAssignmentDto?> GetUserAssignmentAsync(Guid userId, int assignmentId)
@@ -224,6 +261,7 @@ namespace final_project_be_Application.Repository
 
             return _mapper.Map<UserAssignmentDto>(assignment);
         }
+
 
         public async Task<bool> UpdateUserAssignmentAsync(submitAssignmentDto dto)
         {
@@ -267,6 +305,11 @@ namespace final_project_be_Application.Repository
 
              await _lessonDAO.SaveChangesAsync();
             return true;
+        }
+
+        public async Task<List<UserAssignmentInfoDto>> ListAssignmentsNotPresentAsync(int assignmentId)
+        {
+            return await _userAssignmentDAO.ListAssignmentsNotPresentAsync(assignmentId);
         }
     }
 }

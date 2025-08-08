@@ -130,6 +130,9 @@ namespace final_project_be_Application.Repository
                     CompletedAt = DateTime.UtcNow,
                     Status = "Not Started"
                 });
+
+                course.StudentCount += 1;
+                await _courseDAO.UpdateAsync(course);
                 // Trừ điểm người dùng
                 user.Point -= finalCost;
                 await _userDAO.UpdateAsync(user);

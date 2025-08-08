@@ -21,4 +21,5 @@ namespace final_project_be_Domain.DTOs.Schedule
         public Guid UserId { get; set; }
         public int ScheduleId { get; set; }
     }
+
 }

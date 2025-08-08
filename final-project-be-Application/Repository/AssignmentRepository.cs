@@ -4,7 +4,6 @@ using final_project_be_Application.Service.EmailService;
 using final_project_be_Application.Service.GoogleMeetService;
 using final_project_be_Application.Ultils;
 using final_project_be_Domain.DTOs.Assignment;
-using final_project_be_Domain.DTOs.Assignment;
 using final_project_be_Domain.Models;
 using final_project_be_Infrastructure.DAO;
 using final_project_be_Infrastructure.DAO_Interface;
@@ -99,7 +98,21 @@ namespace final_project_be_Application.Repository
 			}
 		}
 
-		public async Task<ICollection<AssignmentResponseDto>> GetAllAssignmentByLessonId(int lessonId)
+        public async Task<List<GetAssignmentLessonDto>> GetAssignmentsBycreatorAsync(Guid userId)
+        {
+            var assignments = await _assignmentDAO.GetAssignmentsByUserIdAsync(userId);
+
+            return assignments.Select(a => new GetAssignmentLessonDto
+            {
+                AssignmentId = a.AssignmentId,
+                LessonId = a.LessonId,
+                Content = a.Content,
+                MeetLink = a.MeetLink,
+				Title = a.Lesson?.Title
+            }).ToList();
+        }
+
+        public async Task<ICollection<AssignmentResponseDto>> GetAllAssignmentByLessonId(int lessonId)
 		{
 			try
 			{

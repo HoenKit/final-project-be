@@ -16,6 +16,22 @@ namespace final_project_be_Domain.DTOs.LearnDto
         public int CourseId { get; set; }
     }
 
+    public class UserAssignmentInfoDto
+    {
+        public int AssignmentId { get; set; }
+        public Guid UserId { get; set; }
+        public string? FirstName { get; set; }
+        public string? LastName { get; set; }   
+        public string? content { get; set; }
+        public bool? IsScored { get; set; }
+        public bool? IsPresented { get; set; }
+    }
+
+    public class CreateUserAssignmentDto
+    {
+        public Guid UserId { get; set; }
+        public int AssignmentId { get; set; }
+    }
     public class UserAssignmentDto
     {
         public int AssignmentId { get; set; }
