@@ -101,21 +101,32 @@ namespace final_project_be_Application.Repository
 
         public List<MonthlyStatDto> GetUserStatisticsByMonth()
         {
-            var allUsers = _userDAO.GetAll()
-                .Where(u => u.CreateAt != null)
-                .ToList();
+            try
+            {
+                var allUsers = _userDAO.GetAll()
+                    .Where(u => u.CreateAt != null)
+                    .ToList();
 
-            var stats = allUsers
-                .GroupBy(u => new { u.CreateAt.Year, u.CreateAt.Month })
-                .Select(g => new MonthlyStatDto
-                {
-                    Month = $"{g.Key.Month:D2}/{g.Key.Year}",
-                    Total = g.Count()
-                })
-                .OrderBy(x => x.Month)
-                .ToList();
+                _logger.LogInformation($"Processing {allUsers.Count} users for monthly statistics.");
 
-            return stats;
+                var stats = allUsers
+                    .GroupBy(u => new { u.CreateAt.Year, u.CreateAt.Month })
+                    .Select(g => new MonthlyStatDto
+                    {
+                        Month = $"{g.Key.Month:D2}/{g.Key.Year}",
+                        Total = g.Count()
+                    })
+                    .OrderBy(x => x.Month)
+                    .ToList();
+
+                _logger.LogInformation("Successfully calculated monthly user statistics.");
+                return stats;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while calculating user statistics by month.");
+                return new List<MonthlyStatDto>();
+            }
         }
 
         public async Task<User> UpdateUserPoint(decimal point, Guid userId)
