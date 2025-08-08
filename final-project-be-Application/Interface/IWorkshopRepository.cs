@@ -16,6 +16,6 @@ namespace final_project_be_Application.Interface
         public PageResult<WorkShop> GetAllWorkshop(int page, int pageSize);
         public Task<WorkShop> UpdateWorkshop(WorkShopDto dto);
         public Task<WorkShop> GetWorkshop(int id);
-        public Task<bool> DeleteCategory(int id);
+        public Task<bool> DeleteWorkshop(int id);
     }
 }
