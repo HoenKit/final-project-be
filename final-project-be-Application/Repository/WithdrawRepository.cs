@@ -83,7 +83,6 @@ namespace final_project_be_Application.Repository
             var totalCount = query.Count();
 
             var items = query
-                .OrderByDescending(w => w.CreateAt) 
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToList();
