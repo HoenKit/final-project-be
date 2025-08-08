@@ -122,6 +122,7 @@ namespace final_project_be.Controllers
 
             return Ok("Certificate uploaded and link saved.");
         }
+
         [HttpGet("submissions")]
         public async Task<ActionResult> GetUserAssignmentsByAssignmentId(int assignmentId)
         {
@@ -131,6 +132,7 @@ namespace final_project_be.Controllers
 
             return Ok(result);
         }
+
         [HttpGet("user")]
         public async Task<ActionResult> GetUserAssignment(int assignmentId, Guid userId)
         {
@@ -171,11 +173,12 @@ namespace final_project_be.Controllers
 
             return Ok("Users marked as present successfully.");
         }
+
         [HttpPut("grade")]
         public async Task<IActionResult> GradeSubmission([FromBody] GradeAssignmentDto dto)
         {
             if (dto.Mark < 0 || dto.Mark > 100)
-                return BadRequest("Mark must be between 0 and 10.");
+                return BadRequest("Mark must be between 0 and 100.");
 
             var success = await _learnrepository.GradeSubmissionAsync(dto);
             if (!success)

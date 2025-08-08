@@ -36,6 +36,8 @@ namespace final_project_be_Domain.DTOs.LearnDto
     {
         public int AssignmentId { get; set; }
         public Guid UserId { get; set; }
+        public string? FirstName { get; set; }
+        public string? LastName { get; set; }
         public string? Content { get; set; }
         public bool IsScored { get; set; }
         public bool IsPresented { get; set; }
