@@ -140,38 +140,59 @@ namespace final_project_be_Application.Repository
             return userLesson;
         }
 
-        public async Task<UserAssignment?> CreateUserAssignmentAsync(CreateUserAssignmentDto dto)
+            public async Task<UserAssignment?> CreateUserAssignmentAsync(CreateUserAssignmentDto dto)
+    {
+        var existing = await _userAssignmentDAO.GetUserAssignmentAsync(dto.UserId, dto.AssignmentId);
+
+        // Nếu chưa có thì tạo mới (Yêu cầu 4)
+        if (existing == null)
         {
-            var existing = await _userAssignmentDAO.GetUserAssignmentAsync(dto.UserId, dto.AssignmentId);
+            var created = await _userAssignmentDAO.CreateUserAssignmentAsync(dto);
 
-            // Nếu chưa có thì tạo mới (Yêu cầu 4)
-            if (existing == null)
-            {
-                return await _userAssignmentDAO.CreateUserAssignmentAsync(dto);
-            }
-
-            // ✅ Lấy assignment tách biệt thay vì dùng existing.Assignment
+            // ➕ Tạo thêm UserLesson nếu chưa có
             var assignment = await _assignmentDAO.GetByIdAsync(dto.AssignmentId);
-            if (assignment == null || assignment.LessonId == 0) return null;
-
-            var userLesson = await _userlessonDAO.GetUserLessonbyuserandlessonAsync(dto.UserId, assignment.LessonId);
-
-            if (userLesson != null && userLesson.IsPassed == false)
+            if (assignment != null && assignment.LessonId != 0)
             {
-                // TH1: IsPresented = true && IsScored = true → Update lại
-                if (existing.IsPresented && existing.IsScored)
+                var userLesson = await _userlessonDAO.GetUserLessonbyuserandlessonAsync(dto.UserId, assignment.LessonId);
+                if (userLesson == null)
                 {
-                    await _userAssignmentDAO.UpdateUserAssignmentAsync(existing);
-                    return existing;
+                    var newUserLesson = new UserLesson
+                    {
+                        UserId = dto.UserId,
+                        LessonId = assignment.LessonId,
+                        IsPassed = false,
+                        // thêm các field khác nếu có: StartDate, Progress, v.v.
+                    };
+                    await _userlessonDAO.AddUserLessonAsync(newUserLesson);
                 }
-
-                // TH2 & TH3: Không được tạo lại
-                return null;
             }
 
-            // TH4: Đã pass rồi → không tạo lại
+            return created;
+        }
+
+        // ✅ Lấy assignment tách biệt thay vì dùng existing.Assignment
+        var assignmentDetail = await _assignmentDAO.GetByIdAsync(dto.AssignmentId);
+        if (assignmentDetail == null || assignmentDetail.LessonId == 0)
+            return null;
+
+        var existingUserLesson = await _userlessonDAO.GetUserLessonbyuserandlessonAsync(dto.UserId, assignmentDetail.LessonId);
+
+        if (existingUserLesson != null && existingUserLesson.IsPassed == false)
+        {
+            // TH1: IsPresented = true && IsScored = true → Update lại
+            if (existing.IsPresented && existing.IsScored)
+            {
+                await _userAssignmentDAO.UpdateUserAssignmentAsync(existing);
+                return existing;
+            }
+
+            // TH2 & TH3: Không được tạo lại
             return null;
         }
+
+        // TH4: Đã pass rồi → không tạo lại
+        return null;
+    }
 
         public async Task<float> SubmitQuizAsync(SubmitQuizDto dto)
         {

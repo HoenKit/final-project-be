@@ -20,6 +20,8 @@ namespace final_project_be_Infrastructure.DAO
                           && ua.IsScored == false
                           && ua.IsPresented == true)
                 .Include(ua => ua.Assignment)
+                .Include(u=>u.User)
+                    .ThenInclude(um => um.UserMetaData)
                 .ToListAsync();
         }
 
