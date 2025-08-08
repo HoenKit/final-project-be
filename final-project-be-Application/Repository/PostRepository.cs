@@ -370,21 +370,32 @@ namespace final_project_be_Application.Repository
 
         public List<MonthlyStatDto> GetPostStatisticsByMonth()
         {
-            var allPosts = _postDAO.GetAll()
-                .Where(u => u.CreateAt != null)
-                .ToList();
+            try
+            {
+                var allPosts = _postDAO.GetAll()
+                    .Where(u => u.CreateAt != null)
+                    .ToList();
 
-            var stats = allPosts
-                .GroupBy(u => new { u.CreateAt.Year, u.CreateAt.Month })
-                .Select(g => new MonthlyStatDto
-                {
-                    Month = $"{g.Key.Month:D2}/{g.Key.Year}",
-                    Total = g.Count()
-                })
-                .OrderBy(x => x.Month)
-                .ToList();
+                _logger.LogInformation($"Processing {allPosts.Count} posts for monthly statistics.");
 
-            return stats;
+                var stats = allPosts
+                    .GroupBy(u => new { u.CreateAt.Year, u.CreateAt.Month })
+                    .Select(g => new MonthlyStatDto
+                    {
+                        Month = $"{g.Key.Month:D2}/{g.Key.Year}",
+                        Total = g.Count()
+                    })
+                    .OrderBy(x => x.Month)
+                    .ToList();
+
+                _logger.LogInformation("Successfully generated post statistics by month.");
+                return stats;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to calculate post statistics by month.");
+                return new List<MonthlyStatDto>();
+            }
         }
 
         public async Task<PostDetailDto> GetPostDetail(int id)
