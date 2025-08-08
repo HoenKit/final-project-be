@@ -70,10 +70,15 @@ namespace final_project_be.Controllers
 
             if (!loginResult.Success)
             {
+                if (loginResult.ErrorMessage == "Your account has been banned.")
+                {
+                    return Ok(new { message = loginResult.ErrorMessage });
+                }
+
                 return BadRequest(new { message = loginResult.ErrorMessage });
             }
 
-            return Ok(loginResult.Token);
+            return Ok(new { token = loginResult.Token });
         }
 
 
