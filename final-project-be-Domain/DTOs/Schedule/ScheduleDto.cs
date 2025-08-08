@@ -8,6 +8,7 @@ namespace final_project_be_Domain.DTOs.Schedule
 {
     public class ScheduleDto
     {
+        public int ScheduleId { get; set; }
         public int MentorId { get; set; }
         public string ScheduleName { get; set; }
         public DateTime MentorDay { get; set; }
@@ -20,4 +21,5 @@ namespace final_project_be_Domain.DTOs.Schedule
         public Guid UserId { get; set; }
         public int ScheduleId { get; set; }
     }
+
 }

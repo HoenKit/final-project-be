@@ -62,6 +62,9 @@ namespace final_project_be_Infrastructure.Data.Migrations
                     b.Property<DateTime>("CreateAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<TimeSpan?>("ExamTime")
+                        .HasColumnType("time");
+
                     b.Property<int>("LessonId")
                         .HasColumnType("int");
 
@@ -1041,6 +1044,9 @@ namespace final_project_be_Infrastructure.Data.Migrations
                     b.Property<bool>("IsPremium")
                         .HasColumnType("bit");
 
+                    b.Property<DateTime?>("LastDailyLogin")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Password")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -1091,6 +1097,12 @@ namespace final_project_be_Infrastructure.Data.Migrations
 
                     b.Property<DateTime?>("CreateAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsPresented")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsScored")
+                        .HasColumnType("bit");
 
                     b.HasKey("AssignmentId", "UserId");
 

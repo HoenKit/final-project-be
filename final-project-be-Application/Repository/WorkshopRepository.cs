@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using final_project_be_Application.Interface;
 using final_project_be_Domain.DTOs;
+using final_project_be_Domain.DTOs.Category;
 using final_project_be_Domain.DTOs.Workshop;
 using final_project_be_Domain.Models;
+using final_project_be_Infrastructure.DAO;
 using final_project_be_Infrastructure.DAO_Interface;
 using Microsoft.Extensions.Logging;
 using System;
@@ -60,7 +62,7 @@ namespace final_project_be_Application.Repository
             var totalCount = query.Count();
 
             var items = query
-                .OrderByDescending(w => w.CreateAt)
+                .OrderByDescending(w => w.UpdateAt)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToList();
@@ -68,29 +70,84 @@ namespace final_project_be_Application.Repository
             return new PageResult<WorkShop>(items, totalCount, page, pageSize);
         }
 
+
+
+        
+        public async Task<WorkShop> GetWorkshop(int id)
+        {
+            try
+            {
+                await _workshopDAO.BeginTransactionAsync();
+                var lesson = await _workshopDAO.GetByIdAsync(id);
+                await _workshopDAO.CommitTransactionAsync();
+                _logger.LogInformation("Get Lesson success");
+                return lesson;
+            }
+            catch (Exception ex)
+            {
+                await _workshopDAO.RollbackTransactionAsync();
+                _logger.LogError(ex, "Error when getting Lesson");
+                return null;
+            }
+        }
         public async Task<WorkShop> UpdateWorkshop(WorkShopDto dto)
         {
             try
             {
                 await _workshopDAO.BeginTransactionAsync();
-                var workShop = await _workshopDAO.GetByIdAsync(dto.WorkShopId);
-                if (workShop == null)
+
+                var existing = await _workshopDAO.GetByIdAsync(dto.WorkShopId);
+                if (existing == null)
                 {
-                    _logger.LogWarning("workShop not found with ID: {Id}", dto.WorkShopId);
-                    await _workshopDAO.RollbackTransactionAsync();
+                    _logger.LogWarning("Không tìm thấy Workshop với ID: {0}", dto.WorkShopId);
                     return null;
                 }
-                _mapper.Map(dto, workShop);
-                await _workshopDAO.UpdateAsync(workShop);
+
+                existing.Decription = !string.IsNullOrWhiteSpace(dto.Decription)
+                    ? dto.Decription
+                    : existing.Decription;
+
+                existing.StreamingLink = !string.IsNullOrWhiteSpace(dto.StreamingLink)
+                    ? dto.StreamingLink
+                    : existing.StreamingLink;
+
+
+                existing.CreateAt = dto.CreateAt != default(DateTime)
+                    ? dto.CreateAt
+                    : existing.CreateAt;
+
+                existing.UpdateAt = DateTime.Now;
+
+                await _workshopDAO.UpdateAsync(existing);
                 await _workshopDAO.CommitTransactionAsync();
-                _logger.LogInformation("UpdateAsync workShop success");
-                return workShop;
+
+                _logger.LogInformation("Workshop updated successfully with ID: {0}", existing.WorkShopId);
+                return existing;
             }
             catch (Exception ex)
             {
                 await _workshopDAO.RollbackTransactionAsync();
-                _logger.LogError(ex, "Error when updating workShop");
+                _logger.LogError(ex, "Error updating workshop");
                 return null;
+            }
+        }
+
+        public async Task<bool> DeleteCategory(int id)
+        {
+            try
+            {
+                await _workshopDAO.BeginTransactionAsync();
+                await _workshopDAO.DeleteAsync(id);
+                await _workshopDAO.CommitTransactionAsync();
+
+                _logger.LogInformation("DeleteAsync category success");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                await _workshopDAO.RollbackTransactionAsync();
+                _logger.LogError(ex, "Error when delete category");
+                return false;
             }
         }
 

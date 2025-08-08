@@ -4,6 +4,7 @@ using final_project_be_Application.Repository;
 using final_project_be_Application.Ultils;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using final_project_be_Domain.Models;
 
 namespace final_project_be.Controllers
 {
@@ -40,23 +41,24 @@ namespace final_project_be.Controllers
 
         // POST api/<PostController>
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] PostCreateDto postDto)//Change PostDto to PostCreateDto
+        public async Task<IActionResult> Post([FromForm] PostCreateDto postDto)//Change PostDto to PostCreateDto
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
             var post = await _postRepository.CreatePost(postDto);
 
             await _hubContext.Clients.All.SendAsync("ReceivePost", post);
-            return Ok(postDto);
+            return Ok(post);
         }
 
         // PUT api/<PostController>/5
         [HttpPut]
-        public async Task<IActionResult> Put(PostCreateDto postDto)//Change PostDto to PostCreateDto
+        public async Task<IActionResult> Put([FromForm] PostCreateDto postDto)//Change PostDto to PostCreateDto
         {
             if (!ModelState.IsValid) { return BadRequest(ModelState); }
-            await _postRepository.UpdatePost(postDto);
-            return Ok(postDto);
+            var post = await _postRepository.UpdatePost(postDto);
+            await _hubContext.Clients.All.SendAsync("ReceivePost", post);
+            return Ok(post);
         }
 
         // DELETE api/<PostController>/5
@@ -68,6 +70,7 @@ namespace final_project_be.Controllers
             {
                 return StatusCode(500, "Failed to UpdateAsync post status.");
             }
+            await _hubContext.Clients.All.SendAsync("ReceivePost", updatedPost);
             return Ok(updatedPost);
         }
 
@@ -92,7 +95,7 @@ namespace final_project_be.Controllers
         public async Task<IActionResult> GetDetail(int id)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            return Ok(await _postRepository.GetPostv2(id));
+            return Ok(await _postRepository.GetPostDetail(id));
         }
     }
 }

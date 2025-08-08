@@ -54,7 +54,16 @@ namespace final_project_be.Controllers
 			}
 		}
 
+        [HttpGet("by-creator")]
+        public async Task<IActionResult> GetAssignmentsByUserId(Guid userId)
+        {
+            var assignments = await _assignmentRepository.GetAssignmentsBycreatorAsync(userId);
 
+            if (assignments == null || !assignments.Any())
+                return NotFound("No assignments found for this user.");
+
+            return Ok(assignments);
+        }
 
         // PUT api/<AssignmentController>/5
         [HttpPut]

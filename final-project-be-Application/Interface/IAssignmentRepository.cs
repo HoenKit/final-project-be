@@ -11,7 +11,8 @@ namespace final_project_be_Application.Interface
 	public interface IAssignmentRepository : IRepository<Assignment>
 	{
 		public Task<Assignment> CreateAssignment(AssignmentDto dto);
-		public Task<bool> DeleteAssignment(int id);
+		public Task<List<GetAssignmentLessonDto>> GetAssignmentsBycreatorAsync(Guid userId);
+        public Task<bool> DeleteAssignment(int id);
 		public Task<Assignment> GetAssignment(int id);
 		public Task<Assignment> UpdateAssignment(UpdateAssignmentDto dto);
         public Task<ICollection<AssignmentResponseDto>> GetAllAssignmentByLessonId(int lessonId);

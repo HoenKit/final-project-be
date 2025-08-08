@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
+using final_project_be_Application.Interface;
 using final_project_be_Application.Repository;
 using final_project_be_Application.Ultils;
 using final_project_be_Domain.DTOs.Assignment;
@@ -21,6 +22,7 @@ namespace final_project_be_Tests
     public class AssignmentRepositoryTests
     {
         private readonly IMapper _mapper;
+        private readonly Mock<IGoogleMeetService> _googleMeetServiceMock = new();
 
         public AssignmentRepositoryTests()
         {
@@ -41,7 +43,7 @@ namespace final_project_be_Tests
 
             mockDao.Setup(d => d.GetAll()).Returns(assignments.AsQueryable());
 
-            return new AssignmentRepository(mockDao.Object, _mapper, logger, options);
+            return new AssignmentRepository(mockDao.Object, _mapper, _googleMeetServiceMock.Object, logger, options);
         }
 
         [Fact]
@@ -88,7 +90,7 @@ namespace final_project_be_Tests
             mockDao.Setup(d => d.CommitTransactionAsync()).Returns(Task.CompletedTask);
             mockDao.Setup(d => d.RollbackTransactionAsync()).Returns(Task.CompletedTask);
 
-            var repo = new AssignmentRepository(mockDao.Object, _mapper, logger, mockOptions);
+            var repo = new AssignmentRepository(mockDao.Object, _mapper, _googleMeetServiceMock.Object, logger, mockOptions);
 
             // Act
             var result = await repo.DeleteAssignment(assignmentId);

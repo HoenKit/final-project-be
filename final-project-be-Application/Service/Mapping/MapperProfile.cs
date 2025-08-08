@@ -4,6 +4,7 @@ using final_project_be_Domain.DTOs.Assignment;
 using final_project_be_Domain.DTOs.Category;
 using final_project_be_Domain.DTOs.Comment;
 using final_project_be_Domain.DTOs.Courses;
+using final_project_be_Domain.DTOs.LearnDto;
 using final_project_be_Domain.DTOs.Lesson;
 using final_project_be_Domain.DTOs.Mentor;
 using final_project_be_Domain.DTOs.Module;
@@ -86,6 +87,11 @@ namespace final_project_be_Application.Service.Mapping
             CreateMap<Payment, GetPaymentDto>().ReverseMap();
             CreateMap<WorkShop, WorkShopCreateDto>().ReverseMap();
             CreateMap<WorkShop, WorkShopDto>().ReverseMap();
+            CreateMap<ReportCourseDto, ReportCourse>().ReverseMap();
+            CreateMap<ReportCourseDto, Report>().ReverseMap();
+            CreateMap<ReportCourseDto, ReportDto>().ReverseMap();
+			CreateMap<UserAssignmentDto, UserAssignment>().ReverseMap();
+			CreateMap<UserScheduleDto, UserSchedule>().ReverseMap();
         }
 	}
 }

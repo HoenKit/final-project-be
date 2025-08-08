@@ -67,5 +67,32 @@ namespace final_project_be.Controllers
 
             return Ok(schedules);
         }
+
+        [HttpGet("by-Mentor")]
+        public async Task<IActionResult> GetAllSchedulesByMentor(int MentorId)
+        {
+            var schedules = await _Schedulerepository.GetSchedulesByMentorAsync(MentorId);
+            if (schedules == null || schedules.Count == 0)
+                return NotFound($"No schedules found for MentorId {MentorId}");
+
+            return Ok(schedules);
+        }
+
+        [HttpGet("Registed")]
+        public async Task<IActionResult> GetUserSchedules(Guid userId)
+        {
+            var result = await _Schedulerepository.GetUserSchedulesAsync(userId);
+            return Ok(result);
+        }
+
+        // DELETE api/<ModuleController>/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            await _Schedulerepository.DeleteSchedule(id);
+            return Ok();
+        }
     }
+
 }

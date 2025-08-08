@@ -130,6 +130,9 @@ namespace final_project_be_Application.Repository
                     CompletedAt = DateTime.UtcNow,
                     Status = "Not Started"
                 });
+
+                course.StudentCount += 1;
+                await _courseDAO.UpdateAsync(course);
                 // Trừ điểm người dùng
                 user.Point -= finalCost;
                 await _userDAO.UpdateAsync(user);
@@ -158,6 +161,10 @@ namespace final_project_be_Application.Repository
                 var query = _paymentDAO.GetAll()
                     .Include(c => c.User)
                     .ThenInclude(c => c.UserMetaData)
+                    .Include(c => c.PaymentCourses)
+                    .ThenInclude(pc => pc.Courses)
+                    .Include(c => c.PaymentPlans)
+                    .ThenInclude(pp => pp.MembershipPlan)
                     .Where(p => ServiceType == null || ServiceType.Count == 0 || ServiceType.Select(s => s.ToString()).Contains(p.ServiceType));
 
 
@@ -183,7 +190,10 @@ namespace final_project_be_Application.Repository
                     PaymentId = p.PaymentId,
                     UserId = p.UserId,
                     Email = p.User.Email,
-                    Amount = p.Amount,
+					CourseId = p.PaymentCourses?.FirstOrDefault()?.CourseId ?? 0,
+					CourseName = p.PaymentCourses?.FirstOrDefault()?.Courses?.CourseName ?? string.Empty,
+                    PlanName = p.PaymentPlans?.FirstOrDefault()?.MembershipPlan?.Name ?? string.Empty,
+					Amount = p.Amount,
                     Status = p.Status,
                     ServiceType = p.ServiceType,
                     CreatedAt = p.CreatedAt,
@@ -201,48 +211,57 @@ namespace final_project_be_Application.Repository
 
         public async Task<List<MothlyStatPaymentDto>> GetStatisticsByMonth(int? year)
         {
-            var query = _paymentDAO.GetAll()
-                .Include(p => p.PaymentCourses)
-                    .ThenInclude(pc => pc.Courses)
-                        .ThenInclude(c => c.Modules)
-                .Where(p => p.Status == "Success");
-
-            if (year.HasValue)
+            try
             {
-                query = query.Where(p => p.CreatedAt.Year == year.Value);
-            }
+                var query = _paymentDAO.GetAll()
+                    .Include(p => p.PaymentCourses)
+                        .ThenInclude(pc => pc.Courses)
+                            .ThenInclude(c => c.Modules)
+                    .Where(p => p.Status == "Success");
 
-            var payments = await query.ToListAsync();
-
-            var stats = payments
-                .GroupBy(p => new { p.CreatedAt.Year, p.CreatedAt.Month })
-                .Select(g => new MothlyStatPaymentDto
+                if (year.HasValue)
                 {
-                    Time = $"{g.Key.Month:D2}/{g.Key.Year}",
-                    TotalPremium = g.Count(p => p.ServiceType == "Premium"),
-                    TotalPoint = g.Sum(p =>
+                    query = query.Where(p => p.CreatedAt.Year == year.Value);
+                }
+
+                var payments = await query.ToListAsync();
+
+                var stats = payments
+                    .GroupBy(p => new { p.CreatedAt.Year, p.CreatedAt.Month })
+                    .Select(g => new MothlyStatPaymentDto
                     {
-                        // Nếu là Premium thì tính 100%
-                        if (p.ServiceType == "Premium")
+                        Time = $"{g.Key.Month:D2}/{g.Key.Year}",
+                        TotalPremium = g.Count(p => p.ServiceType == "Premium"),
+                        TotalPoint = g.Sum(p =>
                         {
+                            // Nếu là Premium thì tính 100%
+                            if (p.ServiceType == "Premium")
+                            {
+                                return p.Amount * 1.0m;
+                            }
+                            // Nếu là Course thì tính 25% hoặc 35% tùy điều kiện
+                            else if (p.ServiceType == "Course")
+                            {
+                                var course = p.PaymentCourses?.FirstOrDefault()?.Courses;
+                                if (course == null || course.IsDeleted) return 0m;
+                                bool hasPremiumModules = course.Modules?.Any(m => m.IsPremium) ?? false;
+                                return p.Amount * (hasPremiumModules ? 0.25m : 0.35m);
+                            }
+
                             return p.Amount * 1.0m;
-                        }
-                        // Nếu là Course thì tính 25% hoặc 35% tùy điều kiện
-                        else if (p.ServiceType == "Course")
-                        {
-                            var course = p.PaymentCourses?.FirstOrDefault()?.Courses;
-                            if (course == null || course.IsDeleted) return 0m;
-                            bool hasPremiumModules = course.Modules?.Any(m => m.IsPremium) ?? false;
-                            return p.Amount * (hasPremiumModules ? 0.25m : 0.35m);
-                        }
-
-                        return p.Amount * 1.0m;
+                        })
                     })
-                })
-                .OrderBy(s => s.Time)
-                .ToList();
+                    .OrderBy(s => s.Time)
+                    .ToList();
 
-            return stats;
+                _logger.LogInformation("Successfully generated payment statistics for {Count} months", stats.Count);
+                return stats;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to generate payment statistics");
+                throw;
+            }
         }
     }
 

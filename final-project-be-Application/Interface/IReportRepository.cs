@@ -11,5 +11,6 @@ namespace final_project_be_Application.Interface
         public List<ReportPostDto> GetReportsByPost(int postId);
         public List<ReportUserDto> GetReportsByUser(Guid userId);
         public List<ReportCommentDto> GetReportsByComment(int commentId);
+        public List<ReportCourseDto> GetReportsByCourse(int courseId);
     }
 }

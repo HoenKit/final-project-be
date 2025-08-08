@@ -20,6 +20,7 @@ namespace final_project_be_Application.Repository
         private readonly IMapper _mapper;
         private readonly ILogger<AnswerRepository> _logger;
 
+
         public ScheduleRepository(IScheduleDAO scheduleDAO, IMapper mapper, ILogger<AnswerRepository> logger, IUserScheduleDAO userScheduleDAO) : base(scheduleDAO)
         {
             _scheduleDAO = scheduleDAO;
@@ -66,10 +67,40 @@ namespace final_project_be_Application.Repository
             return true;
         }
 
+        public async Task<List<UserScheduleDto>> GetUserSchedulesAsync(Guid userId)
+        {
+            var schedules = await _userScheduleDAO.GetSchedulesByUserIdAsync(userId);
+            return _mapper.Map<List<UserScheduleDto>>(schedules);
+        }
+
         public async Task<List<ScheduleDto>> GetSchedulesByCourseAsync(int courseId)
         {
             var schedules = await _scheduleDAO.GetSchedulesByCourseIdAsync(courseId);
             return _mapper.Map<List<ScheduleDto>>(schedules);
+        }
+
+        public async Task<List<ScheduleDto>> GetSchedulesByMentorAsync(int mentorId)
+        {
+            var schedules = await _scheduleDAO.GetSchedulesByMentorIdAsync(mentorId);
+            return _mapper.Map<List<ScheduleDto>>(schedules);
+        }
+
+        public async Task<bool> DeleteSchedule(int id)
+        {
+            try
+            {
+                await _scheduleDAO.BeginTransactionAsync();
+                await _scheduleDAO.DeleteAsync(id);
+                await _scheduleDAO.CommitTransactionAsync();
+                _logger.LogInformation("Delete Schedule success");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                await _scheduleDAO.RollbackTransactionAsync();
+                _logger.LogError(ex, "Error when delete Schedule");
+                return false;
+            }
         }
     }
 }
