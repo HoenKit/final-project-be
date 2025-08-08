@@ -62,7 +62,7 @@ namespace final_project_be.Controllers
         public async Task<IActionResult> DeleteAsync(int id)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            await _workshopRepository.DeleteCategory(id);
+            await _workshopRepository.DeleteWorkshop(id);
             return Ok();
         }
     }

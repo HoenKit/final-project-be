@@ -297,6 +297,7 @@ namespace final_project_be_Application.Repository
                 return null;
             }
         }
+
         public async Task ForgotPasswordAsync(ForgotpasswordDto dto)
         {
             var user = _UserDAO.GetUserbyEmail(dto.Email);
@@ -398,6 +399,15 @@ namespace final_project_be_Application.Repository
             }
 
             // 4. Generate token
+            if (existingUser.IsBanned)
+            {
+                return new LoginResultDto
+                {
+                    Success = false,
+                    Token = null,
+                    ErrorMessage = "Your account has been banned."
+                };
+            }
             var token = GenerateToken(existingUser);
 
             return new LoginResultDto

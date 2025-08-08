@@ -69,9 +69,6 @@ namespace final_project_be_Application.Repository
 
             return new PageResult<WorkShop>(items, totalCount, page, pageSize);
         }
-
-
-
         
         public async Task<WorkShop> GetWorkshop(int id)
         {
@@ -132,7 +129,7 @@ namespace final_project_be_Application.Repository
             }
         }
 
-        public async Task<bool> DeleteCategory(int id)
+        public async Task<bool> DeleteWorkshop(int id)
         {
             try
             {
