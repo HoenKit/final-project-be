@@ -485,21 +485,33 @@ namespace final_project_be_Application.Repository
             var userEmbedding = await _userEmbeddingDAO.GetByIdAsync(userId);
             float[] queryVector;
 
-            if (userEmbedding != null && (DateTime.UtcNow - userEmbedding.UpdatedAt).TotalDays < 30)
-            {
-                queryVector = JsonConvert.DeserializeObject<float[]>(userEmbedding.EmbeddingJson);
-            }
-            else
+            bool needsUpdate = userEmbedding == null
+                               || (DateTime.UtcNow - userEmbedding.UpdatedAt).TotalDays > 30;
+
+            if (needsUpdate)
             {
                 var profile = await _userRepository.GetUserProfileSummaryAsync(userId);
                 queryVector = await _embeddingService.GetEmbeddingAsync(profile);
 
-                await _userEmbeddingDAO.AddAsync(new UserEmbedding
+                if (userEmbedding == null)
                 {
-                    UserId = userId,
-                    EmbeddingJson = JsonConvert.SerializeObject(queryVector),
-                    UpdatedAt = DateTime.UtcNow
-                });
+                    await _userEmbeddingDAO.AddAsync(new UserEmbedding
+                    {
+                        UserId = userId,
+                        EmbeddingJson = JsonConvert.SerializeObject(queryVector),
+                        UpdatedAt = DateTime.UtcNow
+                    });
+                }
+                else
+                {
+                    userEmbedding.EmbeddingJson = JsonConvert.SerializeObject(queryVector);
+                    userEmbedding.UpdatedAt = DateTime.UtcNow;
+                    await _userEmbeddingDAO.UpdateAsync(userEmbedding);
+                }
+            }
+            else
+            {
+                queryVector = JsonConvert.DeserializeObject<float[]>(userEmbedding.EmbeddingJson);
             }
 
             var userCourses = await _userCourseDAO.GetUserCoursesByUserId(userId);
