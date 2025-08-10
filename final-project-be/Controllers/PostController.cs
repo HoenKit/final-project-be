@@ -5,6 +5,8 @@ using final_project_be_Application.Ultils;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using final_project_be_Domain.Models;
+using DocumentFormat.OpenXml.Wordprocessing;
+using System.Drawing.Printing;
 
 namespace final_project_be.Controllers
 {
@@ -22,11 +24,12 @@ namespace final_project_be.Controllers
         // GET: api/<PostController>
         //UpdateAsync GetAllPost
         [HttpGet]
-        public IActionResult GetAll(int? page, int? CategoryId, string? title, Guid? userId)
+        public IActionResult GetAll(int? page, int? pageSize, int? CategoryId, string? title, Guid? userId)
         {
             int currentPage = page ?? 1;
+            int currentSize = pageSize ?? 5;
 
-            var pagedPosts = _postRepository.GetAllPosts(currentPage, 5, CategoryId, title, userId, false);
+            var pagedPosts = _postRepository.GetAllPosts(currentPage, currentSize, CategoryId, title, userId, false);
             return Ok(pagedPosts);
         }
 
