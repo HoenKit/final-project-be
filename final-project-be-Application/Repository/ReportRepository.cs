@@ -16,10 +16,11 @@ namespace final_project_be_Application.Repository
         private readonly IReportUserDAO _ReportUserDAO;
         private readonly IReportCourseDAO _ReportCourseDAO;
         private readonly IReportCommentDAO _ReportCommentDAO;
+        private readonly IReportWorkShopDAO _ReportWorkShopDAO;
         private readonly IMapper _mapper;
         private readonly ILogger<ReportRepository> _logger;
 
-        public ReportRepository(IReportDAO ReportDAO, IReportPostDAO ReportPostDAO, IReportUserDAO ReportUserDAO, IReportCommentDAO ReportCommentDAO, IReportCourseDAO reportCourseDAO, IMapper mapper, ILogger<ReportRepository> logger) : base(ReportDAO)
+        public ReportRepository(IReportDAO ReportDAO, IReportPostDAO ReportPostDAO, IReportUserDAO ReportUserDAO, IReportCommentDAO ReportCommentDAO, IReportCourseDAO reportCourseDAO, IReportWorkShopDAO reportWorkShopDAO, IMapper mapper, ILogger<ReportRepository> logger) : base(ReportDAO)
         {
             _mapper = mapper;
             _logger = logger;
@@ -28,6 +29,7 @@ namespace final_project_be_Application.Repository
             _ReportUserDAO = ReportUserDAO;
             _ReportCommentDAO = ReportCommentDAO;
             _ReportCourseDAO = reportCourseDAO;
+            _ReportWorkShopDAO = reportWorkShopDAO;
         }
 
         public async Task<Report> CreateReport(ReportDto dto)
@@ -132,6 +134,28 @@ namespace final_project_be_Application.Repository
                               {
                                   ReportId = r.ReportId,
                                   CourseId = rp.CourseId,
+                                  UserId = r.UserId,
+                                  Content = r.Content
+                              }).ToList();
+
+            return reportDtos;
+        }
+
+        public List<ReportWorkShopDto> GetReportsByWorkShop(int workShopId)
+        {
+            var reportWorkShops = _ReportWorkShopDAO.GetByWorkShopId(workShopId);
+
+            // Truy vấn Report hoặc WorkShop
+            var reportIds = reportWorkShops.Select(x => x.ReportId).ToList();
+            var reports = _ReportDAO.GetAll().Where(r => reportIds.Contains(r.ReportId)).ToList();
+
+            // Mapping và kết hợp logic
+            var reportDtos = (from rp in reportWorkShops
+                              join r in reports on rp.ReportId equals r.ReportId
+                              select new ReportWorkShopDto
+                              {
+                                  ReportId = r.ReportId,
+                                  WorkShopId = rp.WorkshopId,
                                   UserId = r.UserId,
                                   Content = r.Content
                               }).ToList();

@@ -44,6 +44,13 @@ namespace final_project_be.Controllers
             return Ok(data);
         }
 
+        [HttpGet("by-WorkShop/{workShopId}")]
+        public IActionResult GetReportsByWorkShop(int workShopId)
+        {
+            var data = _reportRepository.GetReportsByWorkShop(workShopId);
+            return Ok(data);
+        }
+
         // GET api/<ReportPostController>/5
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id)
