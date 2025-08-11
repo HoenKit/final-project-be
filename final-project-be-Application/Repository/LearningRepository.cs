@@ -324,18 +324,33 @@ namespace final_project_be_Application.Repository
 
         public async Task<bool> GradeSubmissionAsync(GradeAssignmentDto grade)
         {
+            // Lấy userLesson
             var userLesson = await _userlessonDAO.GetUserLessonbyuserandlessonAsync(grade.UserId, grade.LessonId);
+
+            // Nếu không có thì tạo mới
+            if (userLesson == null)
+            {
+                userLesson = new UserLesson
+                {
+                    UserId = grade.UserId,
+                    LessonId = grade.LessonId
+                };
+                await _userlessonDAO.AddUserLessonAsync(userLesson);
+            }
+
+            // Lấy userAssignment
             var userAssignment = await _userAssignmentDAO.GetUserAssignmentAsync(grade.UserId, grade.AssignmentId);
+            if (userAssignment == null)
+                return false; // Không tìm thấy assignment => không thể chấm điểm
 
-            if (userLesson == null || userAssignment == null)
-                return false;
-
+            // Gán giá trị chấm điểm
             userLesson.Mark = grade.Mark;
             userLesson.CompletedAt = DateTime.UtcNow;
-            userLesson.IsPassed = grade.Mark >= 80; // hoặc tuỳ điều kiện
+            userLesson.IsPassed = grade.Mark >= 80; // tuỳ điều kiện
             userAssignment.IsScored = true;
 
-             await _lessonDAO.SaveChangesAsync();
+            // Lưu thay đổi
+            await _lessonDAO.SaveChangesAsync();
             return true;
         }
 
