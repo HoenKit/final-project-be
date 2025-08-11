@@ -24,7 +24,7 @@ namespace final_project_be.Controllers
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
             int currentPage = page ?? 1;
-            int currentSize = pageSize ?? 5;
+            int currentSize = pageSize ?? 100;
             var pagedComments = _categoryRepository.GetAllCategory(currentPage, currentSize);
             return Ok(pagedComments);
         }

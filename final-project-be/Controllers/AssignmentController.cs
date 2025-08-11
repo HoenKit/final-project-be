@@ -54,7 +54,7 @@ namespace final_project_be.Controllers
 			}
 		}
 
-        [HttpGet("by-creator")]
+         [HttpGet("by-creator")]
         public async Task<IActionResult> GetAssignmentsByUserId(Guid userId)
         {
             var assignments = await _assignmentRepository.GetAssignmentsBycreatorAsync(userId);

@@ -110,6 +110,7 @@ builder.Services.AddScoped<IWithdrawDAO, WithdrawDAO>();
 builder.Services.AddScoped<IMessageDAO, MessageDAO>();
 builder.Services.AddScoped<IWorkshopDAO, WorkshopDAO>();
 builder.Services.AddScoped<IReportCourseDAO, ReportCourseDAO>();
+builder.Services.AddScoped<IReportWorkShopDAO, ReportWorkShopDAO>();
 // Config Repository
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
@@ -142,6 +143,7 @@ builder.Services.AddScoped<IWithdrawRepository, WithdrawRepository>();
 builder.Services.AddScoped<IMessageRepository, MessagesRepository>();
 builder.Services.AddScoped<IWorkshopRepository, WorkshopRepository>();
 builder.Services.AddScoped<IReportCourseRepository, ReportCourseRepository>();
+builder.Services.AddScoped<IReportWorkShopRepository, ReportWorkShopRepository>();
 //Config Service
 builder.Services.AddScoped<IBlobStorageService,BlobStorageService>();
 builder.Services.AddScoped<IOpenAIEmbeddingService, OpenAIEmbeddingService>();

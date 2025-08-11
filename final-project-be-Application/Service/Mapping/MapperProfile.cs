@@ -90,6 +90,9 @@ namespace final_project_be_Application.Service.Mapping
             CreateMap<ReportCourseDto, ReportCourse>().ReverseMap();
             CreateMap<ReportCourseDto, Report>().ReverseMap();
             CreateMap<ReportCourseDto, ReportDto>().ReverseMap();
+			CreateMap<ReportWorkShopDto, ReportWorkShop>().ReverseMap();
+			CreateMap<ReportWorkShopDto, Report>().ReverseMap();
+			CreateMap<ReportWorkShopDto, ReportDto>().ReverseMap();
 			CreateMap<UserAssignment, UserAssignmentDto>().ReverseMap();
             CreateMap<UserScheduleDto, UserSchedule>().ReverseMap();
 

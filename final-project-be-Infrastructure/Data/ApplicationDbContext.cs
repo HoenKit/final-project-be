@@ -49,6 +49,7 @@ namespace final_project_be_Infrastructure.Data
 		public DbSet<ReportPost> reportPost { get; set; }
         public DbSet<ReportCourse> ReportCourse { get; set; }
         public DbSet<ReportUser> reportUser { get; set; }
+        public DbSet<ReportWorkShop> reportWorkShop { get; set; }
 		public DbSet<UserMetadata> UserMetadata { get; set; }
         public DbSet<CourseEmbedding> CourseEmbeddings { get; set; }
         public DbSet<UserEmbedding> UserEmbeddings { get; set; }
