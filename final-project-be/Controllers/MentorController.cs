@@ -55,7 +55,7 @@ namespace final_project_be.Controllers
         }
 
         // POST api/<NotificationController>
-        [Authorize]
+        [Authorize(Roles ="User")]
         [HttpPost]
         public async Task<IActionResult> Post([FromForm] CreateMentorDto MentorDto)
         {
