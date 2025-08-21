@@ -62,8 +62,16 @@ namespace final_project_be_Application.Repository
         {
             try
             {
-                var totalCount = _userDAO.GetAll().Count();
+
+                /*var totalCount = _userDAO.GetAll().Count();
                 var users = _userDAO.GetAll()
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToList();*/
+
+                var query = _userDAO.GetAll().Include(u => u.UserMetaData);
+                var totalCount = query.Count();
+                var users = query
                     .Skip((page - 1) * pageSize)
                     .Take(pageSize)
                     .ToList();
@@ -74,7 +82,7 @@ namespace final_project_be_Application.Repository
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error when getting users");
+                _logger.LogError(ex, "Error when getting users with metadata");
                 return new PageResult<User>(new List<User>(), 0, page, pageSize);
             }
         }

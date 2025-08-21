@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.SignalR;
 using final_project_be_Domain.Models;
 using DocumentFormat.OpenXml.Wordprocessing;
 using System.Drawing.Printing;
+using final_project_be_Domain.DTOs.SearchResult;
+using final_project_be_Domain.DTOs.Courses;
 
 namespace final_project_be.Controllers
 {
@@ -16,11 +18,110 @@ namespace final_project_be.Controllers
     {
         private readonly IHubContext<SignalRHub> _hubContext;
         private readonly IPostRepository _postRepository;
-        public PostController(IPostRepository postRepository, IHubContext<SignalRHub> hubContext)
+        private readonly ICourseRepository _courseRepository;
+        private readonly IUserRepository _userRepository;
+        public PostController(IUserRepository userRepository,ICourseRepository courseRepository,IPostRepository postRepository, IHubContext<SignalRHub> hubContext)
         {
             _postRepository = postRepository;
+            _userRepository = userRepository;
+            _courseRepository = courseRepository;
             _hubContext = hubContext;
         }
+
+        [HttpGet("search-all")]
+        public IActionResult SearchAll(
+        int? page,
+        int? pageSize,
+        string? searchTerm,
+        string? searchType = "all") // "users", "posts", "courses", "all"
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            int currentPage = page ?? 1;
+            int currentSize = pageSize ?? 20;
+
+            var searchResults = new SearchResultDto
+            {
+                CurrentPage = currentPage,
+                PageSize = currentSize
+            };
+
+            // Search Users
+            if (searchType == "all" || searchType == "users")
+            {
+                var allUsers = _userRepository.GetAllUsers(currentPage, currentSize);
+
+                if (!string.IsNullOrEmpty(searchTerm))
+                {
+                    var lowerSearchTerm = searchTerm.ToLower();
+
+                    searchResults.Users = allUsers.Items
+                        .Where(u =>
+                            (u.Email?.ToLower().Contains(lowerSearchTerm) ?? false) ||
+                            (u.UserMetaData != null &&
+                                (
+                                    (u.UserMetaData.FirstName?.ToLower().Contains(lowerSearchTerm) ?? false) ||
+                                    (u.UserMetaData.LastName?.ToLower().Contains(lowerSearchTerm) ?? false)
+                                )
+                            )
+                        )
+                        .Cast<object>()
+                        .ToList();
+                }
+                else
+                {
+                    searchResults.Users = allUsers.Items.Cast<object>().ToList();
+                }
+            }
+
+
+            // Search Posts
+            if (searchType == "all" || searchType == "posts")
+            {
+                var allPosts = _postRepository.GetAllPosts(currentPage, currentSize, null, searchTerm, null, false);
+                searchResults.Posts = allPosts.Items.Cast<object>().ToList();
+            }
+
+            // Search Courses
+            if (searchType == "all" || searchType == "courses")
+            {
+                var allCourses = _courseRepository.GetAllCourses(
+                    currentPage, currentSize, null, searchTerm,
+                    null, null, null, null, null, null, null, null, null, null
+                );
+
+                /* searchResults.Courses = allCourses.Items
+                     .Select(c => new GetCourseDto
+                     {
+                         CourseId = c.CourseId,
+                         CourseName = c.CourseName,
+                         CourseContent = c.CourseContent,
+                         Cost = c.Cost,
+                         SkillLearn = c.SkillLearn,
+                         Requirement = c.Requirement ?? string.Empty,
+                         IntendedLearner = c.IntendedLearner ?? string.Empty,
+                         Language = c.Language,
+                         Level = c.Level,
+                         StudentCount = c.StudentCount,
+                         CoursesImage = c.CoursesImage,
+                         CourseLength = c.CourseLength,
+                         IsDeleted = c.IsDeleted,
+                         Status = c.Status,
+                         AverageRating = c.AverageRating,
+                         TotalReviews = c.TotalReviews,
+                         CreateAt = c.CreateAt,
+                         Mentor = c.Mentor // nếu repository có include Mentor
+                     })
+                     .Cast<object>() 
+                     .ToList();*/
+                searchResults.Courses = allCourses.Items.Cast<object>().ToList();
+            }
+
+            searchResults.TotalResults = searchResults.Users.Count + searchResults.Posts.Count + searchResults.Courses.Count;
+
+            return Ok(searchResults);
+        }
+
         // GET: api/<PostController>
         //UpdateAsync GetAllPost
         [HttpGet]
