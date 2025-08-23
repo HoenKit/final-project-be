@@ -1,6 +1,7 @@
 ﻿using final_project_be_Application.Interface;
 using final_project_be_Domain.DTOs.Module;
 using final_project_be_Domain.DTOs.Question;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -9,7 +10,8 @@ namespace final_project_be.Controllers
 {
 	[Route("api/[controller]")]
 	[ApiController]
-	public class QuestionController : ControllerBase
+    [Authorize]
+    public class QuestionController : ControllerBase
 	{
 		private readonly IQuestionRepository _questionRepository;
 		public QuestionController(IQuestionRepository questionRepository)

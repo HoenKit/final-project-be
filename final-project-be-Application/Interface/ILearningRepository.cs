@@ -15,7 +15,8 @@ namespace final_project_be_Application.Interface
         public Task<UserLesson> CompleteLessonAsync(Guid userId, int lessonId, float? score);
         public Task<float> SubmitQuizAsync(SubmitQuizDto dto);
         public Task<List<QuizDto>> GetQuizByLessonIdAsync(int lessonId);
-        public Task<bool> UploadCertificateAndSaveLinkAsync(CertificateUploadDto dto);
+        public Task<UserCourse?> GetUserCourseAsync(Guid userId, int courseId);
+        public Task<string?> UploadCertificateAndSaveLinkAsync(CertificateUploadDto dto);
         public Task<UserAssignment> CreateUserAssignmentAsync(CreateUserAssignmentDto dto);
         public Task<List<UserAssignmentInfoDto>> ListAssignmentsNotPresentAsync(int assignmentId);
         public Task<List<UserAssignmentDto>> GetUserAssignmentsByAssignmentIdAsync(int assignmentId);

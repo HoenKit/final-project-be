@@ -11,6 +11,7 @@ namespace final_project_be_Infrastructure.DAO_Interface
     {
         IQueryable<CourseCoupon> GetCourseCoupons(int courseId, int couponId);
         Task AddCourseCouponAsync(CourseCoupon courseCoupon);
+        Task AddCourseCouponsAsync(IEnumerable<CourseCoupon> courseCoupons);
         Task RemoveCourseCouponsAsync(IEnumerable<CourseCoupon> courseCoupons);
     }
 

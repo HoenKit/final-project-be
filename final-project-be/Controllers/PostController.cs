@@ -1,14 +1,16 @@
-﻿using final_project_be_Domain.DTOs.Post;
+﻿using DocumentFormat.OpenXml.Wordprocessing;
 using final_project_be_Application.Interface;
 using final_project_be_Application.Repository;
 using final_project_be_Application.Ultils;
+using final_project_be_Domain.DTOs.Notification;
+using final_project_be_Domain.DTOs.Post;
+using final_project_be_Domain.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
-using final_project_be_Domain.Models;
-using DocumentFormat.OpenXml.Wordprocessing;
 using System.Drawing.Printing;
 using final_project_be_Domain.DTOs.SearchResult;
 using final_project_be_Domain.DTOs.Courses;
+using Microsoft.AspNetCore.Authorization;
 
 namespace final_project_be.Controllers
 {
@@ -18,14 +20,16 @@ namespace final_project_be.Controllers
     {
         private readonly IHubContext<SignalRHub> _hubContext;
         private readonly IPostRepository _postRepository;
+        private readonly INotificationRepository _notificationRepository;
         private readonly ICourseRepository _courseRepository;
         private readonly IUserRepository _userRepository;
-        public PostController(IUserRepository userRepository,ICourseRepository courseRepository,IPostRepository postRepository, IHubContext<SignalRHub> hubContext)
+        public PostController(IUserRepository userRepository,ICourseRepository courseRepository,IPostRepository postRepository, IHubContext<SignalRHub> hubContext, INotificationRepository notificationRepository)
         {
             _postRepository = postRepository;
             _userRepository = userRepository;
             _courseRepository = courseRepository;
             _hubContext = hubContext;
+            _notificationRepository = notificationRepository;
         }
 
         [HttpGet("search-all")]
@@ -144,6 +148,7 @@ namespace final_project_be.Controllers
 
 
         // POST api/<PostController>
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> Post([FromForm] PostCreateDto postDto)//Change PostDto to PostCreateDto
         {
@@ -152,10 +157,16 @@ namespace final_project_be.Controllers
             var post = await _postRepository.CreatePost(postDto);
 
             await _hubContext.Clients.All.SendAsync("ReceivePost", post);
+            await _notificationRepository.CreateNotification(new NotificationDto
+            {
+                UserId = post.UserId, 
+                Message = $"New post has been created"
+            });
             return Ok(post);
         }
 
         // PUT api/<PostController>/5
+        [Authorize]
         [HttpPut]
         public async Task<IActionResult> Put([FromForm] PostCreateDto postDto)//Change PostDto to PostCreateDto
         {
@@ -166,6 +177,7 @@ namespace final_project_be.Controllers
         }
 
         // DELETE api/<PostController>/5
+        [Authorize]
         [HttpPut("toggle-deleted/{id}")]
         public async Task<IActionResult> TogglePostDeleteStatus(int id)
         {
@@ -178,14 +190,14 @@ namespace final_project_be.Controllers
             return Ok(updatedPost);
         }
 
-
+        [Authorize]
         [HttpGet("monthly-stats")]
         public IActionResult GetPostStatisticsByMonth()
         {
             var stats = _postRepository.GetPostStatisticsByMonth();
             return Ok(stats);
         }
-
+        [Authorize]
         [HttpGet("GetAllIsDeleted")]
         public IActionResult GetAllIsDeleted(int? page, int? CategoryId, string? title, Guid? userId)
         {

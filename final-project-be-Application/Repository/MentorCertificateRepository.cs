@@ -59,7 +59,6 @@ namespace final_project_be_Application.Repository
                 await _mentorCertificateDAO.CommitTransactionAsync();
                 _logger.LogInformation("AddAsync Course success");
                 return certificate;
-
             }
             catch (Exception ex)
             {
@@ -68,6 +67,8 @@ namespace final_project_be_Application.Repository
                 return null;
             }
         }
+
+
 
         public async Task<bool> DeleteMentorCertificate(int id)
         {
@@ -110,6 +111,38 @@ namespace final_project_be_Application.Repository
             }
         }
 
+        public async Task<ICollection<MentorCertificate>> GetMentorCertificatesByUserId(Guid userId)
+        {
+            try
+            {
+                await _mentorCertificateDAO.BeginTransactionAsync();
+                // Lấy tất cả certificate từ DAO
+                var allCertificates = _mentorCertificateDAO.GetAll(); // Giả sử đây là IEnumerable<MentorCertificate>
+
+                // Filter theo UserId
+                var certificates = allCertificates
+                    .Where(c => c.Mentor != null && c.Mentor.UserId == userId)
+                    .ToList();
+
+                if (!certificates.Any())
+                {
+                    _logger.LogWarning("No MentorCertificates found for userId {UserId}", userId);
+                    return new List<MentorCertificate>(); // trả về list rỗng nếu không tìm thấy
+                }
+
+                await _mentorCertificateDAO.CommitTransactionAsync();
+
+                return certificates;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching MentorCertificates by UserId");
+                await _mentorCertificateDAO.RollbackTransactionAsync();
+                return null;
+            }
+        }
+
+
         public async Task<ICollection<GetMentorCertificateDto>> GetAllMentorCertificatesByMentorId(int MentorId)
         {
             try
@@ -124,7 +157,7 @@ namespace final_project_be_Application.Repository
 
                 await _mentorCertificateDAO.CommitTransactionAsync();
 
-                _logger.LogInformation("Successfully retrieved modules for Mentor ID {MentorId}", MentorId);
+                _logger.LogInformation("Successfully retrieved Certificate for Mentor ID {MentorId}", MentorId);
                 return moduleDtos;
             }
             catch (Exception ex)

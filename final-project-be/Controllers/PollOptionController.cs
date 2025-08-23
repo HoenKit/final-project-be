@@ -1,6 +1,7 @@
 ﻿using final_project_be_Domain.DTOs.PollOption;
 using final_project_be_Application.Interface;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -8,6 +9,7 @@ namespace final_project_be.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class PollOptionController : ControllerBase
     {
         private readonly IPollOptionRepository _PollOptionRepository;

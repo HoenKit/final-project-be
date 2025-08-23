@@ -33,19 +33,17 @@ namespace final_project_be_Application.Service.GoogleMeetService
         {
             try
             {
-                // Lấy UserCredential sử dụng OAuth client credentials
                 UserCredential credential;
                 using (var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(GetClientCredentialJson())))
                 {
                     credential = await GoogleWebAuthorizationBroker.AuthorizeAsync(
                         GoogleClientSecrets.FromStream(stream).Secrets,
                         Scopes,
-                        "user", // Dùng một user ID cố định cho toàn hệ thống
+                        "user",
                         CancellationToken.None,
                         new FileDataStore("Google.Calendar.Auth.Store"));
                 }
 
-                // Tạo Calendar service
                 var service = new CalendarService(new BaseClientService.Initializer()
                 {
                     HttpClientInitializer = credential,
@@ -97,16 +95,18 @@ namespace final_project_be_Application.Service.GoogleMeetService
             var authProviderCertUrl = Environment.GetEnvironmentVariable("AUTH_PROVIDER_X509_CERT_URL");
             var clientSecret = Environment.GetEnvironmentVariable("CLIENT_SECRET");
             var redirectUri = Environment.GetEnvironmentVariable("REDIRECT_URI");
+            var jsOrigin = Environment.GetEnvironmentVariable("JS_ORIGIN");
 
             return $@"{{
-        ""installed"": {{
+        ""web"": {{
             ""client_id"": ""{clientId}"",
             ""project_id"": ""{projectId}"",
             ""auth_uri"": ""{authUri}"",
             ""token_uri"": ""{tokenUri}"",
             ""auth_provider_x509_cert_url"": ""{authProviderCertUrl}"",
             ""client_secret"": ""{clientSecret}"",
-            ""redirect_uris"": [""{redirectUri}""]
+            ""redirect_uris"": [""{redirectUri}""],
+            ""javascript_origins"": [""{jsOrigin}""]
         }}
     }}";
         }

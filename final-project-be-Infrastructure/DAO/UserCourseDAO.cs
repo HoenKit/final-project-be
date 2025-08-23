@@ -14,6 +14,18 @@ namespace final_project_be_Infrastructure.DAO
             _context = context;
         }
 
+        public async Task<IEnumerable<UserCourse>> GetCertificatesByUserIdAsync(Guid userId)
+        {
+            return await _context.UserCourses
+                .Include(uc => uc.Courses)
+                .ThenInclude(m=> m.Mentor)
+                .ThenInclude(m => m.User)
+                .ThenInclude(m => m.UserMetaData)
+                .Where(uc => uc.UserId == userId
+                          && uc.Status == "Completed")  
+                .ToListAsync();
+        }
+
         public async Task<UserCourse> GetUserCourse(Guid userId, int courseId)
             => await _context.UserCourses.FirstOrDefaultAsync(uc => uc.UserId == userId && uc.CourseId == courseId);
 

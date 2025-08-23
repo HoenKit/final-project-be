@@ -31,6 +31,20 @@ namespace final_project_be.Controllers
             return Ok(updatedUser);
         }
 
+        [HttpGet("userCertificate")]
+        public async Task<IActionResult> GetCertificatesByUser(Guid userId)
+        {
+            if (userId == Guid.Empty)
+                return BadRequest("UserId is required.");
+
+            var certificates = await _userRepository.GetCertificatesByUserIdAsync(userId);
+
+            if (!certificates.Any())
+                return NotFound("No completed certificates found for this user.");
+
+            return Ok(certificates);
+        }
+
         [HttpGet]
         public IActionResult GetAll(int? page, int? pageSize)
         {
@@ -54,7 +68,7 @@ namespace final_project_be.Controllers
             }
             return Ok(user);
         }
-
+        [Authorize]
         [HttpPut("update/{userId}")]
         public async Task<IActionResult> Update(Guid userId, [FromBody] UpdateUserMetadataDto dto)
         {
@@ -65,7 +79,7 @@ namespace final_project_be.Controllers
             return Ok(new { message = "User metadata updated successfully" });
         }
 
-
+        [Authorize]
         [HttpPut("update-user-point")]
         public async Task<IActionResult> UpdateUserPoint(decimal point, Guid userId)
         {
@@ -74,6 +88,7 @@ namespace final_project_be.Controllers
             return Ok(user);
         }
 
+        [Authorize]
         [HttpGet("monthly-stats")]
         public IActionResult GetUserStatisticsByMonth()
         {

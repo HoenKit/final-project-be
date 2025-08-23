@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static Azure.Core.HttpHeader;
 
 namespace final_project_be_Application.Repository
 {
@@ -41,24 +42,36 @@ namespace final_project_be_Application.Repository
         }
 
 
-        public async Task<bool> CreateCourseCouponAsync(CourseCoupon courseCoupon)
+        public async Task AddCourseCouponsAsync(AddCouponDto dto)
         {
-            try
+            foreach (var courseId in dto.CourseIds)
             {
-                var oldCoupons = _courseCouponDAO.GetCourseCoupons(courseCoupon.CourseId, courseCoupon.CouponId).ToList();
-                await _courseCouponDAO.RemoveCourseCouponsAsync(oldCoupons);
+                // Lấy coupon đã tồn tại (nếu có)
+                var existing = _courseCouponDAO
+                    .GetCourseCoupons(courseId, dto.CouponId)
+                    .FirstOrDefault();
 
-                await _courseCouponDAO.AddCourseCouponAsync(courseCoupon);
+                if (existing == null)
+                {
+                    // Nếu chưa có -> thêm mới
+                    var courseCoupon = new CourseCoupon
+                    {
+                        CourseId = courseId,
+                        CouponId = dto.CouponId,
+                        ExpiredAt = dto.ExpiredAt
+                    };
 
-                await _courseCouponDAO.SaveChangesAsync();
-                return true;
+                    await _courseCouponDAO.AddCourseCouponAsync(courseCoupon);
+                }
+                else
+                {
+                    // exits -> update ExpiredAt
+                    existing.ExpiredAt = dto.ExpiredAt;
+                    await _courseCouponDAO.UpdateAsync(existing);
+                }
             }
-            catch
-            {
-                return false;
-            }
+
+            await _courseCouponDAO.SaveChangesAsync();
         }
-
-
     }
 }

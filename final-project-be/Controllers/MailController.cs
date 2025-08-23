@@ -1,9 +1,11 @@
 ﻿using final_project_be_Application.Service.EmailService;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class MailController : ControllerBase
 {
     private readonly IEmailService _emailService;

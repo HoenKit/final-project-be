@@ -3,6 +3,7 @@ using final_project_be_Application.Interface;
 using final_project_be_Application.Repository;
 using final_project_be_Domain.DTOs.Category;
 using final_project_be_Domain.DTOs.Workshop;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -20,6 +21,7 @@ namespace final_project_be.Controllers
             _workshopRepository = workshopRepository;
             _mapper = mapper;
         }
+        [Authorize(Roles ="Mentor")]
         [HttpPost]
         public async Task<IActionResult> CreateWorkshop([FromBody] WorkShopCreateDto dto)
         {
@@ -40,6 +42,7 @@ namespace final_project_be.Controllers
             var result = _workshopRepository.GetAllWorkshop(page, pageSize);
             return Ok(result);
         }
+
         // GET api/<LessonController>/5
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id)
@@ -50,6 +53,7 @@ namespace final_project_be.Controllers
 
 
         // PUT api/<CategoryController>/5
+        [Authorize(Roles ="Mentor")]
         [HttpPut]
         public async Task<IActionResult> Put(WorkShopDto dto)
         {
@@ -58,6 +62,7 @@ namespace final_project_be.Controllers
             return Ok(dto);
         }
         // DeleteAsync api/<CategoryController>/5
+        [Authorize(Roles = "Mentor")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAsync(int id)
         {

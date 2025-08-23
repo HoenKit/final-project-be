@@ -1,5 +1,6 @@
 ﻿using final_project_be_Application.Interface;
 using final_project_be_Application.Ultils;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
@@ -8,6 +9,7 @@ namespace final_project_be.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class ProgressController : ControllerBase
     {
         private readonly ICaculator _caculator;

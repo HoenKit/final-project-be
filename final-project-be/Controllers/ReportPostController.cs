@@ -1,12 +1,14 @@
-﻿using final_project_be_Domain.DTOs.Report;
-using final_project_be_Application.Interface;
-using Microsoft.AspNetCore.Mvc;
+﻿using final_project_be_Application.Interface;
+using final_project_be_Domain.DTOs.Report;
 using final_project_be_Domain.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace final_project_be.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class ReportPostController : Controller
     {
         private readonly IReportPostRepository _ReportPostRepository;

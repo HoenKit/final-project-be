@@ -2,6 +2,7 @@
 using final_project_be_Application.Repository;
 using final_project_be_Domain.DTOs.Courses;
 using final_project_be_Domain.DTOs.LearnDto;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,6 +10,7 @@ namespace final_project_be.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class LearningController : ControllerBase
     {
         private readonly ILearningRepository _learnrepository;
@@ -39,6 +41,19 @@ namespace final_project_be.Controllers
             };
 
             return Ok(result);
+        }
+
+        [HttpGet("UserCourse")]
+        public async Task<IActionResult> GetUserCourse(Guid userId, int courseId)
+        {
+            var userCourse = await _learnrepository.GetUserCourseAsync(userId, courseId);
+
+            if (userCourse == null)
+            {
+                return NotFound(new { message = "UserCourse not found" });
+            }
+
+            return Ok(userCourse);
         }
 
         [HttpPost("submit")]
@@ -113,14 +128,15 @@ namespace final_project_be.Controllers
                 return StatusCode(500, new { error = ex.Message });
             }
         }
-        [HttpPost("upload")]
+        [HttpPut("upload")]
         public async Task<IActionResult> UploadCertificate([FromForm] CertificateUploadDto dto)
         {
-            var success = await _learnrepository.UploadCertificateAndSaveLinkAsync(dto);
-            if (!success)
-                return BadRequest("Course is not completed or upload failed.");
+            var fileUrl = await _learnrepository.UploadCertificateAndSaveLinkAsync(dto);
 
-            return Ok("Certificate uploaded and link saved.");
+            if (fileUrl == null)
+                return NotFound(new { message = "UserCourse not found or course not completed." });
+
+            return Ok(new { message = "The certificate has been uploaded." });
         }
 
         [HttpGet("submissions")]
@@ -153,6 +169,7 @@ namespace final_project_be.Controllers
             return Ok("User assignment updated successfully.");
         }
 
+        [Authorize(Roles ="Mentor")]
         [HttpGet("not-presented")]
         public async Task<IActionResult> GetNotPresentedAssignments(int assignmentId)
         {
@@ -163,7 +180,7 @@ namespace final_project_be.Controllers
 
             return Ok(assignments);
         }
-
+        [Authorize(Roles = "Mentor")]
         [HttpPut("mark-present")]
         public async Task<IActionResult> MarkUsersAsPresent([FromBody] MarkPresentDto dto)
         {
@@ -174,6 +191,7 @@ namespace final_project_be.Controllers
             return Ok("Users marked as present successfully.");
         }
 
+        [Authorize(Roles = "Mentor")]
         [HttpPut("grade")]
         public async Task<IActionResult> GradeSubmission([FromBody] GradeAssignmentDto dto)
         {

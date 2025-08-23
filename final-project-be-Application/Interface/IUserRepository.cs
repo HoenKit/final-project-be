@@ -15,5 +15,6 @@ namespace final_project_be_Application.Interface
         public Task<User> UpdateUserPoint(decimal point, Guid userId);
         public Task<string> GetUserProfileSummaryAsync(Guid userId);
         public Task<bool> UpdateMetadataAsync(Guid userId, UpdateUserMetadataDto dto);
+        public Task<IEnumerable<UserCertificateDto>> GetCertificatesByUserIdAsync(Guid userId);
     }
 }

@@ -18,4 +18,14 @@ namespace final_project_be_Domain.DTOs.Users
         public string? Goals { get; set; }
         public string? FavouriteSubject { get; set; }
     }
+    public class UserCertificateDto
+    {
+        public Guid UserId { get; set; }
+        public int CourseId { get; set; }
+        public string CourseName { get; set; }
+        public string MentorName { get; set; }
+        public string? Level { get; set; }
+        public string? CertificateLink { get; set; }
+        public DateTime CompletedAt { get; set; }
+    }
 }

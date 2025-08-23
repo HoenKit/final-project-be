@@ -1,7 +1,8 @@
-﻿using final_project_be_Domain.DTOs.Report;
-using final_project_be_Application.Interface;
-using Microsoft.AspNetCore.Mvc;
+﻿using final_project_be_Application.Interface;
 using final_project_be_Application.Repository;
+using final_project_be_Domain.DTOs.Report;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -9,6 +10,7 @@ namespace final_project_be.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class ReportUserController : ControllerBase
     {
         private readonly IReportUserRepository _ReportUserRepository;

@@ -1,5 +1,6 @@
-﻿using final_project_be_Domain.DTOs.Post;
-using final_project_be_Application.Interface;
+﻿using final_project_be_Application.Interface;
+using final_project_be_Domain.DTOs.Post;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -34,8 +35,9 @@ namespace final_project_be.Controllers
 			return Ok(await _PostFileRepository.GetPostFile(id));
 		}
 
-		// POST api/<PostFileController>
-		[HttpPost]
+        // POST api/<PostFileController>
+        [Authorize]
+        [HttpPost]
 		public async Task<IActionResult> Post([FromBody] PostFileDto PostFileDto)
 		{
 			if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -43,17 +45,18 @@ namespace final_project_be.Controllers
 			return Ok(PostFileDto);
 		}
 
-		// PUT api/<PostFileController>/5
-		//[HttpPut]
-		//public IActionResult Put(PostFileDto PostFileDto)
-		//{
-		//	if (!ModelState.IsValid) { return BadRequest(ModelState); }
-		//	_PostFileRepository.UpdatePostFile(PostFileDto);
-		//	return Ok(PostFileDto);
-		//}
+        // PUT api/<PostFileController>/5
+        //[HttpPut]
+        //public IActionResult Put(PostFileDto PostFileDto)
+        //{
+        //	if (!ModelState.IsValid) { return BadRequest(ModelState); }
+        //	_PostFileRepository.UpdatePostFile(PostFileDto);
+        //	return Ok(PostFileDto);
+        //}
 
-		// DeleteAsync api/<PostFileController>/5
-		[HttpDelete("{id}")]
+        // DeleteAsync api/<PostFileController>/5
+        [Authorize]
+        [HttpDelete("{id}")]
 		public async Task<IActionResult> DeleteAsync(int id)
 		{
 			if (!ModelState.IsValid) return BadRequest(ModelState);

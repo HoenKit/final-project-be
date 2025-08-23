@@ -12,6 +12,6 @@ namespace final_project_be_Application.Interface
     {
         public Task<List<CouponDto>> GetAllCouponsAsync();
         public Task<List<CouponDto>> GetCouponsByCourseIdAsync(int courseId);
-        public Task<bool> CreateCourseCouponAsync(CourseCoupon courseCoupon);
+        public Task AddCourseCouponsAsync(AddCouponDto dto);
     }
 }

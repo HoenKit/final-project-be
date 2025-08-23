@@ -17,4 +17,9 @@ namespace final_project_be_Domain.DTOs.Payment
         public bool Success { get; set; }
         public string? Error { get; set; }
     }
+    public class BuyPremiumRequest
+    {
+        public Guid UserId { get; set; }
+        public int PlanId { get; set; }
+    }
 }
