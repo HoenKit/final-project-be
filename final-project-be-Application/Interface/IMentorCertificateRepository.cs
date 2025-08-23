@@ -16,7 +16,7 @@ namespace final_project_be_Application.Interface
         public Task<bool> DeleteMentorCertificate(int id);
         public Task<GetMentorCertificateDto> GetMentorCertificate(int id);
         public Task<MentorCertificate> UpdateMentorCertificate(MentorCertificateDto dto);
-
+        public Task<ICollection<MentorCertificate>> GetMentorCertificatesByUserId(Guid userId);
         public PageResult<GetMentorCertificateDto> GetAllMentorCertificates(int page, int pageSize);
 
         public Task<ICollection<GetMentorCertificateDto>> GetAllMentorCertificatesByMentorId(int MentorId);

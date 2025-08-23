@@ -2,6 +2,7 @@
 using final_project_be_Application.Repository;
 using final_project_be_Domain.DTOs.Courses;
 using final_project_be_Domain.DTOs.Review;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,6 +10,7 @@ namespace final_project_be.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+
     public class ReviewController : ControllerBase
     {
         private readonly IReviewRepository _reviewRepository;
@@ -37,6 +39,7 @@ namespace final_project_be.Controllers
         }
 
         // POST: ReviewController/Create
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] ReviewDto dto)
         {
@@ -54,6 +57,7 @@ namespace final_project_be.Controllers
         }
 
         // PUT: ReviewController/Edit/5
+        [Authorize]
         [HttpPut]
         public async Task<IActionResult> Put([FromBody] UpdateReviewDto dto)
         {
@@ -71,6 +75,7 @@ namespace final_project_be.Controllers
         }
 
         // DELETE api/<ReviewController>/5
+        [Authorize]
         [HttpPut("toggle-deleted/{id}")]
         public async Task<IActionResult> ToggleReviewDeleteStatus(int id)
         {

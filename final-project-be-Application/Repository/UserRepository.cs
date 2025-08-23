@@ -17,17 +17,33 @@ namespace final_project_be_Application.Repository
     {
         private readonly IUserDAO _userDAO;
         private readonly IMapper _mapper;
+        private readonly IUserCourseDAO _userCourseDAO;
         private readonly ILogger<UserRepository> _logger;
 
-        public UserRepository(IUserDAO userDAO, IMapper mapper, ILogger<UserRepository> logger)
+        public UserRepository(IUserDAO userDAO, IMapper mapper, ILogger<UserRepository> logger, IUserCourseDAO userCourseDAO)
             : base(userDAO)
         {
             _userDAO = userDAO;
             _mapper = mapper;
             _logger = logger;
+            _userCourseDAO = userCourseDAO;
 
         }
+        public async Task<IEnumerable<UserCertificateDto>> GetCertificatesByUserIdAsync(Guid userId)
+        {
+            var userCourses = await _userCourseDAO.GetCertificatesByUserIdAsync(userId);
 
+            return userCourses.Select(uc => new UserCertificateDto
+            {
+                UserId = uc.UserId,
+                CourseId = uc.CourseId,
+                MentorName = uc.Courses?.Mentor?.User?.UserMetaData?.FirstName + " "+ uc.Courses?.Mentor?.User?.UserMetaData?.LastName ?? "Unknown Mentor",
+                Level = uc.Courses?.Level,
+                CourseName = uc.Courses?.CourseName ?? "Unknown Course",
+                CertificateLink = uc.CertificateLink,
+                CompletedAt = uc.CompletedAt
+            }).ToList();
+        }
         public async Task<User> ToggleIsBanned(Guid userId)
         {
 			await _userDAO.BeginTransactionAsync();

@@ -1,6 +1,7 @@
 ﻿using final_project_be_Application.Interface;
 using final_project_be_Application.Repository;
 using final_project_be_Domain.DTOs.Schedule;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using NuGet.Protocol.Core.Types;
@@ -9,6 +10,7 @@ namespace final_project_be.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class ScheduleController : ControllerBase
     {
         private readonly IScheduleRepository _Schedulerepository;
@@ -23,6 +25,7 @@ namespace final_project_be.Controllers
         /// <summary>
         /// Mentor creates schedule
         /// </summary>
+        [Authorize(Roles ="Mentor")]
         [HttpPost("create")]
         public async Task<IActionResult> CreateSchedule([FromBody] ScheduleDto dto)
         {

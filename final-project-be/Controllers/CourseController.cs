@@ -2,6 +2,7 @@
 using final_project_be_Application.Repository;
 using final_project_be_Application.Service.CloudinaryService;
 using final_project_be_Domain.DTOs.Courses;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -10,7 +11,7 @@ namespace final_project_be.Controllers
 {
     [Route("api/[controller]")]
 	[ApiController]
-	public class CourseController : ControllerBase
+    public class CourseController : ControllerBase
 	{
 		private readonly ICourseRepository _courseRepository;
 		private readonly ICloudinaryService _cloudinaryService;
@@ -41,6 +42,7 @@ namespace final_project_be.Controllers
 		}
 
 		// POST: CourseController/Create
+		[Authorize(Roles ="Mentor")]
 		[HttpPost]
 		public async Task<IActionResult> Post([FromForm] CourseDto dto)
 		{
@@ -57,7 +59,7 @@ namespace final_project_be.Controllers
 			}
 		}
 
-
+		[Authorize]
         [HttpGet("status")]
         public async Task<IActionResult> GetUserCoursesByStatus([FromQuery] Guid userId, [FromQuery] string? status)
         {
@@ -70,6 +72,7 @@ namespace final_project_be.Controllers
 
 
         // PUT: CourseController/Edit/5
+        [Authorize(Roles ="Mentor")]
         [HttpPut]
 		public async Task<IActionResult> Put([FromForm] UpdateCourseDto dto)
 		{
@@ -86,6 +89,7 @@ namespace final_project_be.Controllers
 			}
 		}
 
+		[Authorize(Roles = "Admin")]
         [HttpPut("toggle-status")]
         public async Task<IActionResult> ToggleCourseStatus(int id, string status)
         {
@@ -98,6 +102,7 @@ namespace final_project_be.Controllers
         }
 
         // DELETE api/<PostController>/5
+        [Authorize(Roles = "Admin,Mentor")]
         [HttpPut("toggle-deleted/{id}")]
 		public async Task<IActionResult> TogglePostDeleteStatus(int id)
 		{
@@ -109,40 +114,9 @@ namespace final_project_be.Controllers
 			return Ok(updatedCourse);
 		}
 
-		[HttpPost("upload")]
-		public async Task<IActionResult> UploadVideo(IFormFile videoFile)
-		{
-			try
-			{
-				var videoUrl = await _cloudinaryService.UploadVideoAndGetUrlAsync(videoFile);
+		
 
-				return Ok(new
-				{
-					Url = videoUrl
-				});
-			}
-			catch (Exception ex)
-			{
-				return BadRequest(new { Message = ex.Message });
-			}
-		}
-
-		[HttpPost("delete-video")]
-		public async Task<IActionResult> DeleteVideo(string url)
-		{
-			var deleted = await _cloudinaryService.DeleteVideoByUrlAsync(url);
-
-			if (deleted)
-			{
-				return Ok();
-			}
-			else
-			{
-				return NotFound();
-			}
-
-		}
-
+		[Authorize]
         [HttpGet("recommend-course")]
         public async Task<IActionResult> RecommendCourses([FromQuery] Guid userId)
         {
@@ -154,6 +128,7 @@ namespace final_project_be.Controllers
             return Ok(recommendations);
         }
 
+		[Authorize(Roles ="Mentor")]
         [HttpPost("generate-structure/{courseId}")]
         public async Task<IActionResult> GenerateCourseStructure(int courseId)
         {
@@ -165,7 +140,7 @@ namespace final_project_be.Controllers
 
             return Ok(new { message = "Course structure generated successfully." });
         }
-
+        [Authorize]
         [HttpGet("monthly-stats/{userId}")]
         public async Task<IActionResult> GetStatisticsByMonth(Guid userId, [FromQuery] int? year = null)
         {

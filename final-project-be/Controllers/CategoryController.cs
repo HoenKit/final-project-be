@@ -18,7 +18,6 @@ namespace final_project_be.Controllers
         }
         // GET: api/<CategoryController>
         [HttpGet]
-        
         public IActionResult GetAll(int? page, int? pageSize)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);

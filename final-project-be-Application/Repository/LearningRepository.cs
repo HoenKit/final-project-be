@@ -253,11 +253,19 @@ namespace final_project_be_Application.Repository
             }).ToList();
         }
 
-        public async Task<bool> UploadCertificateAndSaveLinkAsync(CertificateUploadDto dto)
+        public async Task<UserCourse?> GetUserCourseAsync(Guid userId, int courseId)
+        {
+            return await _usercourseDAO.GetUserCourse(userId, courseId);
+        }
+
+        public async Task<string?> UploadCertificateAndSaveLinkAsync(CertificateUploadDto dto)
         {
             var userCourse = await _usercourseDAO.GetCompletedUserCourseAsync(dto.UserId, dto.CourseId);
             if (userCourse == null)
-                return false;
+                return null;
+
+            if (!string.IsNullOrEmpty(userCourse.CertificateLink))
+                return userCourse.CertificateLink;
 
             var fileName = $"certificates/User{dto.UserId}_Course{dto.CourseId}_{DateTime.UtcNow.Ticks}{Path.GetExtension(dto.CertificateFile.FileName)}";
 
@@ -265,9 +273,10 @@ namespace final_project_be_Application.Repository
             await _blobStorageService.UploadFileAsync(fileName, stream);
 
             var fileUrl = $"https://finalprojectbestorage.blob.core.windows.net/phronesisfiles/{fileName}";
+
             await _usercourseDAO.UpdateCertificateLinkAsync(dto.UserId, dto.CourseId, fileUrl);
 
-            return true;
+            return fileUrl; // ✅ Trả link cho Controller
         }
 
         public async Task<List<UserAssignmentDto>> GetUserAssignmentsByAssignmentIdAsync(int assignmentId)

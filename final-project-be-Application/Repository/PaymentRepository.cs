@@ -2,6 +2,7 @@
 using final_project_be_Domain.DTOs;
 using final_project_be_Domain.DTOs.Courses;
 using final_project_be_Domain.DTOs.Mentor;
+using final_project_be_Domain.DTOs.Notification;
 using final_project_be_Domain.DTOs.Payment;
 using final_project_be_Domain.DTOs.Post;
 using final_project_be_Domain.DTOs.Transaction;
@@ -29,8 +30,10 @@ namespace final_project_be_Application.Repository
         private readonly IMentorDAO _mentorDAO;
         private readonly IPaymentDAO _paymentDAO;
         private readonly IPaymentCourseDAO _paymentCourseDAO;
+        private readonly IPaymentPlanDAO _paymentPlanDAO;
+        private readonly IMembershipPlanDAO _MembershipPlanDAO;
         private readonly ILogger<PaymentRepository> _logger;
-        public PaymentRepository(IUserDAO userDAO, ICourseDAO courseDAO, IPaymentDAO paymentDAO, IPaymentCourseDAO paymentCourseDAO, ILogger<PaymentRepository> logger,IMentorDAO mentorDAO,ICouponDAO couponDAO, IUserCourseDAO userCourseDAO) 
+        public PaymentRepository(IUserDAO userDAO, ICourseDAO courseDAO, IPaymentDAO paymentDAO, IPaymentPlanDAO paymentPlanDAO, IMembershipPlanDAO MembershipPlanDAO, IPaymentCourseDAO paymentCourseDAO, ILogger<PaymentRepository> logger,IMentorDAO mentorDAO,ICouponDAO couponDAO, IUserCourseDAO userCourseDAO) 
         {
             _mentorDAO = mentorDAO;
             _userDAO = userDAO;
@@ -38,6 +41,8 @@ namespace final_project_be_Application.Repository
             _courseDAO = courseDAO;
             _paymentDAO = paymentDAO;
             _paymentCourseDAO = paymentCourseDAO;
+            _paymentPlanDAO = paymentPlanDAO;
+            _MembershipPlanDAO = MembershipPlanDAO;
             _couponDAO = couponDAO;
             _logger = logger;
         }
@@ -63,12 +68,12 @@ namespace final_project_be_Application.Repository
                 var existingUserCourse = await _userCourseDAO.GetUserCourse(userId, courseId);
                 if (existingUserCourse != null)
                 {
-                    var status = existingUserCourse.Status ?? string.Empty;
-                    if (status.Equals("Completed", StringComparison.OrdinalIgnoreCase))
+                    await _paymentDAO.RollbackTransactionAsync();
+                    return new BuyCourseResult
                     {
-                        await _paymentDAO.RollbackTransactionAsync();
-                        return new BuyCourseResult { Success = false, Error = "PreviouslyPurchased" };
-                    }
+                        Success = false,
+                        Error = "PreviouslyPurchased"
+                    };
                 }
 
                 // Tính toán giá sau khi giảm
@@ -153,6 +158,76 @@ namespace final_project_be_Application.Repository
                 return new BuyCourseResult { Success = false, Error = "Exception" };
             }
         }
+
+        public async Task<IEnumerable<MembershipPlan>> GetAllMembershipplanAsync()
+        {
+            try
+            {
+                var membershipPlans = await _MembershipPlanDAO.GetAll().ToListAsync();
+
+                _logger.LogInformation("Get Membership plans success");
+
+                return membershipPlans;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error when getting Membership plans");
+                return new List<MembershipPlan>();
+            }
+        }
+
+        public async Task<bool> BuyPremiumAsync(Guid userId, int planId)
+        {
+            await _paymentDAO.BeginTransactionAsync();
+
+            try
+            {
+                var user = await _userDAO.GetByIdAsync(userId);
+                if (user == null) throw new Exception("User not found");
+
+                var plan = await _MembershipPlanDAO.GetByIdAsync(planId);
+                if (plan == null) throw new Exception("Membership plan not found");
+
+                if (user.Point < plan.Price)
+                    throw new Exception("Not enough points");
+
+                // Trừ point và bật Premium
+                user.Point -= plan.Price;
+                user.IsPremium = true;
+                await _userDAO.UpdateAsync(user);
+
+                // Tạo Payment
+                var payment = new Payment
+                {
+                    UserId = user.UserId,
+                    Amount = plan.Price,
+                    ServiceType = "Membership",
+                    Status = "Success",
+                    CreatedAt = DateTime.UtcNow
+                };
+                 await _paymentDAO.AddAsync(payment); // đảm bảo PaymentId được set
+
+                // Tính ExpiredAt từ Name
+                int months = ParseMonthsFromPlanName(plan.Name); // helper function
+                var paymentPlan = new PaymentPlan
+                {
+                    PaymentId = payment.PaymentId,
+                    PlanId = plan.PlanId,
+                    CreatedAt = DateTime.UtcNow,
+                    ExpiredAt = DateTime.UtcNow.AddMonths(months)
+                };
+                await _paymentPlanDAO.AddAsync(paymentPlan);
+
+                await _paymentDAO.CommitTransactionAsync();
+                return true;
+            }
+            catch
+            {
+                await _paymentDAO.RollbackTransactionAsync();
+                throw;
+            }
+        }
+
 
         public PageResult<GetPaymentDto> GetAll(int page, int pageSize, Guid? UserId, string? sortOption, List<ServiceTypeEnum>? ServiceType)
         {
@@ -262,6 +337,18 @@ namespace final_project_be_Application.Repository
                 _logger.LogError(ex, "Failed to generate payment statistics");
                 throw;
             }
+        }
+        private int ParseMonthsFromPlanName(string planName)
+        {
+            // ví dụ: "6 Month Subscription"
+            if (string.IsNullOrEmpty(planName)) return 1;
+            var parts = planName.Split(' ');
+            if (parts.Length < 1) return 1;
+
+            if (int.TryParse(parts[0], out int months))
+                return months;
+
+            return 1;
         }
     }
 

@@ -67,7 +67,9 @@ namespace final_project_be_Application.Service.Mapping
 			CreateMap<Assignment, AssignmentDto>().ReverseMap();
 			CreateMap<Assignment, UpdateAssignmentDto>().ReverseMap();
 			CreateMap<Assignment, AssignmentResponseDto>().ReverseMap();
-            CreateMap<Mentor, MentorCertificateDto>().ReverseMap();
+            CreateMap<MentorCertificateDto, MentorCertificate>()
+            .ForMember(dest => dest.FileUrl, opt => opt.Ignore()) 
+            .ForMember(dest => dest.MentorCertificateId, opt => opt.Ignore());
             CreateMap<MentorCertificate, MentorCertificateDto>();
             CreateMap<Mentor, CreateMentorDto>().ReverseMap();
             CreateMap<Mentor, GetMentorDto>().ReverseMap();

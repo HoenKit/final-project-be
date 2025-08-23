@@ -24,9 +24,9 @@ namespace final_project_be.Controllers
             _hubContext = hubContext;
         }
         // GET: api/<CommentController>
-        
-        [HttpGet]
-        public IActionResult GetAll(int? page, int postId)  
+
+        [HttpGet("GetByPostId")]
+        public IActionResult GetAllByPostId(int? page, int postId)  
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
@@ -44,6 +44,7 @@ namespace final_project_be.Controllers
         }
 
         // POST api/<CommentController>
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] CommentDto commentDto)
         {
@@ -54,6 +55,7 @@ namespace final_project_be.Controllers
         }
 
         // PUT api/<CommentController>/5
+        [Authorize]
         [HttpPut]
         public async Task<IActionResult> Put(CommentDto commentDto)
         {
@@ -63,6 +65,7 @@ namespace final_project_be.Controllers
         }
 
         // DeleteAsync api/<CommentController>/5
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAsync(int id)
         {

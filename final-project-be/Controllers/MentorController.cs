@@ -18,7 +18,7 @@ namespace final_project_be.Controllers
         {
             _mentorRepository = mentorRepository;
         }
-        // GET: api/<NotificationController>
+        // GET: api/<MentorController>
         [HttpGet]
         public  IActionResult GetAll(int? page)
         {
@@ -39,7 +39,7 @@ namespace final_project_be.Controllers
             return Ok(mentor);
         }
 
-        // GET api/<NotificationController>/5
+        // GET api/<MentorController>/5
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id)
         {
@@ -54,7 +54,7 @@ namespace final_project_be.Controllers
             return Ok(await _mentorRepository.GetMentorByUserId(userId));
         }
 
-        // POST api/<NotificationController>
+        // POST api/<MentorController>
         [Authorize(Roles ="User")]
         [HttpPost]
         public async Task<IActionResult> Post([FromForm] CreateMentorDto MentorDto)
@@ -64,7 +64,8 @@ namespace final_project_be.Controllers
             return Ok(MentorDto);
         }
 
-        // PUT api/<NotificationController>/5
+        // PUT api/<MentorController>/5
+        [Authorize]
         [HttpPut]
         public async Task<IActionResult> Put(CreateMentorDto MentorDto)
         {
@@ -72,7 +73,7 @@ namespace final_project_be.Controllers
             await _mentorRepository.UpdateMentor(MentorDto);
             return Ok(MentorDto);
         }
-
+        [Authorize]
         [HttpPut("update/{userId}")]
         public async Task<IActionResult> Update(Guid userId, [FromBody] InfoBank dto)
         {
@@ -83,8 +84,9 @@ namespace final_project_be.Controllers
             return Ok(new { message = "Mentor updated successfully" });
         }
 
-        // DeleteAsync api/<NotificationController>/5
+        // DeleteAsync api/<MentorController>/5
         [HttpDelete("{id}")]
+        [Authorize]
         public async Task<IActionResult> DeleteAsync(int id)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
