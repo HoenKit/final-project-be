@@ -1,22 +1,29 @@
 ﻿using final_project_be_Application.Interface;
 using final_project_be_Application.Repository;
+using final_project_be_Domain.DTOs.Notification;
 using final_project_be_Domain.DTOs.Payment;
 using final_project_be_Domain.DTOs.Transaction;
+using final_project_be_Domain.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using NuGet.Protocol.Core.Types;
 
 namespace final_project_be.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class PaymentController : ControllerBase
     {
         private readonly IPaymentRepositoty _paymentRepositoty;
         private readonly ILearningRepository _learnrepository;
-        public PaymentController(IPaymentRepositoty paymentRepositoty, ILearningRepository learnrepository)
+        private readonly INotificationRepository _notificationRepository;
+        public PaymentController(IPaymentRepositoty paymentRepositoty, ILearningRepository learnrepository, INotificationRepository notificationRepository)
         {
             _paymentRepositoty = paymentRepositoty;
             _learnrepository = learnrepository;
+            _notificationRepository = notificationRepository;
         }
         [HttpPost("buy-course")]
         public async Task<IActionResult> BuyCourse([FromBody] PaymentDto request)
@@ -36,8 +43,43 @@ namespace final_project_be.Controllers
                 };
             }
 
+
+            await _notificationRepository.CreateNotification(new NotificationDto
+            {
+                UserId = request.UserId, 
+                Message = $"You have successfully purchased the course. "
+            });
+
             await _learnrepository.StartCourseAsync(request.UserId, request.CourseId);
             return Ok("Purchase and course start successful.");
+        }
+
+
+        [HttpPost("buy-premium")]
+        public async Task<IActionResult> BuyPremium([FromBody] BuyPremiumRequest request)
+        {
+            try
+            {
+                await _paymentRepositoty.BuyPremiumAsync(request.UserId, request.PlanId);
+                return Ok(new { Message = "Membership purchased successfully" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Error = ex.Message });
+            }
+        }
+
+        [HttpGet("Premium-package")]
+        public async Task<IActionResult> GetAllMembershipPlans()
+        {
+            var plans = await _paymentRepositoty.GetAllMembershipplanAsync();
+
+            if (plans == null || !plans.Any())
+            {
+                return NotFound(new { message = "No membership plans found" });
+            }
+
+            return Ok(plans);
         }
 
         [HttpGet]

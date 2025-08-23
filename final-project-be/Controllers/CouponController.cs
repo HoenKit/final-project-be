@@ -2,11 +2,13 @@
 using final_project_be_Domain.DTOs.Coupon;
 using final_project_be_Domain.Models;
 using final_project_be_Infrastructure.DAO;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace final_project_be.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class CouponController : ControllerBase
@@ -38,31 +40,28 @@ namespace final_project_be.Controllers
             return Ok(coupons);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> CreateCourseCoupon([FromBody] CreateCouponDto dto)
+        /// <summary>
+        /// Add coupons to multiple courses
+        /// </summary>
+        [Authorize(Roles ="Mentor")]
+        [HttpPost("add-coupons")]
+        public async Task<IActionResult> AddCourseCoupons([FromBody] AddCouponDto dto)
         {
-            if (dto == null)
-                return BadRequest("Invalid input");
-
-            var courseCoupon = new CourseCoupon
+            if (dto == null || dto.CourseIds == null || !dto.CourseIds.Any())
             {
-                CourseId = dto.CourseId,
-                CouponId = dto.CouponId,
-                ExpiredAt = dto.ExpiredAt
-            };
+                return BadRequest(new { message = "The CourseIds list cannot be left blank." });
+            }
 
-            var result = await _couponRepository.CreateCourseCouponAsync(courseCoupon);
-
-            if (!result)
-                return StatusCode(500, "Failed to create course coupon.");
-
-            return Ok(new
+            try
             {
-                message = "CourseCoupon created successfully.",
-                dto.CourseId,
-                dto.CouponId,
-                dto.ExpiredAt
-            });
+                await _couponRepository.AddCourseCouponsAsync(dto);
+                return Ok(new { message = "Successfully added coupon to course." });
+            }
+            catch (Exception ex)
+            {
+                // log exception nếu cần
+                return StatusCode(500, new { message = "An error occurred.", detail = ex.Message });
+            }
         }
 
     }

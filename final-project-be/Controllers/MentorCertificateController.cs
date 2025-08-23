@@ -3,6 +3,7 @@ using final_project_be_Application.Repository;
 using final_project_be_Application.Service.CloudinaryService;
 using final_project_be_Domain.DTOs.Mentor;
 using final_project_be_Domain.DTOs.Post;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,6 +11,7 @@ namespace final_project_be.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+
     public class MentorCertificateController : ControllerBase
     {
         private readonly IMentorCertificateRepository _mentorCertificateRepository;
@@ -17,9 +19,36 @@ namespace final_project_be.Controllers
         {
             _mentorCertificateRepository = mentorCertificateRepository;
         }
+
+        [HttpGet("GetByUserId")]
+        public async Task<IActionResult> GetByUserId(Guid userId)
+        {
+                var certificates = await _mentorCertificateRepository.GetMentorCertificatesByUserId(userId);
+
+                if (certificates == null)
+                {
+                    return Ok("Error fetching mentor certificates");
+                }
+
+                if (!certificates.Any())
+                {
+                    return NotFound($"No mentor certificates found for userId {userId}");
+                }
+
+                // Optionally, select fields to return instead of full entity
+                var result = certificates.Select(c => new
+                {
+                    c.MentorCertificateId,
+                    c.MentorId,
+                    c.CertificateName,
+                    c.FileUrl
+                });
+
+                return Ok(result);
+        }
+            
         // GET: api/<PostFileController>
         [HttpGet]
-
         public async Task<IActionResult> GetAll(int mentorId)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -38,11 +67,25 @@ namespace final_project_be.Controllers
 
         // POST api/<PostFileController>
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] MentorCertificateDto CertificateDto)
+        [Authorize]
+        public async Task<IActionResult> Post([FromForm] MentorCertificateDto CertificateDto)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-            await _mentorCertificateRepository.CreateMentorCertificate(CertificateDto);
-            return Ok(CertificateDto);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var certificate = await _mentorCertificateRepository.CreateMentorCertificate(CertificateDto);
+
+            if (certificate == null)
+                return StatusCode(500, "Could not create mentor certificate");
+
+            // Return the saved object with the uploaded file URL
+            return Ok(new
+            {
+                certificate.MentorCertificateId,
+                certificate.MentorId,
+                certificate.CertificateName,
+                certificate.FileUrl
+            });
         }
 
         // PUT api/<PostFileController>/5
@@ -56,6 +99,7 @@ namespace final_project_be.Controllers
 
         // DeleteAsync api/<PostFileController>/5
         [HttpDelete("{id}")]
+        [Authorize]
         public async Task<IActionResult> DeleteAsync(int id)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);

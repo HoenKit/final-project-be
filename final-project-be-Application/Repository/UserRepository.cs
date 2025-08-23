@@ -17,17 +17,33 @@ namespace final_project_be_Application.Repository
     {
         private readonly IUserDAO _userDAO;
         private readonly IMapper _mapper;
+        private readonly IUserCourseDAO _userCourseDAO;
         private readonly ILogger<UserRepository> _logger;
 
-        public UserRepository(IUserDAO userDAO, IMapper mapper, ILogger<UserRepository> logger)
+        public UserRepository(IUserDAO userDAO, IMapper mapper, ILogger<UserRepository> logger, IUserCourseDAO userCourseDAO)
             : base(userDAO)
         {
             _userDAO = userDAO;
             _mapper = mapper;
             _logger = logger;
+            _userCourseDAO = userCourseDAO;
 
         }
+        public async Task<IEnumerable<UserCertificateDto>> GetCertificatesByUserIdAsync(Guid userId)
+        {
+            var userCourses = await _userCourseDAO.GetCertificatesByUserIdAsync(userId);
 
+            return userCourses.Select(uc => new UserCertificateDto
+            {
+                UserId = uc.UserId,
+                CourseId = uc.CourseId,
+                MentorName = uc.Courses?.Mentor?.User?.UserMetaData?.FirstName + " "+ uc.Courses?.Mentor?.User?.UserMetaData?.LastName ?? "Unknown Mentor",
+                Level = uc.Courses?.Level,
+                CourseName = uc.Courses?.CourseName ?? "Unknown Course",
+                CertificateLink = uc.CertificateLink,
+                CompletedAt = uc.CompletedAt
+            }).ToList();
+        }
         public async Task<User> ToggleIsBanned(Guid userId)
         {
 			await _userDAO.BeginTransactionAsync();
@@ -62,8 +78,16 @@ namespace final_project_be_Application.Repository
         {
             try
             {
-                var totalCount = _userDAO.GetAll().Count();
+
+                /*var totalCount = _userDAO.GetAll().Count();
                 var users = _userDAO.GetAll()
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToList();*/
+
+                var query = _userDAO.GetAll().Include(u => u.UserMetaData);
+                var totalCount = query.Count();
+                var users = query
                     .Skip((page - 1) * pageSize)
                     .Take(pageSize)
                     .ToList();
@@ -74,7 +98,7 @@ namespace final_project_be_Application.Repository
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error when getting users");
+                _logger.LogError(ex, "Error when getting users with metadata");
                 return new PageResult<User>(new List<User>(), 0, page, pageSize);
             }
         }

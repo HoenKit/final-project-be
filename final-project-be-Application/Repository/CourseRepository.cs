@@ -609,7 +609,7 @@ namespace final_project_be_Application.Repository
                     TotalStudentsEnrolled = g.Select(pc => pc.Payment.UserId).Distinct().Count(),
                     TotalEarnings = g.Sum(pc =>
                         pc.Payment.Amount *
-                        (pc.Courses.Modules?.Any(m => m.IsPremium) == true ? 0.75m : 0.65m))
+                        (pc.Courses.Modules?.Any(m => m.IsPremium) == true ? 0.75m : 0.65m) * 1000)
         
                 })
                 .OrderBy(s => s.Time)

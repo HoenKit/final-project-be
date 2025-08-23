@@ -1,6 +1,7 @@
 ﻿using Azure.Core;
 using final_project_be_Application.Interface;
 using final_project_be_Domain.DTOs.Assignment;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Org.BouncyCastle.Asn1.Cmp;
 
@@ -8,6 +9,7 @@ using Org.BouncyCastle.Asn1.Cmp;
 
 namespace final_project_be.Controllers
 {
+	[Authorize]
 	[Route("api/[controller]")]
 	[ApiController]
 	public class AssignmentController : ControllerBase

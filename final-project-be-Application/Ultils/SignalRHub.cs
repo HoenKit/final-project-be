@@ -1,5 +1,6 @@
 ﻿using final_project_be_Domain.DTOs.Comment;
 using final_project_be_Domain.DTOs.Message;
+using final_project_be_Domain.DTOs.Notification;
 using final_project_be_Domain.DTOs.Post;
 using Microsoft.AspNetCore.SignalR;
 
@@ -27,6 +28,12 @@ namespace final_project_be_Application.Ultils
         {
             await Clients.User(receiverId.ToString())
                          .SendAsync("NewChatRoom", partnerId);
+        }
+
+        public async Task SendNotification(NotificationDto notification)
+        {
+            await Clients.User(notification.UserId.ToString())
+                         .SendAsync("ReceiveNotification", notification);
         }
 
     }

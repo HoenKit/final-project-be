@@ -25,4 +25,10 @@ namespace final_project_be_Domain.DTOs.Coupon
         public int CourseId { get; set; }   
         public DateTime ExpiredAt { get; set; }
     }
+    public class AddCouponDto
+    {
+        public int CouponId { get; set; }
+        public List<int> CourseIds { get; set; } = new List<int>();
+        public DateTime ExpiredAt { get; set; }
+    }
 }

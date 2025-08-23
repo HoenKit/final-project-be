@@ -1,12 +1,15 @@
 ﻿using AutoMapper;
-using final_project_be_Infrastructure.DAO;
-using final_project_be_Domain.Models;
-using final_project_be_Domain.DTOs.Notification;
-using final_project_be_Domain.DTOs;
-using final_project_be_Application.Interface;
-using Microsoft.Extensions.Logging;
+using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml.Wordprocessing;
+using final_project_be_Application.Interface;
+using final_project_be_Application.Ultils;
+using final_project_be_Domain.DTOs;
+using final_project_be_Domain.DTOs.Notification;
+using final_project_be_Domain.Models;
+using final_project_be_Infrastructure.DAO;
 using final_project_be_Infrastructure.DAO_Interface;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Logging;
 
 namespace final_project_be_Application.Repository
 {
@@ -15,12 +18,13 @@ namespace final_project_be_Application.Repository
         private readonly INotificationDAO _NotificationDAO;
         private readonly IMapper _mapper;
         private readonly ILogger<NotificationRepository> _logger;
-
-        public NotificationRepository(INotificationDAO NotificationDAO, IMapper mapper, ILogger<NotificationRepository> logger) : base(NotificationDAO)
+        private readonly IHubContext<SignalRHub> _hubContext;
+        public NotificationRepository(INotificationDAO NotificationDAO, IMapper mapper, ILogger<NotificationRepository> logger, IHubContext<SignalRHub> hubContext) : base(NotificationDAO)
         {
             _mapper = mapper;
             _logger = logger;
             _NotificationDAO = NotificationDAO;
+            _hubContext = hubContext;
         }
 
         public async Task<Notification> CreateNotification(NotificationDto dto)
@@ -30,6 +34,16 @@ namespace final_project_be_Application.Repository
                 await _NotificationDAO.BeginTransactionAsync();
                 var Notification = _mapper.Map<Notification>(dto);
                 await _NotificationDAO.AddAsync(Notification);
+
+                await _hubContext.Clients
+                    .User(Notification.UserId.ToString())
+                    .SendAsync("ReceiveNotification", new
+                    {
+                        NotificationId = Notification.NotificationId,
+                        Message = Notification.Message,
+                        CreatedAt = Notification.CreatedAt
+                    });
+
                 await _NotificationDAO.CommitTransactionAsync();
 
                 _logger.LogInformation("AddAsync Notification success");
@@ -109,8 +123,10 @@ namespace final_project_be_Application.Repository
             {
                 var notifications = _NotificationDAO.GetAll()
                     .Where(n => n.UserId == userId)
+                    .OrderByDescending(n => n.CreatedAt)
                     .Take(5)
                     .ToList();
+
 
                 _logger.LogInformation("Get Notifications success");
 

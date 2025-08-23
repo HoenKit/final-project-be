@@ -2,6 +2,7 @@
 using DocumentFormat.OpenXml.VariantTypes;
 using final_project_be_Application.Interface;
 using final_project_be_Application.Repository;
+using final_project_be_Application.Service.BackGroundService;
 using final_project_be_Application.Service.CloudinaryService;
 using final_project_be_Application.Service.EmailService;
 using final_project_be_Application.Service.GoogleMeetService;
@@ -124,6 +125,7 @@ builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IPollOptionVoteRepository, PollOptionVoteRepository>();
 builder.Services.AddScoped<IUserAuthRepository, UserAuthRepository>();
 builder.Services.AddScoped<IReportUserRepository, ReportUserRepository>();
+builder.Services.AddScoped<IEventRepository, EventRepository>();
 builder.Services.AddScoped<IPostFileRepository, PostFileRepository>();
 builder.Services.AddScoped<ICourseRepository, CourseRepository>();
 builder.Services.AddScoped<IModuleRepository, ModuleRepository>();
@@ -149,7 +151,7 @@ builder.Services.AddScoped<IBlobStorageService,BlobStorageService>();
 builder.Services.AddScoped<IOpenAIEmbeddingService, OpenAIEmbeddingService>();
 builder.Services.AddHttpClient<IOpenAIEmbeddingService, OpenAIEmbeddingService>();
 builder.Services.AddScoped<IGoogleMeetService, GoogleMeetService>();
-
+builder.Services.AddHostedService<PremiumExpirationService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddSingleton<ICloudinaryService,CloudinaryService>();
 builder.Services.Configure<CloudinarySettings>(
@@ -208,7 +210,8 @@ builder.Services.AddCors(options =>
         policy.WithOrigins(
             "https://localhost:7191",
             "https://phronesis-c2dzfzakfwe9eyf0.southeastasia-01.azurewebsites.net",
-            "https://phronesis-fe-esd4fvddb4d8cnc4.eastasia-01.azurewebsites.net"
+            "https://phronesis-fe-esd4fvddb4d8cnc4.eastasia-01.azurewebsites.net",
+            "https://finalprojectbestorage.blob.core.windows.net/phronesisfiles"
         )
               .AllowAnyHeader()
               .AllowAnyMethod().

@@ -14,6 +14,7 @@ namespace final_project_be_Infrastructure.DAO_Interface
         Task<List<UserCourse>> GetUserCoursesByUserId(Guid userId);
         Task UpdateCertificateLinkAsync(Guid userId, int courseId, string link);
         Task<UserCourse?> GetCompletedUserCourseAsync(Guid userId, int courseId);
+        Task<IEnumerable<UserCourse>> GetCertificatesByUserIdAsync(Guid userId);
         Task AddUserCourseAsync(UserCourse userCourse);
         Task UpdateUserCourse(UserCourse userCourse);
     }

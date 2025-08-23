@@ -2,6 +2,7 @@
 using final_project_be_Application.Repository;
 using final_project_be_Domain.DTOs.Module;
 using Humanizer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -10,6 +11,7 @@ namespace final_project_be.Controllers
 {
 	[Route("api/[controller]")]
 	[ApiController]
+	[Authorize]
 	public class ModuleController : ControllerBase
 	{
 		private readonly IModuleRepository _moduleRepository;
@@ -34,6 +36,7 @@ namespace final_project_be.Controllers
 		}
 
 		// POST api/<ModuleController>
+		[Authorize(Roles ="Mentor")]
 		[HttpPost]
 		public async Task<IActionResult> Post([FromBody] ModuleDto dto)
 		{
@@ -50,8 +53,9 @@ namespace final_project_be.Controllers
 			}
 		}
 
-		// PUT api/<ModuleController>/5
-		[HttpPut]
+        // PUT api/<ModuleController>/5
+        [Authorize(Roles = "Mentor")]
+        [HttpPut]
 		public async Task<IActionResult> Put([FromBody] UpdateModuleDto dto)
 		{
 			try

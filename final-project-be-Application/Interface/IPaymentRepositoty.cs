@@ -12,8 +12,10 @@ namespace final_project_be_Application.Interface
 {
     public interface IPaymentRepositoty 
     {
-       public Task<BuyCourseResult> BuyCourseAsync(Guid userId, int courseId, int couponId);
+        public Task<bool> BuyPremiumAsync(Guid userId, int planId);
+        public Task<BuyCourseResult> BuyCourseAsync(Guid userId, int courseId, int couponId);
         public PageResult<GetPaymentDto> GetAll(int page, int pageSize, Guid? UserId, string? sortOption, List<ServiceTypeEnum>? ServiceType);
         public Task<List<MothlyStatPaymentDto>> GetStatisticsByMonth(int? year);
+        public Task<IEnumerable<MembershipPlan>> GetAllMembershipplanAsync();
     }
 }
