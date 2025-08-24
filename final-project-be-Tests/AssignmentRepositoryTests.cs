@@ -1,170 +1,265 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using final_project_be_Application.Interface;
 using final_project_be_Application.Repository;
+using final_project_be_Application.Service.GoogleMeetService;
 using final_project_be_Application.Ultils;
 using final_project_be_Domain.DTOs.Assignment;
 using final_project_be_Domain.Models;
 using final_project_be_Infrastructure.DAO_Interface;
-using final_project_be_Infrastructure.Data;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace final_project_be_Tests
 {
     public class AssignmentRepositoryTests
     {
-        private readonly IMapper _mapper;
-        private readonly Mock<IGoogleMeetService> _googleMeetServiceMock = new();
+        private readonly Mock<IAssignmentDAO> _assignmentDaoMock;
+        private readonly Mock<IMapper> _mapperMock;
+        private readonly Mock<IGoogleMeetService> _googleMeetServiceMock;
+        private readonly Mock<ILogger<AssignmentRepository>> _loggerMock;
+        private readonly IOptions<ClientSettings> _clientSettings;
+        private readonly AssignmentRepository _repository;
 
         public AssignmentRepositoryTests()
         {
-            var config = new MapperConfiguration(cfg =>
-            {
-                cfg.CreateMap<AssignmentDto, Assignment>();
-                cfg.CreateMap<UpdateAssignmentDto, Assignment>();
-                cfg.CreateMap<Assignment, AssignmentResponseDto>();
-            });
+            _assignmentDaoMock = new Mock<IAssignmentDAO>();
+            _mapperMock = new Mock<IMapper>();
+            _googleMeetServiceMock = new Mock<IGoogleMeetService>();
+            _loggerMock = new Mock<ILogger<AssignmentRepository>>();
+            _clientSettings = Options.Create(new ClientSettings { BaseUrl = "http://localhost" });
 
-            _mapper = config.CreateMapper();
-        }
-
-        private AssignmentRepository CreateRepository(Mock<IAssignmentDAO> mockDao, List<Assignment> assignments)
-        {
-            var logger = Mock.Of<ILogger<AssignmentRepository>>();
-            var options = Options.Create(new ClientSettings());
-
-            mockDao.Setup(d => d.GetAll()).Returns(assignments.AsQueryable());
-
-            return new AssignmentRepository(mockDao.Object, _mapper, _googleMeetServiceMock.Object, logger, options);
+            _repository = new AssignmentRepository(
+                _assignmentDaoMock.Object,
+                _mapperMock.Object,
+                _googleMeetServiceMock.Object,
+                _loggerMock.Object,
+                _clientSettings
+            );
         }
 
         [Fact]
-        public async Task CreateAssignment_ShouldAddAssignment()
-        {
-            var mockDao = new Mock<IAssignmentDAO>();
-            var assignments = new List<Assignment>();
-
-            mockDao.Setup(d => d.AddAsync(It.IsAny<Assignment>()))
-                   .Callback<Assignment>(a => { a.AssignmentId = 1; assignments.Add(a); })
-                   .Returns(Task.CompletedTask);
-
-            var repo = CreateRepository(mockDao, assignments);
-
-            var dto = new AssignmentDto
-            {
-                LessonId = 1,
-                Content = "New Assignment",
-                MeetLink = "http://meet.link"
-            };
-
-            var result = await repo.CreateAssignment(dto);
-
-            Assert.NotNull(result);
-            Assert.Equal("New Assignment", result.Content);
-            Assert.Equal("http://meet.link", result.MeetLink);
-        }
-
-        [Fact]
-        public async Task DeleteAssignment_ShouldRemoveAssignment()
+        public async Task CreateAssignment_ShouldCreateAssignmentWithMeetLink_WhenNoLinkProvided()
         {
             // Arrange
-            var mockDao = new Mock<IAssignmentDAO>();
-            var logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger<AssignmentRepository>();
-            var mockOptions = Options.Create(new ClientSettings());
-
-            var assignmentId = 1;
-            var deleted = false;
-
-            mockDao.Setup(d => d.BeginTransactionAsync()).Returns(Task.CompletedTask);
-            mockDao.Setup(d => d.DeleteAsync(assignmentId))
-                   .Callback(() => deleted = true)
-                   .Returns(Task.CompletedTask);
-            mockDao.Setup(d => d.CommitTransactionAsync()).Returns(Task.CompletedTask);
-            mockDao.Setup(d => d.RollbackTransactionAsync()).Returns(Task.CompletedTask);
-
-            var repo = new AssignmentRepository(mockDao.Object, _mapper, _googleMeetServiceMock.Object, logger, mockOptions);
+            var dto = new AssignmentDto { LessonId = 1, Content = "Test", MeetLink = null };
+            var assignment = new Assignment { LessonId = 1, Content = "Test", MeetLink = null };
+            _mapperMock.Setup(m => m.Map<Assignment>(dto)).Returns(assignment);
+            _googleMeetServiceMock.Setup(m => m.CreateGoogleMeetLinkAsync(It.IsAny<string>(), It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<string>()))
+                .ReturnsAsync("http://meet.link");
+            _assignmentDaoMock.Setup(m => m.AddAsync(It.IsAny<Assignment>())).Returns(Task.CompletedTask);
+            _assignmentDaoMock.Setup(m => m.BeginTransactionAsync()).Returns(Task.CompletedTask);
+            _assignmentDaoMock.Setup(m => m.CommitTransactionAsync()).Returns(Task.CompletedTask);
 
             // Act
-            var result = await repo.DeleteAssignment(assignmentId);
+            var result = await _repository.CreateAssignment(dto);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal("http://meet.link", result.MeetLink);
+            _assignmentDaoMock.Verify(m => m.AddAsync(It.IsAny<Assignment>()), Times.Once);
+            _assignmentDaoMock.Verify(m => m.CommitTransactionAsync(), Times.Once);
+        }
+
+        [Fact]
+        public async Task CreateAssignment_ShouldReturnNullAndRollback_WhenExceptionThrown()
+        {
+            // Arrange
+            var dto = new AssignmentDto { LessonId = 1, Content = "Test" };
+            _mapperMock.Setup(m => m.Map<Assignment>(dto)).Throws(new Exception("Mapping failed"));
+            _assignmentDaoMock.Setup(m => m.BeginTransactionAsync()).Returns(Task.CompletedTask);
+            _assignmentDaoMock.Setup(m => m.RollbackTransactionAsync()).Returns(Task.CompletedTask);
+
+            // Act
+            var result = await _repository.CreateAssignment(dto);
+
+            // Assert
+            Assert.Null(result);
+            _assignmentDaoMock.Verify(m => m.RollbackTransactionAsync(), Times.Once);
+        }
+
+        [Fact]
+        public async Task DeleteAssignment_ShouldReturnTrue_WhenDeleteSucceeds()
+        {
+            // Arrange
+            _assignmentDaoMock.Setup(m => m.BeginTransactionAsync()).Returns(Task.CompletedTask);
+            _assignmentDaoMock.Setup(m => m.DeleteAsync(It.IsAny<int>())).Returns(Task.CompletedTask);
+            _assignmentDaoMock.Setup(m => m.CommitTransactionAsync()).Returns(Task.CompletedTask);
+
+            // Act
+            var result = await _repository.DeleteAssignment(1);
 
             // Assert
             Assert.True(result);
-            Assert.True(deleted);
+            _assignmentDaoMock.Verify(m => m.DeleteAsync(1), Times.Once);
         }
 
         [Fact]
-        public async Task GetAllAssignmentByLessonId_ShouldReturnAssignments()
+        public async Task DeleteAssignment_ShouldReturnFalseAndRollback_WhenExceptionThrown()
         {
+            // Arrange
+            _assignmentDaoMock.Setup(m => m.BeginTransactionAsync()).Returns(Task.CompletedTask);
+            _assignmentDaoMock.Setup(m => m.DeleteAsync(It.IsAny<int>())).Throws(new Exception("Delete failed"));
+            _assignmentDaoMock.Setup(m => m.RollbackTransactionAsync()).Returns(Task.CompletedTask);
+
+            // Act
+            var result = await _repository.DeleteAssignment(1);
+
+            // Assert
+            Assert.False(result);
+            _assignmentDaoMock.Verify(m => m.RollbackTransactionAsync(), Times.Once);
+        }
+
+        [Fact]
+        public async Task GetAssignmentsBycreatorAsync_ShouldReturnMappedDtos()
+        {
+            // Arrange
+            var userId = Guid.NewGuid();
             var assignments = new List<Assignment>
-        {
-            new Assignment { AssignmentId = 1, LessonId = 1, Content = "A" },
-            new Assignment { AssignmentId = 2, LessonId = 1, Content = "B" },
-            new Assignment { AssignmentId = 3, LessonId = 2, Content = "C" }
-        };
-
-            var mockDao = new Mock<IAssignmentDAO>();
-            var repo = CreateRepository(mockDao, assignments);
-
-            var result = await repo.GetAllAssignmentByLessonId(1);
-
-            Assert.Equal(2, result.Count);
-            Assert.All(result, a => Assert.Equal(1, a.LessonId));
-        }
-
-        [Fact]
-        public async Task GetAssignment_ShouldReturnCorrectAssignment()
-        {
-            var assignment = new Assignment { AssignmentId = 1, LessonId = 1, Content = "Fetch Me" };
-            var mockDao = new Mock<IAssignmentDAO>();
-            mockDao.Setup(d => d.GetByIdAsync(1)).ReturnsAsync(assignment);
-
-            var repo = CreateRepository(mockDao, new List<Assignment>());
-
-            var result = await repo.GetAssignment(1);
-
-            Assert.NotNull(result);
-            Assert.Equal("Fetch Me", result.Content);
-        }
-
-        [Fact]
-        public async Task UpdateAssignment_ShouldUpdateFields()
-        {
-            var assignment = new Assignment { AssignmentId = 1, LessonId = 1, Content = "Old", MeetLink = null };
-
-            var mockDao = new Mock<IAssignmentDAO>();
-            mockDao.Setup(d => d.GetByIdAsync(1)).ReturnsAsync(assignment);
-            mockDao.Setup(d => d.UpdateAsync(It.IsAny<Assignment>()))
-                   .Callback<Assignment>(a =>
-                   {
-                       assignment.Content = a.Content;
-                       assignment.MeetLink = a.MeetLink;
-                   })
-                   .Returns(Task.CompletedTask);
-
-            var repo = CreateRepository(mockDao, new List<Assignment>());
-
-            var dto = new UpdateAssignmentDto
             {
-                AssignmentId = 1,
-                LessonId = 1,
-                Content = "Updated",
-                MeetLink = "http://new.meet"
+                new Assignment { AssignmentId = 1, LessonId = 2, Content = "A", MeetLink = "link", Lesson = new Lesson { Title = "T" } }
             };
+            _assignmentDaoMock.Setup(m => m.GetAssignmentsByUserIdAsync(userId)).ReturnsAsync(assignments);
 
-            var result = await repo.UpdateAssignment(dto);
+            // Act
+            var result = await _repository.GetAssignmentsBycreatorAsync(userId);
 
+            // Assert
+            Assert.Single(result);
+            Assert.Equal(1, result[0].AssignmentId);
+            Assert.Equal("T", result[0].Title);
+        }
+
+        [Fact]
+        public async Task GetAllAssignmentByLessonId_ShouldReturnDtos_WhenSuccess()
+        {
+            // Arrange
+            var lessonId = 1;
+            var assignments = new List<Assignment>
+            {
+                new Assignment { AssignmentId = 1, LessonId = lessonId, Content = "A", MeetLink = "link", CreateAt = DateTime.Now }
+            };
+            var dtos = new List<AssignmentResponseDto>
+            {
+                new AssignmentResponseDto { AssignmentId = 1, LessonId = lessonId, Content = "A", MeetLink = "link", CreateAt = DateTime.Now }
+            };
+            _assignmentDaoMock.Setup(m => m.BeginTransactionAsync()).Returns(Task.CompletedTask);
+            _assignmentDaoMock.Setup(m => m.GetAll()).Returns(assignments.AsQueryable());
+            _mapperMock.Setup(m => m.Map<List<AssignmentResponseDto>>(It.IsAny<List<Assignment>>())).Returns(dtos);
+            _assignmentDaoMock.Setup(m => m.CommitTransactionAsync()).Returns(Task.CompletedTask);
+
+            // Act
+            var result = await _repository.GetAllAssignmentByLessonId(lessonId);
+
+            // Assert
+            Assert.Single(result);
+            Assert.Equal(1, result.First().AssignmentId);
+        }
+
+        [Fact]
+        public async Task GetAllAssignmentByLessonId_ShouldReturnEmptyList_WhenExceptionThrown()
+        {
+            // Arrange
+            _assignmentDaoMock.Setup(m => m.BeginTransactionAsync()).Throws(new Exception("DB error"));
+            _assignmentDaoMock.Setup(m => m.RollbackTransactionAsync()).Returns(Task.CompletedTask);
+
+            // Act
+            var result = await _repository.GetAllAssignmentByLessonId(1);
+
+            // Assert
+            Assert.Empty(result);
+            _assignmentDaoMock.Verify(m => m.RollbackTransactionAsync(), Times.Once);
+        }
+
+        [Fact]
+        public async Task GetAssignment_ShouldReturnAssignment_WhenFound()
+        {
+            // Arrange
+            var assignment = new Assignment { AssignmentId = 1 };
+            _assignmentDaoMock.Setup(m => m.BeginTransactionAsync()).Returns(Task.CompletedTask);
+            _assignmentDaoMock.Setup(m => m.GetByIdAsync(1)).ReturnsAsync(assignment);
+            _assignmentDaoMock.Setup(m => m.CommitTransactionAsync()).Returns(Task.CompletedTask);
+
+            // Act
+            var result = await _repository.GetAssignment(1);
+
+            // Assert
             Assert.NotNull(result);
-            Assert.Equal("Updated", result.Content);
-            Assert.Equal("http://new.meet", result.MeetLink);
+            Assert.Equal(1, result.AssignmentId);
+        }
+
+        [Fact]
+        public async Task GetAssignment_ShouldReturnNullAndRollback_WhenExceptionThrown()
+        {
+            // Arrange
+            _assignmentDaoMock.Setup(m => m.BeginTransactionAsync()).Throws(new Exception("DB error"));
+            _assignmentDaoMock.Setup(m => m.RollbackTransactionAsync()).Returns(Task.CompletedTask);
+
+            // Act
+            var result = await _repository.GetAssignment(1);
+
+            // Assert
+            Assert.Null(result);
+            _assignmentDaoMock.Verify(m => m.RollbackTransactionAsync(), Times.Once);
+        }
+
+        [Fact]
+        public async Task UpdateAssignment_ShouldUpdateAndReturnAssignment_WhenFound()
+        {
+            // Arrange
+            var dto = new UpdateAssignmentDto { AssignmentId = 1, LessonId = 2, Content = "Updated" };
+            var assignment = new Assignment { AssignmentId = 1, LessonId = 2, Content = "Old" };
+            _assignmentDaoMock.Setup(m => m.BeginTransactionAsync()).Returns(Task.CompletedTask);
+            _assignmentDaoMock.Setup(m => m.GetByIdAsync(dto.AssignmentId)).ReturnsAsync(assignment);
+            _mapperMock.Setup(m => m.Map(dto, assignment)).Verifiable();
+            _assignmentDaoMock.Setup(m => m.UpdateAsync(assignment)).Returns(Task.CompletedTask);
+            _assignmentDaoMock.Setup(m => m.CommitTransactionAsync()).Returns(Task.CompletedTask);
+
+            // Act
+            var result = await _repository.UpdateAssignment(dto);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(1, result.AssignmentId);
+            _assignmentDaoMock.Verify(m => m.UpdateAsync(assignment), Times.Once);
+        }
+
+        [Fact]
+        public async Task UpdateAssignment_ShouldReturnNullAndRollback_WhenAssignmentNotFound()
+        {
+            // Arrange
+            var dto = new UpdateAssignmentDto { AssignmentId = 1 };
+            _assignmentDaoMock.Setup(m => m.BeginTransactionAsync()).Returns(Task.CompletedTask);
+            _assignmentDaoMock.Setup(m => m.GetByIdAsync(dto.AssignmentId)).ReturnsAsync((Assignment)null);
+            _assignmentDaoMock.Setup(m => m.RollbackTransactionAsync()).Returns(Task.CompletedTask);
+
+            // Act
+            var result = await _repository.UpdateAssignment(dto);
+
+            // Assert
+            Assert.Null(result);
+            _assignmentDaoMock.Verify(m => m.RollbackTransactionAsync(), Times.Once);
+        }
+
+        [Fact]
+        public async Task UpdateAssignment_ShouldReturnNullAndRollback_WhenExceptionThrown()
+        {
+            // Arrange
+            var dto = new UpdateAssignmentDto { AssignmentId = 1 };
+            _assignmentDaoMock.Setup(m => m.BeginTransactionAsync()).Throws(new Exception("DB error"));
+            _assignmentDaoMock.Setup(m => m.RollbackTransactionAsync()).Returns(Task.CompletedTask);
+
+            // Act
+            var result = await _repository.UpdateAssignment(dto);
+
+            // Assert
+            Assert.Null(result);
+            _assignmentDaoMock.Verify(m => m.RollbackTransactionAsync(), Times.Once);
         }
     }
-
 }

@@ -1,150 +1,213 @@
-﻿using AutoMapper;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using AutoMapper;
 using final_project_be_Application.Repository;
 using final_project_be_Domain.DTOs.Comment;
 using final_project_be_Domain.Models;
 using final_project_be_Infrastructure.DAO_Interface;
-using final_project_be_Infrastructure.Data;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Xunit;
 
 namespace final_project_be_Tests
 {
     public class CommentRepositoryTests
     {
-        private readonly IMapper _mapper;
+        private readonly Mock<ICommentDAO> _commentDaoMock;
+        private readonly Mock<IMapper> _mapperMock;
+        private readonly Mock<ILogger<CommentRepository>> _loggerMock;
+        private readonly CommentRepository _repository;
 
         public CommentRepositoryTests()
         {
-            var config = new MapperConfiguration(cfg =>
-            {
-                cfg.CreateMap<CommentDto, Comment>();
-            });
-            _mapper = config.CreateMapper();
-        }
-
-        private CommentRepository CreateRepository(Mock<ICommentDAO> mockDao)
-        {
-            var logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger<CommentRepository>();
-            return new CommentRepository(mockDao.Object, _mapper, logger);
+            _commentDaoMock = new Mock<ICommentDAO>();
+            _mapperMock = new Mock<IMapper>();
+            _loggerMock = new Mock<ILogger<CommentRepository>>();
+            _repository = new CommentRepository(
+                _commentDaoMock.Object,
+                _mapperMock.Object,
+                _loggerMock.Object
+            );
         }
 
         [Fact]
-        public async Task CreateComment_ShouldReturnComment()
+        public async Task CreateComment_ShouldReturnComment_WhenSuccess()
         {
-            // Arrange
-            var mockDao = new Mock<ICommentDAO>();
-            var dto = new CommentDto { Content = "Test", PostId = 1 };
-            var repo = CreateRepository(mockDao);
+            var dto = new CommentDto { Content = "Test", PostId = 1, UserId = Guid.NewGuid() };
+            var comment = new Comment { CommentId = 1, Content = "Test", PostId = 1, UserId = dto.UserId };
+            _mapperMock.Setup(m => m.Map<Comment>(dto)).Returns(comment);
+            _commentDaoMock.Setup(d => d.BeginTransactionAsync()).Returns(Task.CompletedTask);
+            _commentDaoMock.Setup(d => d.AddAsync(comment)).Returns(Task.CompletedTask);
+            _commentDaoMock.Setup(d => d.CommitTransactionAsync()).Returns(Task.CompletedTask);
 
-            mockDao.Setup(d => d.BeginTransactionAsync()).Returns(Task.CompletedTask);
-            mockDao.Setup(d => d.AddAsync(It.IsAny<Comment>())).Returns(Task.CompletedTask);
-            mockDao.Setup(d => d.CommitTransactionAsync()).Returns(Task.CompletedTask);
+            var result = await _repository.CreateComment(dto);
 
-            // Act
-            var result = await repo.CreateComment(dto);
-
-            // Assert
             Assert.NotNull(result);
             Assert.Equal("Test", result.Content);
-            Assert.Equal(1, result.PostId);
+            _commentDaoMock.Verify(d => d.AddAsync(comment), Times.Once);
+            _commentDaoMock.Verify(d => d.CommitTransactionAsync(), Times.Once);
         }
 
         [Fact]
-        public async Task DeleteComment_ShouldReturnTrue()
+        public async Task CreateComment_ShouldReturnNullAndRollback_WhenExceptionThrown()
         {
-            var mockDao = new Mock<ICommentDAO>();
-            var repo = CreateRepository(mockDao);
+            var dto = new CommentDto { Content = "Test", PostId = 1, UserId = Guid.NewGuid() };
+            _mapperMock.Setup(m => m.Map<Comment>(dto)).Throws(new Exception("Mapping failed"));
+            _commentDaoMock.Setup(d => d.BeginTransactionAsync()).Returns(Task.CompletedTask);
+            _commentDaoMock.Setup(d => d.RollbackTransactionAsync()).Returns(Task.CompletedTask);
 
-            mockDao.Setup(d => d.BeginTransactionAsync()).Returns(Task.CompletedTask);
-            mockDao.Setup(d => d.DeleteAsync(1)).Returns(Task.CompletedTask);
-            mockDao.Setup(d => d.CommitTransactionAsync()).Returns(Task.CompletedTask);
+            var result = await _repository.CreateComment(dto);
 
-            var result = await repo.DeleteComment(1);
+            Assert.Null(result);
+            _commentDaoMock.Verify(d => d.RollbackTransactionAsync(), Times.Once);
+        }
+
+        [Fact]
+        public async Task DeleteComment_ShouldReturnTrue_WhenSuccess()
+        {
+            _commentDaoMock.Setup(d => d.BeginTransactionAsync()).Returns(Task.CompletedTask);
+            _commentDaoMock.Setup(d => d.DeleteAsync(1)).Returns(Task.CompletedTask);
+            _commentDaoMock.Setup(d => d.CommitTransactionAsync()).Returns(Task.CompletedTask);
+
+            var result = await _repository.DeleteComment(1);
 
             Assert.True(result);
+            _commentDaoMock.Verify(d => d.DeleteAsync(1), Times.Once);
         }
 
         [Fact]
-        public async Task GetComment_ShouldReturnCorrectComment()
+        public async Task DeleteComment_ShouldReturnFalseAndRollback_WhenExceptionThrown()
         {
-            var mockDao = new Mock<ICommentDAO>();
-            var comment = new Comment { CommentId = 1, Content = "Fetched", PostId = 2 };
-            var repo = CreateRepository(mockDao);
+            _commentDaoMock.Setup(d => d.BeginTransactionAsync()).Returns(Task.CompletedTask);
+            _commentDaoMock.Setup(d => d.DeleteAsync(It.IsAny<int>())).Throws(new Exception("Delete failed"));
+            _commentDaoMock.Setup(d => d.RollbackTransactionAsync()).Returns(Task.CompletedTask);
 
-            mockDao.Setup(d => d.BeginTransactionAsync()).Returns(Task.CompletedTask);
-            mockDao.Setup(d => d.GetByIdAsync(1)).ReturnsAsync(comment);
-            mockDao.Setup(d => d.CommitTransactionAsync()).Returns(Task.CompletedTask);
+            var result = await _repository.DeleteComment(1);
 
-            var result = await repo.GetComment(1);
+            Assert.False(result);
+            _commentDaoMock.Verify(d => d.RollbackTransactionAsync(), Times.Once);
+        }
+
+        [Fact]
+        public void GetAllCommentsByPostId_ShouldReturnPagedResult()
+        {
+            var postId = 1;
+            var data = new List<Comment>
+            {
+                new Comment { CommentId = 1, PostId = postId, Content = "A" },
+                new Comment { CommentId = 2, PostId = postId, Content = "B" },
+                new Comment { CommentId = 3, PostId = postId, Content = "C" },
+            }.AsQueryable();
+
+            _commentDaoMock.Setup(d => d.GetAll()).Returns(data);
+
+            var result = _repository.GetAllCommentsByPostId(1, 3, postId);
+
+            Assert.Equal(3, result.TotalCount);
+            Assert.Equal(1, result.CurrentPage);
+            Assert.Equal(3, result.PageSize);
+            Assert.Equal(3, result.Items.Count());
+        }
+
+        [Fact]
+        public void GetAllCommentsByPostId_ShouldReturnEmptyResult_WhenExceptionThrown()
+        {
+            _commentDaoMock.Setup(d => d.GetAll()).Throws(new Exception("DB error"));
+
+            var result = _repository.GetAllCommentsByPostId(1, 3, 1);
+
+            Assert.Empty(result.Items);
+            Assert.Equal(0, result.TotalCount);
+        }
+
+        [Fact]
+        public async Task GetComment_ShouldReturnComment_WhenFound()
+        {
+            var comment = new Comment { CommentId = 1, Content = "Test" };
+            _commentDaoMock.Setup(d => d.BeginTransactionAsync()).Returns(Task.CompletedTask);
+            _commentDaoMock.Setup(d => d.GetByIdAsync(1)).ReturnsAsync(comment);
+            _commentDaoMock.Setup(d => d.CommitTransactionAsync()).Returns(Task.CompletedTask);
+
+            var result = await _repository.GetComment(1);
 
             Assert.NotNull(result);
-            Assert.Equal("Fetched", result.Content);
-            Assert.Equal(2, result.PostId);
+            Assert.Equal("Test", result.Content);
         }
 
         [Fact]
-        public async Task UpdateComment_ShouldUpdateFields()
+        public async Task GetComment_ShouldReturnNullAndRollback_WhenExceptionThrown()
         {
-            var mockDao = new Mock<ICommentDAO>();
-            var dto = new CommentDto { CommentId = 1, Content = "Updated", PostId = 5 };
-            var repo = CreateRepository(mockDao);
+            _commentDaoMock.Setup(d => d.BeginTransactionAsync()).Throws(new Exception("DB error"));
+            _commentDaoMock.Setup(d => d.RollbackTransactionAsync()).Returns(Task.CompletedTask);
 
-            mockDao.Setup(d => d.BeginTransactionAsync()).Returns(Task.CompletedTask);
-            mockDao.Setup(d => d.UpdateAsync(It.IsAny<Comment>())).Returns(Task.CompletedTask);
-            mockDao.Setup(d => d.CommitTransactionAsync()).Returns(Task.CompletedTask);
+            var result = await _repository.GetComment(1);
 
-            var result = await repo.UpdateComment(dto);
+            Assert.Null(result);
+            _commentDaoMock.Verify(d => d.RollbackTransactionAsync(), Times.Once);
+        }
+
+        [Fact]
+        public async Task UpdateComment_ShouldReturnUpdatedComment_WhenSuccess()
+        {
+            var dto = new CommentDto { CommentId = 1, Content = "Updated", PostId = 1, UserId = Guid.NewGuid() };
+            var comment = new Comment { CommentId = 1, Content = "Updated", PostId = 1, UserId = dto.UserId };
+            _mapperMock.Setup(m => m.Map<Comment>(dto)).Returns(comment);
+            _commentDaoMock.Setup(d => d.BeginTransactionAsync()).Returns(Task.CompletedTask);
+            _commentDaoMock.Setup(d => d.UpdateAsync(comment)).Returns(Task.CompletedTask);
+            _commentDaoMock.Setup(d => d.CommitTransactionAsync()).Returns(Task.CompletedTask);
+
+            var result = await _repository.UpdateComment(dto);
 
             Assert.NotNull(result);
             Assert.Equal("Updated", result.Content);
-            Assert.Equal(5, result.PostId);
+            _commentDaoMock.Verify(d => d.UpdateAsync(comment), Times.Once);
+        }
+
+        [Fact]
+        public async Task UpdateComment_ShouldReturnNullAndRollback_WhenExceptionThrown()
+        {
+            var dto = new CommentDto { CommentId = 1, Content = "Updated", PostId = 1, UserId = Guid.NewGuid() };
+            _mapperMock.Setup(m => m.Map<Comment>(dto)).Throws(new Exception("Mapping failed"));
+            _commentDaoMock.Setup(d => d.BeginTransactionAsync()).Returns(Task.CompletedTask);
+            _commentDaoMock.Setup(d => d.RollbackTransactionAsync()).Returns(Task.CompletedTask);
+
+            var result = await _repository.UpdateComment(dto);
+
+            Assert.Null(result);
+            _commentDaoMock.Verify(d => d.RollbackTransactionAsync(), Times.Once);
         }
 
         [Fact]
         public void GetAllComments_ShouldReturnPagedResult()
         {
-            var mockDao = new Mock<ICommentDAO>();
             var data = new List<Comment>
-        {
-            new Comment { CommentId = 1, PostId = 1 },
-            new Comment { CommentId = 2, PostId = 1 },
-            new Comment { CommentId = 3, PostId = 2 },
-        }.AsQueryable();
+            {
+                new Comment { CommentId = 1, Content = "A" },
+                new Comment { CommentId = 2, Content = "B" },
+                new Comment { CommentId = 3, Content = "C" },
+            }.AsQueryable();
 
-            mockDao.Setup(d => d.GetAll()).Returns(data);
+            _commentDaoMock.Setup(d => d.GetAll()).Returns(data);
 
-            var repo = CreateRepository(mockDao);
-
-            var result = repo.GetAllComments(1, 2);
+            var result = _repository.GetAllComments(1, 3);
 
             Assert.Equal(3, result.TotalCount);
+            Assert.Equal(1, result.CurrentPage);
+            Assert.Equal(3, result.PageSize);
+            Assert.Equal(3, result.Items.Count());
         }
 
         [Fact]
-        public void GetAllCommentsByPostId_ShouldReturnCorrectComments()
+        public void GetAllComments_ShouldReturnEmptyResult_WhenExceptionThrown()
         {
-            var mockDao = new Mock<ICommentDAO>();
-            var data = new List<Comment>
-        {
-            new Comment { CommentId = 1, PostId = 1 },
-            new Comment { CommentId = 2, PostId = 1 },
-            new Comment { CommentId = 3, PostId = 2 },
-        }.AsQueryable();
+            _commentDaoMock.Setup(d => d.GetAll()).Throws(new Exception("DB error"));
 
-            mockDao.Setup(d => d.GetAll()).Returns(data);
+            var result = _repository.GetAllComments(1, 3);
 
-            var repo = CreateRepository(mockDao);
-
-            var result = repo.GetAllCommentsByPostId(1, 10, 1);
-
-            Assert.Equal(2, result.TotalCount);
-            Assert.All(result.Items, c => Assert.Equal(1, c.PostId));
+            Assert.Empty(result.Items);
+            Assert.Equal(0, result.TotalCount);
         }
     }
 }

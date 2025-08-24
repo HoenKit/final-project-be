@@ -206,9 +206,9 @@ namespace final_project_be_Application.Repository
 
         public async Task<string> GetUserProfileSummaryAsync(Guid userId)
         {
-            var user = await _userDAO.GetAll()
+            var user = _userDAO.GetAll()
                 .Include(u => u.UserMetaData)
-                .FirstOrDefaultAsync(u => u.UserId == userId);
+                .FirstOrDefault(u => u.UserId == userId);
 
             if (user == null || user.UserMetaData == null)
                 return "Unknown user with no metadata";
