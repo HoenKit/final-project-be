@@ -90,7 +90,16 @@ namespace final_project_be_Application.Repository
 
                 if (dto.Avatar != null && dto.Avatar.Length > 0)
                 {
-                    // Lấy extension
+                    // Xóa avatar cũ nếu có
+                    var oldAvatarUrl = user.UserMetaData?.Avatar;
+                    if (!string.IsNullOrEmpty(oldAvatarUrl))
+                    {
+                        // Lấy tên file từ URL
+                        var oldFileName = Path.GetFileName(new Uri(oldAvatarUrl).LocalPath);
+                        await _blobStorageService.DeleteFileIfExistsAsync(oldFileName);
+                    }
+
+                    // Lấy extension và tạo tên file mới
                     var fileExtension = Path.GetExtension(dto.Avatar.FileName);
                     var uniqueFileName = Guid.NewGuid().ToString() + fileExtension;
 

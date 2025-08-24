@@ -19,6 +19,10 @@ namespace final_project_be_Infrastructure.DAO
 
         public async Task<List<Schedule>> GetSchedulesByMentorIdAsync(int mentorId)
             => await _context.Schedules
+                             .Include(c => c.Courses)
+                                   .ThenInclude(m => m.Modules)
+                                    .ThenInclude(l=>l.Lessons)
+                                    .ThenInclude(a=>a.Assignments)
                              .Where(s => s.MentorId == mentorId)
                              .ToListAsync();
 

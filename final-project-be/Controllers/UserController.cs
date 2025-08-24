@@ -32,6 +32,7 @@ namespace final_project_be.Controllers
         }
 
 
+
         [Authorize]
         [HttpPut("update-avatar")]
         public async Task<IActionResult> UpdateAvatar(Guid userId, [FromForm] UpdateAvatarDto dto)

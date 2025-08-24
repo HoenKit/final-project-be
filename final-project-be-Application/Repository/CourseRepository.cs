@@ -1,21 +1,22 @@
 ﻿using AutoMapper;
-using final_project_be_Infrastructure.DAO;
-using final_project_be_Domain.Models;
-using final_project_be_Domain.DTOs;
-using final_project_be_Domain.DTOs.Courses;
-using final_project_be_Domain.DTOs.Post;
-using final_project_be_Application.Interface;
-using Microsoft.Extensions.Logging;
-using final_project_be_Application.Ultils;
-using Microsoft.EntityFrameworkCore;
-using final_project_be_Domain.DTOs.Comment;
-using final_project_be_Domain.DTOs.Mentor;
 using Azure;
-using DocumentFormat.OpenXml.InkML;
-using Newtonsoft.Json;
-using final_project_be_Infrastructure.DAO_Interface;
-using Polly;
 using DocumentFormat.OpenXml.Bibliography;
+using DocumentFormat.OpenXml.InkML;
+using final_project_be_Application.Interface;
+using final_project_be_Application.Ultils;
+using final_project_be_Domain.DTOs;
+using final_project_be_Domain.DTOs.Assignment;
+using final_project_be_Domain.DTOs.Comment;
+using final_project_be_Domain.DTOs.Courses;
+using final_project_be_Domain.DTOs.Mentor;
+using final_project_be_Domain.DTOs.Post;
+using final_project_be_Domain.Models;
+using final_project_be_Infrastructure.DAO;
+using final_project_be_Infrastructure.DAO_Interface;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using Polly;
 
 namespace final_project_be_Application.Repository
 {
@@ -116,6 +117,9 @@ namespace final_project_be_Application.Repository
                             .ThenInclude(c => c.UserMetaData)
                     .Include(c => c.Category)
                     .Include(c => c.Reviews.Where(r => !r.IsDeleted))
+                    .Include(c=>c.Modules)
+                        .ThenInclude(l=>l.Lessons)
+                            .ThenInclude(a=>a.Assignments)
                     .Where(p => !p.IsDeleted && (statuses == null || statuses.Count == 0 || statuses.Select(s => s.ToString()).Contains(p.Status)));
 
 
@@ -189,7 +193,19 @@ namespace final_project_be_Application.Repository
                     {
                         FirstName = p.Mentor.User.UserMetaData.FirstName,
                         LastName = p.Mentor.User.UserMetaData.LastName
-                    }
+                    },
+                    Assignment = p.Modules?
+                                .SelectMany(m => m.Lessons ?? new List<Lesson>())
+                                .SelectMany(l => l.Assignments ?? new List<Assignment>())
+                                .OrderByDescending(a => !string.IsNullOrEmpty(a.MeetLink)) 
+                                .ThenByDescending(a => a.CreateAt)
+                                .Select(a => new AssignmentDto
+                                {
+                                    AssignmentId = a.AssignmentId,
+                                    Content = a.Content,
+                                    MeetLink = a.MeetLink
+                                })
+                                .FirstOrDefault()
                 }).ToList();
 
                 _logger.LogInformation("Get filtered courses success");
