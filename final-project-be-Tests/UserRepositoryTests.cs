@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using final_project_be_Application.Interface;
 using final_project_be_Application.Repository;
 using final_project_be_Domain.DTOs.Users;
 using final_project_be_Domain.Models;
@@ -20,13 +21,18 @@ namespace final_project_be_Tests
         private readonly Mock<IMapper> _mapperMock = new();
         private readonly Mock<ILogger<UserRepository>> _loggerMock = new();
         private readonly UserRepository _repository;
+        private readonly Mock<IBlobStorageService> _blobStorageMock = new();
+        private readonly Mock<IUserCourseDAO> _userCourseDaoMock = new();
 
         public UserRepositoryTests()
         {
             _repository = new UserRepository(
                 _userDaoMock.Object,
                 _mapperMock.Object,
-                _loggerMock.Object
+                _loggerMock.Object,
+                _userCourseDaoMock.Object,
+                _blobStorageMock.Object
+
             );
         }
 

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -160,27 +160,48 @@ namespace final_project_be_Tests
         }
 
         [Fact]
-        public async Task UploadCertificateAndSaveLinkAsync_ShouldReturnFalse_WhenUserCourseNotFound()
+        public async Task UploadCertificateAndSaveLinkAsync_ShouldReturnNull_WhenUserCourseNotFound()
         {
             var dto = new CertificateUploadDto { UserId = Guid.NewGuid(), CourseId = 1, CertificateFile = Mock.Of<IFormFile>() };
             _userCourseDaoMock.Setup(d => d.GetCompletedUserCourseAsync(dto.UserId, dto.CourseId)).ReturnsAsync((UserCourse)null);
 
             var result = await _repository.UploadCertificateAndSaveLinkAsync(dto);
 
-            Assert.False(result);
+            Assert.Null(result);
         }
 
         [Fact]
-        public async Task UploadCertificateAndSaveLinkAsync_ShouldReturnTrue_WhenSuccess()
+        public async Task UploadCertificateAndSaveLinkAsync_ShouldReturnCertificateLink_WhenSuccess()
         {
-            var dto = new CertificateUploadDto { UserId = Guid.NewGuid(), CourseId = 1, CertificateFile = Mock.Of<IFormFile>(f => f.FileName == "cert.pdf" && f.OpenReadStream() == new MemoryStream(new byte[1])) };
-            _userCourseDaoMock.Setup(d => d.GetCompletedUserCourseAsync(dto.UserId, dto.CourseId)).ReturnsAsync(new UserCourse());
-            _blobStorageServiceMock.Setup(s => s.UploadFileAsync(It.IsAny<string>(), It.IsAny<Stream>())).Returns(Task.CompletedTask);
-            _userCourseDaoMock.Setup(d => d.UpdateCertificateLinkAsync(dto.UserId, dto.CourseId, It.IsAny<string>())).Returns(Task.CompletedTask);
+            // Arrange
+            var dto = new CertificateUploadDto
+            {
+                UserId = Guid.NewGuid(),
+                CourseId = 1,
+                CertificateFile = Mock.Of<IFormFile>(f =>
+                    f.FileName == "cert.pdf" &&
+                    f.OpenReadStream() == new MemoryStream(new byte[1]))
+            };
 
+            _userCourseDaoMock
+                .Setup(d => d.GetCompletedUserCourseAsync(dto.UserId, dto.CourseId))
+                .ReturnsAsync(new UserCourse());
+
+            _blobStorageServiceMock
+                .Setup(s => s.UploadFileAsync(It.IsAny<string>(), It.IsAny<Stream>()))
+                .Returns(Task.CompletedTask);
+
+            _userCourseDaoMock
+                .Setup(d => d.UpdateCertificateLinkAsync(dto.UserId, dto.CourseId, It.IsAny<string>()))
+                .Returns(Task.CompletedTask);
+
+            // Act
             var result = await _repository.UploadCertificateAndSaveLinkAsync(dto);
 
-            Assert.True(result);
+            // Assert
+            Assert.NotNull(result); // ✅ kết quả không null
+            Assert.Contains("https://finalprojectbestorage.blob.core.windows.net/phronesisfiles/", result); // ✅ đúng prefix
+
             _blobStorageServiceMock.Verify(s => s.UploadFileAsync(It.IsAny<string>(), It.IsAny<Stream>()), Times.Once);
             _userCourseDaoMock.Verify(d => d.UpdateCertificateLinkAsync(dto.UserId, dto.CourseId, It.IsAny<string>()), Times.Once);
         }

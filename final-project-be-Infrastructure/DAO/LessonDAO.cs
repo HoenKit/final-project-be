@@ -14,6 +14,12 @@ namespace final_project_be_Infrastructure.DAO
             _context = context;
         }
 
+        public Task<int> GetCourseIdByLessonIdAsync(int lessonId)=>
+            _context.Lessons
+                .Where(l => l.LessonId == lessonId)
+                .Select(l => l.Module.CourseId)
+                .FirstOrDefaultAsync();
+
         public async Task<int> CountLessonsInModule(int moduleId)
             => await _context.Lessons.CountAsync(l => l.ModuleId == moduleId);
 

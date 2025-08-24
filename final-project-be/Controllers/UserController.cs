@@ -31,6 +31,38 @@ namespace final_project_be.Controllers
             return Ok(updatedUser);
         }
 
+
+        [Authorize]
+        [HttpPut("update-avatar")]
+        public async Task<IActionResult> UpdateAvatar(Guid userId, [FromForm] UpdateAvatarDto dto)
+        {
+            try
+            {
+                if (dto.Avatar == null || dto.Avatar.Length == 0)
+                    return BadRequest("Avatar file is required.");
+
+                var avatarUrl = await _userRepository.UpdateAvatarAsync(userId, dto);
+
+                if (avatarUrl == null)
+                    return NotFound("User not found");
+
+                return Ok(new
+                {
+                    Message = "Avatar updated successfully",
+                    AvatarUrl = avatarUrl
+                });
+            }
+            catch (ArgumentException ex)
+            {
+                
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Internal server error.");
+            }
+        }
+
         [HttpGet("userCertificate")]
         public async Task<IActionResult> GetCertificatesByUser(Guid userId)
         {

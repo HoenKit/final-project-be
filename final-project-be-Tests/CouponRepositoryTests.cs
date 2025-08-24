@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -67,35 +67,55 @@ namespace final_project_be_Tests
         }
 
         [Fact]
-        public async Task CreateCourseCouponAsync_ShouldReturnTrue_WhenSuccess()
+        public async Task AddCourseCouponsAsync_ShouldAddNewCoupon_WhenNotExist()
         {
-            var courseCoupon = new CourseCoupon { CourseId = 1, CouponId = 2 };
-            var oldCoupons = new List<CourseCoupon>
+            // Arrange
+            var dto = new AddCouponDto
             {
-                new CourseCoupon { CourseId = 1, CouponId = 2 }
+                CouponId = 2,
+                ExpiredAt = DateTime.UtcNow.AddDays(10),
+                CourseIds = new List<int> { 1 }
             };
-            _courseCouponDaoMock.Setup(d => d.GetCourseCoupons(1, 2)).Returns(oldCoupons.AsQueryable());
-            _courseCouponDaoMock.Setup(d => d.RemoveCourseCouponsAsync(It.IsAny<IEnumerable<CourseCoupon>>())).Returns(Task.CompletedTask);
-            _courseCouponDaoMock.Setup(d => d.AddCourseCouponAsync(courseCoupon)).Returns(Task.CompletedTask);
-            _courseCouponDaoMock.Setup(d => d.SaveChangesAsync()).Returns(Task.CompletedTask);
 
-            var result = await _repository.CreateCourseCouponAsync(courseCoupon);
+            _courseCouponDaoMock
+                .Setup(d => d.GetCourseCoupons(1, 2))
+                .Returns(new List<CourseCoupon>().AsQueryable()); // không có coupon cũ
 
-            Assert.True(result);
-            _courseCouponDaoMock.Verify(d => d.RemoveCourseCouponsAsync(It.IsAny<IEnumerable<CourseCoupon>>()), Times.Once);
-            _courseCouponDaoMock.Verify(d => d.AddCourseCouponAsync(courseCoupon), Times.Once);
+            _courseCouponDaoMock
+                .Setup(d => d.AddCourseCouponAsync(It.IsAny<CourseCoupon>()))
+                .Returns(Task.CompletedTask);
+
+            _courseCouponDaoMock
+                .Setup(d => d.SaveChangesAsync())
+                .Returns(Task.CompletedTask);
+
+            // Act
+            await _repository.AddCourseCouponsAsync(dto);
+
+            // Assert
+            _courseCouponDaoMock.Verify(d => d.AddCourseCouponAsync(It.Is<CourseCoupon>(c => c.CourseId == 1 && c.CouponId == 2)), Times.Once);
+            _courseCouponDaoMock.Verify(d => d.UpdateAsync(It.IsAny<CourseCoupon>()), Times.Never);
             _courseCouponDaoMock.Verify(d => d.SaveChangesAsync(), Times.Once);
         }
 
         [Fact]
-        public async Task CreateCourseCouponAsync_ShouldReturnFalse_WhenExceptionThrown()
+        public async Task AddCourseCouponsAsync_ShouldThrowException_WhenDaoFails()
         {
-            var courseCoupon = new CourseCoupon { CourseId = 1, CouponId = 2 };
-            _courseCouponDaoMock.Setup(d => d.GetCourseCoupons(1, 2)).Throws(new Exception("DB error"));
+            // Arrange
+            var dto = new AddCouponDto
+            {
+                CouponId = 2,
+                ExpiredAt = DateTime.UtcNow.AddDays(5),
+                CourseIds = new List<int> { 1 }
+            };
 
-            var result = await _repository.CreateCourseCouponAsync(courseCoupon);
+            _courseCouponDaoMock
+                .Setup(d => d.GetCourseCoupons(1, 2))
+                .Throws(new Exception("DB error"));
 
-            Assert.False(result);
+            // Act & Assert
+            var ex = await Assert.ThrowsAsync<Exception>(() => _repository.AddCourseCouponsAsync(dto));
+            Assert.Equal("DB error", ex.Message);
         }
     }
 }

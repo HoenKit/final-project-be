@@ -4,6 +4,7 @@ using final_project_be_Application.Service.EmailService;
 using final_project_be_Application.Service.GoogleMeetService;
 using final_project_be_Application.Ultils;
 using final_project_be_Domain.DTOs.Assignment;
+using final_project_be_Domain.DTOs.Lesson;
 using final_project_be_Domain.Models;
 using final_project_be_Infrastructure.DAO;
 using final_project_be_Infrastructure.DAO_Interface;
@@ -27,23 +28,42 @@ namespace final_project_be_Application.Repository
 		private readonly IMapper _mapper;
 		private readonly ILogger<AssignmentRepository> _logger;
         private readonly ClientSettings _clientSettings;
+		private readonly ILessonDAO _lessonDAO;
         private readonly IGoogleMeetService _googleMeetService;
-        public AssignmentRepository(IAssignmentDAO assignmentDAO, IMapper mapper, IGoogleMeetService googleMeetService, ILogger<AssignmentRepository> logger, IOptions<ClientSettings> clientoptions) : base(assignmentDAO)
+        public AssignmentRepository(IAssignmentDAO assignmentDAO, IMapper mapper, IGoogleMeetService googleMeetService, ILogger<AssignmentRepository> logger, IOptions<ClientSettings> clientoptions,ILessonDAO lessonDAO) : base(assignmentDAO)
 		{
 			_assignmentDAO = assignmentDAO;
 			_mapper = mapper;
 			_clientSettings = clientoptions.Value;
             _logger = logger;
             _googleMeetService = googleMeetService;
+			_lessonDAO = lessonDAO;
         }
 
-        public async Task<Assignment> CreateAssignment(AssignmentDto dto)
+        public async Task<(Assignment assignment, string message)> CreateAssignment(AssignmentDto dto)
         {
             try
             {
                 await _assignmentDAO.BeginTransactionAsync();
 
                 var assignment = _mapper.Map<Assignment>(dto);
+
+
+                var courseId = await _lessonDAO.GetCourseIdByLessonIdAsync(dto.LessonId);
+                if (courseId == 0)
+                {
+                    await _assignmentDAO.RollbackTransactionAsync();
+                    _logger.LogWarning("Lesson not found or not belong to any course.");
+                    return (null, "Lesson not found or not belong to any course.");
+                }
+
+                bool hasAssignment = await _assignmentDAO.HasAssignmentByCourseIdAsync(courseId);
+                if (hasAssignment)
+                {
+                    await _assignmentDAO.RollbackTransactionAsync();
+                    _logger.LogWarning("Each course can only have one assignment.");
+                    return (null, "Each course can only have one assignment.");
+                }
 
                 // Tạo Google Meet link nếu không có link
                 if (string.IsNullOrEmpty(assignment.MeetLink))
@@ -69,14 +89,15 @@ namespace final_project_be_Application.Repository
 
                 await _assignmentDAO.AddAsync(assignment);
                 await _assignmentDAO.CommitTransactionAsync();
+
                 _logger.LogInformation("AddAsync Assignment success");
-                return assignment;
+                return (assignment, "Assignment created successfully");
             }
             catch (Exception ex)
             {
                 await _assignmentDAO.RollbackTransactionAsync();
                 _logger.LogError(ex, "Error when adding Assignment");
-                return null;
+                return (null, "Unexpected error when creating assignment");
             }
         }
 

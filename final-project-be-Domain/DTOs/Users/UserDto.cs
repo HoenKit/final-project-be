@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Http;
+using System.ComponentModel.DataAnnotations;
 
 namespace final_project_be_Domain.DTOs.Users
 {
@@ -10,7 +11,12 @@ namespace final_project_be_Domain.DTOs.Users
 		public string Password { get; set; }
 	}
 
-	public class UpdateUserMetadataDto
+    public class UpdateAvatarDto
+    {
+        public IFormFile? Avatar { get; set; }
+    }
+
+    public class UpdateUserMetadataDto
     {
         public string? Phone { get; set; }
         public string? FirstName { get; set; }

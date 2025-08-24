@@ -1,14 +1,16 @@
+using AutoMapper;
+using final_project_be_Application.Repository;
+using final_project_be_Application.Ultils;
+using final_project_be_Domain.DTOs.Notification;
+using final_project_be_Domain.Models;
+using final_project_be_Infrastructure.DAO_Interface;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Logging;
+using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AutoMapper;
-using final_project_be_Application.Repository;
-using final_project_be_Domain.DTOs.Notification;
-using final_project_be_Domain.Models;
-using final_project_be_Infrastructure.DAO_Interface;
-using Microsoft.Extensions.Logging;
-using Moq;
 using Xunit;
 
 namespace final_project_be_Tests
@@ -18,6 +20,7 @@ namespace final_project_be_Tests
         private readonly Mock<INotificationDAO> _daoMock = new();
         private readonly Mock<IMapper> _mapperMock = new();
         private readonly Mock<ILogger<NotificationRepository>> _loggerMock = new();
+        private readonly Mock<IHubContext<SignalRHub>> _signalrHubMock = new();
         private readonly NotificationRepository _repository;
 
         public NotificationRepositoryTests()
@@ -25,26 +28,52 @@ namespace final_project_be_Tests
             _repository = new NotificationRepository(
                 _daoMock.Object,
                 _mapperMock.Object,
-                _loggerMock.Object
+                _loggerMock.Object,
+                _signalrHubMock.Object
             );
         }
 
         [Fact]
         public async Task CreateNotification_ShouldReturnNotification_WhenSuccess()
         {
-            var dto = new NotificationDto { NotificationId = 1, UserId = Guid.NewGuid(), Message = "Test" };
-            var notification = new Notification { NotificationId = 1, UserId = dto.UserId, Message = "Test" };
+            // Arrange
+            var userId = Guid.NewGuid();
+            var dto = new NotificationDto { NotificationId = 1, UserId = userId, Message = "Test" };
+            var notification = new Notification { NotificationId = 1, UserId = userId, Message = "Test" };
+
             _mapperMock.Setup(m => m.Map<Notification>(dto)).Returns(notification);
             _daoMock.Setup(d => d.BeginTransactionAsync()).Returns(Task.CompletedTask);
             _daoMock.Setup(d => d.AddAsync(notification)).Returns(Task.CompletedTask);
             _daoMock.Setup(d => d.CommitTransactionAsync()).Returns(Task.CompletedTask);
 
+            // Mock HubContext
+            var clientProxyMock = new Mock<IClientProxy>();
+            clientProxyMock
+                .Setup(c => c.SendCoreAsync(
+                    "ReceiveNotification",
+                    It.IsAny<object[]>(),
+                    default
+                )).Returns(Task.CompletedTask);
+
+            var clientsMock = new Mock<IHubClients>();
+            clientsMock.Setup(c => c.User(userId.ToString())).Returns(clientProxyMock.Object);
+
+            _signalrHubMock.Setup(h => h.Clients).Returns(clientsMock.Object);
+
+            // Act
             var result = await _repository.CreateNotification(dto);
 
+            // Assert
             Assert.NotNull(result);
             Assert.Equal("Test", result.Message);
+
             _daoMock.Verify(d => d.AddAsync(notification), Times.Once);
             _daoMock.Verify(d => d.CommitTransactionAsync(), Times.Once);
+            clientProxyMock.Verify(c => c.SendCoreAsync(
+                "ReceiveNotification",
+                It.Is<object[]>(o => o.Length == 1),
+                default
+            ), Times.Once);
         }
 
         [Fact]

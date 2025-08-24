@@ -12,6 +12,15 @@ namespace final_project_be_Infrastructure.DAO
         {
             _context = context;
         }
+        public Task<bool> HasAssignmentByCourseIdAsync(int courseId)
+            {
+            return _context.Assignment
+                .Include(a => a.Lesson)
+                .ThenInclude(l => l.Module)
+                .AnyAsync(a => a.Lesson != null &&
+                              a.Lesson.Module != null &&
+                              a.Lesson.Module.CourseId == courseId);
+            }
         public async Task<List<Assignment>> GetAssignmentsByUserIdAsync(Guid userId)
         {
             return await _context.Assignment
@@ -26,6 +35,7 @@ namespace final_project_be_Infrastructure.DAO
                             a.Lesson.Module.Courses.Mentor.UserId == userId)
                 .ToListAsync();
         }
+
     }
 
 }

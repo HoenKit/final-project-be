@@ -23,6 +23,7 @@ namespace final_project_be_Tests
         private readonly Mock<IMapper> _mapperMock;
         private readonly Mock<IGoogleMeetService> _googleMeetServiceMock;
         private readonly Mock<ILogger<AssignmentRepository>> _loggerMock;
+        private readonly Mock<ILessonDAO> _lessonDaoMock;
         private readonly IOptions<ClientSettings> _clientSettings;
         private readonly AssignmentRepository _repository;
 
@@ -30,6 +31,7 @@ namespace final_project_be_Tests
         {
             _assignmentDaoMock = new Mock<IAssignmentDAO>();
             _mapperMock = new Mock<IMapper>();
+            _lessonDaoMock = new Mock<ILessonDAO>();
             _googleMeetServiceMock = new Mock<IGoogleMeetService>();
             _loggerMock = new Mock<ILogger<AssignmentRepository>>();
             _clientSettings = Options.Create(new ClientSettings { BaseUrl = "http://localhost" });
@@ -39,35 +41,52 @@ namespace final_project_be_Tests
                 _mapperMock.Object,
                 _googleMeetServiceMock.Object,
                 _loggerMock.Object,
-                _clientSettings
+                _clientSettings,
+                _lessonDaoMock.Object
             );
         }
-
         [Fact]
         public async Task CreateAssignment_ShouldCreateAssignmentWithMeetLink_WhenNoLinkProvided()
         {
             // Arrange
             var dto = new AssignmentDto { LessonId = 1, Content = "Test", MeetLink = null };
             var assignment = new Assignment { LessonId = 1, Content = "Test", MeetLink = null };
-            _mapperMock.Setup(m => m.Map<Assignment>(dto)).Returns(assignment);
-            _googleMeetServiceMock.Setup(m => m.CreateGoogleMeetLinkAsync(It.IsAny<string>(), It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<string>()))
+
+            _mapperMock
+                .Setup(m => m.Map<Assignment>(dto))
+                .Returns(assignment);
+
+            _lessonDaoMock
+                .Setup(m => m.GetCourseIdByLessonIdAsync(dto.LessonId))
+                .ReturnsAsync(10); // course tồn tại
+
+            _assignmentDaoMock
+                .Setup(m => m.HasAssignmentByCourseIdAsync(10))
+                .ReturnsAsync(false); // chưa có assignment
+
+            _googleMeetServiceMock
+                .Setup(m => m.CreateGoogleMeetLinkAsync(It.IsAny<string>(), It.IsAny<DateTime>(), It.IsAny<DateTime>(), It.IsAny<string>()))
                 .ReturnsAsync("http://meet.link");
-            _assignmentDaoMock.Setup(m => m.AddAsync(It.IsAny<Assignment>())).Returns(Task.CompletedTask);
+
             _assignmentDaoMock.Setup(m => m.BeginTransactionAsync()).Returns(Task.CompletedTask);
+            _assignmentDaoMock.Setup(m => m.AddAsync(It.IsAny<Assignment>())).Returns(Task.CompletedTask);
             _assignmentDaoMock.Setup(m => m.CommitTransactionAsync()).Returns(Task.CompletedTask);
 
             // Act
             var result = await _repository.CreateAssignment(dto);
 
             // Assert
-            Assert.NotNull(result);
-            Assert.Equal("http://meet.link", result.MeetLink);
+            Assert.NotNull(result.assignment);
+            Assert.Equal("http://meet.link", result.assignment.MeetLink);
+            Assert.Equal("Assignment created successfully", result.message);
+
             _assignmentDaoMock.Verify(m => m.AddAsync(It.IsAny<Assignment>()), Times.Once);
             _assignmentDaoMock.Verify(m => m.CommitTransactionAsync(), Times.Once);
+            _assignmentDaoMock.Verify(m => m.RollbackTransactionAsync(), Times.Never);
         }
 
         [Fact]
-        public async Task CreateAssignment_ShouldReturnNullAndRollback_WhenExceptionThrown()
+        public async Task CreateAssignment_ShouldReturnNullAssignmentAndRollback_WhenExceptionThrown()
         {
             // Arrange
             var dto = new AssignmentDto { LessonId = 1, Content = "Test" };
@@ -79,7 +98,8 @@ namespace final_project_be_Tests
             var result = await _repository.CreateAssignment(dto);
 
             // Assert
-            Assert.Null(result);
+            Assert.Null(result.assignment); // ✅ kiểm tra assignment = null
+            Assert.Equal("Unexpected error when creating assignment", result.message); // ✅ kiểm tra message
             _assignmentDaoMock.Verify(m => m.RollbackTransactionAsync(), Times.Once);
         }
 
