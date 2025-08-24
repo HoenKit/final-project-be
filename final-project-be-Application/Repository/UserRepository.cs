@@ -19,15 +19,16 @@ namespace final_project_be_Application.Repository
         private readonly IMapper _mapper;
         private readonly IUserCourseDAO _userCourseDAO;
         private readonly ILogger<UserRepository> _logger;
+        private readonly IBlobStorageService _blobStorageService;
 
-        public UserRepository(IUserDAO userDAO, IMapper mapper, ILogger<UserRepository> logger, IUserCourseDAO userCourseDAO)
+        public UserRepository(IUserDAO userDAO, IMapper mapper, ILogger<UserRepository> logger, IUserCourseDAO userCourseDAO, IBlobStorageService blobStorageService)
             : base(userDAO)
         {
             _userDAO = userDAO;
             _mapper = mapper;
             _logger = logger;
             _userCourseDAO = userCourseDAO;
-
+            _blobStorageService = blobStorageService;
         }
         public async Task<IEnumerable<UserCertificateDto>> GetCertificatesByUserIdAsync(Guid userId)
         {
@@ -70,6 +71,64 @@ namespace final_project_be_Application.Repository
             {
                 await _userDAO.RollbackTransactionAsync();
                 _logger.LogError($"Failed to toggle ban status for User {userId}: {ex.Message}");
+                return null;
+            }
+        }
+
+        public async Task<string?> UpdateAvatarAsync(Guid userId, UpdateAvatarDto dto)
+        {
+            try
+            {
+                await _userDAO.BeginTransactionAsync();
+
+                var user = await _userDAO.GetByIdAsync(userId);
+                if (user == null)
+                {
+                    await _userDAO.RollbackTransactionAsync();
+                    return null;
+                }
+
+                if (dto.Avatar != null && dto.Avatar.Length > 0)
+                {
+                    // Xóa avatar cũ nếu có
+                    var oldAvatarUrl = user.UserMetaData?.Avatar;
+                    if (!string.IsNullOrEmpty(oldAvatarUrl))
+                    {
+                        // Lấy tên file từ URL
+                        var oldFileName = Path.GetFileName(new Uri(oldAvatarUrl).LocalPath);
+                        await _blobStorageService.DeleteFileIfExistsAsync(oldFileName);
+                    }
+
+                    // Lấy extension và tạo tên file mới
+                    var fileExtension = Path.GetExtension(dto.Avatar.FileName);
+                    var uniqueFileName = Guid.NewGuid().ToString() + fileExtension;
+
+                    // Upload lên Azure Blob Storage
+                    using (var stream = dto.Avatar.OpenReadStream())
+                    {
+                        await _blobStorageService.UploadFileAsync(uniqueFileName, stream);
+                    }
+
+                    // Tạo URL public
+                    var avatarUrl = $"https://finalprojectbestorage.blob.core.windows.net/phronesisfiles/{uniqueFileName}";
+
+                    // Update vào DB
+                    user.UserMetaData.Avatar = avatarUrl;
+                    await _userDAO.UpdateAsync(user);
+
+                    await _userDAO.CommitTransactionAsync();
+                    _logger.LogInformation("Update Avatar success for UserId {UserId}", userId);
+
+                    return avatarUrl;
+                }
+
+                await _userDAO.RollbackTransactionAsync();
+                throw new ArgumentException("Avatar file is required.");
+            }
+            catch (Exception ex)
+            {
+                await _userDAO.RollbackTransactionAsync();
+                _logger.LogError(ex, "Error when updating avatar for UserId {UserId}", userId);
                 return null;
             }
         }
@@ -206,9 +265,9 @@ namespace final_project_be_Application.Repository
 
         public async Task<string> GetUserProfileSummaryAsync(Guid userId)
         {
-            var user = await _userDAO.GetAll()
+            var user = _userDAO.GetAll()
                 .Include(u => u.UserMetaData)
-                .FirstOrDefaultAsync(u => u.UserId == userId);
+                .FirstOrDefault(u => u.UserId == userId);
 
             if (user == null || user.UserMetaData == null)
                 return "Unknown user with no metadata";

@@ -1,4 +1,5 @@
-﻿using final_project_be_Domain.DTOs.Category;
+﻿using final_project_be_Domain.DTOs.Assignment;
+using final_project_be_Domain.DTOs.Category;
 using final_project_be_Domain.DTOs.Mentor;
 using Microsoft.AspNetCore.Http;
 using System;
@@ -30,7 +31,9 @@ namespace final_project_be_Domain.DTOs.Courses
 		public Decimal? AverageRating { get; set; }
 		public decimal? TotalReviews { get; set; }
         public DateTime? CreateAt { get; set; }
+        public string MeetingLink { get; set; }
         public MentorDto? Mentor { get; set; }
+        public AssignmentDto? Assignment { get; set; }
 	}
 
     [JsonConverter(typeof(JsonStringEnumConverter))]

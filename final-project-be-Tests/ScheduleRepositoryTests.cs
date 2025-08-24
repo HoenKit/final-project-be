@@ -329,22 +329,47 @@ namespace final_project_be_Tests
 
             var schedules = new List<Schedule>
     {
-        new Schedule { ScheduleId = 1, MentorId = mentorId, ScheduleName = "Test Schedule" }
-    };
+        new Schedule
+        {
+            ScheduleId = 1,
+            MentorId = mentorId,
+            ScheduleName = "Test Schedule",
+            MentorDay = DateTime.UtcNow,
+            CreateAt = DateTime.UtcNow,
+            CourseId = 100,
+            Courses = new Courses
+                {
+                    Modules = new List<Module>
+                    {
+                        new Module
+                        {
+                            Lessons = new List<Lesson>
+                            {
+                                new Lesson
+                                {
+                                    Assignments = new List<Assignment>
+                                    {
+                                        new Assignment
+                                        {
+                                            CreateAt = DateTime.UtcNow,
+                                            MeetLink = "https://meet.google.com/test"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                }
+            };
 
             var mockScheduleDao = new Mock<IScheduleDAO>();
             mockScheduleDao.Setup(d => d.GetSchedulesByMentorIdAsync(mentorId))
                            .ReturnsAsync(schedules);
 
-            var mapperConfig = new MapperConfiguration(cfg =>
-            {
-                cfg.CreateMap<Schedule, ScheduleDto>();
-            });
-            var mapper = mapperConfig.CreateMapper();
-
             var repo = new ScheduleRepository(
                 mockScheduleDao.Object,
-                mapper,
+                Mock.Of<IMapper>(),
                 Mock.Of<ILogger<AnswerRepository>>(),
                 Mock.Of<IUserScheduleDAO>()
             );
@@ -355,6 +380,7 @@ namespace final_project_be_Tests
             // Assert
             Assert.Single(result);
             Assert.Equal("Test Schedule", result[0].ScheduleName);
+            Assert.Equal("https://meet.google.com/test", result[0].MeetingLink);
         }
 
         [Fact]

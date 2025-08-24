@@ -79,10 +79,35 @@ namespace final_project_be_Application.Repository
             return _mapper.Map<List<ScheduleDto>>(schedules);
         }
 
-        public async Task<List<ScheduleDto>> GetSchedulesByMentorAsync(int mentorId)
+        public async Task<List<GetScheduleDto>> GetSchedulesByMentorAsync(int mentorId)
         {
             var schedules = await _scheduleDAO.GetSchedulesByMentorIdAsync(mentorId);
-            return _mapper.Map<List<ScheduleDto>>(schedules);
+
+            var scheduleDtos = schedules.Select(s =>
+            {
+                var assignments = s.Courses.Modules
+                    .SelectMany(m => m.Lessons)
+                    .SelectMany(l => l.Assignments)
+                    .OrderByDescending(a => a.CreateAt) 
+                    .ToList();
+
+                // Ưu tiên assignment có MeetLink
+                var selectedAssignment = assignments.FirstOrDefault(a => !string.IsNullOrEmpty(a.MeetLink))
+                                         ?? assignments.FirstOrDefault();
+
+                return new GetScheduleDto
+                {
+                    ScheduleId = s.ScheduleId,
+                    MentorId = s.MentorId,
+                    ScheduleName = s.ScheduleName,
+                    MentorDay = s.MentorDay,
+                    CreateAt = s.CreateAt,
+                    CourseId = s.CourseId,
+                    MeetingLink = selectedAssignment?.MeetLink
+                };
+            }).ToList();
+
+            return scheduleDtos;
         }
 
         public async Task<bool> DeleteSchedule(int id)

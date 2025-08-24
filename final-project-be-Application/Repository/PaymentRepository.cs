@@ -1,4 +1,4 @@
-﻿ using final_project_be_Application.Interface;
+﻿using final_project_be_Application.Interface;
 using final_project_be_Domain.DTOs;
 using final_project_be_Domain.DTOs.Courses;
 using final_project_be_Domain.DTOs.Mentor;
@@ -271,6 +271,7 @@ namespace final_project_be_Application.Repository
 					Amount = p.Amount,
                     Status = p.Status,
                     ServiceType = p.ServiceType,
+                    hasPremiumModules = p.PaymentCourses?.FirstOrDefault()?.Courses?.Modules?.Any(m => m.IsPremium) ?? false,
                     CreatedAt = p.CreatedAt,
                 }).ToList();
 
@@ -299,7 +300,7 @@ namespace final_project_be_Application.Repository
                     query = query.Where(p => p.CreatedAt.Year == year.Value);
                 }
 
-                var payments = await query.ToListAsync();
+                var payments = query.ToList();
 
                 var stats = payments
                     .GroupBy(p => new { p.CreatedAt.Year, p.CreatedAt.Month })

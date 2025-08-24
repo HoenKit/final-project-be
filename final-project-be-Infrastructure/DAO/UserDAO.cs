@@ -20,6 +20,7 @@ namespace final_project_be_Infrastructure.DAO
                 .Include(u => u.UserMetaData)
                 .FirstOrDefaultAsync(u => u.UserId == userId);
 
+
         public bool UserRegisterExist(UserRegisterDto registerDto)
             => _context.users.Any(u => u.Email == registerDto.Email);
 

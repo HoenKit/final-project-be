@@ -16,6 +16,16 @@ namespace final_project_be_Domain.DTOs.Schedule
         public int CourseId { get; set; }
     }
 
+    public class GetScheduleDto
+    {
+        public int ScheduleId { get; set; }
+        public int MentorId { get; set; }
+        public string ScheduleName { get; set; }
+        public DateTime MentorDay { get; set; }
+        public DateTime CreateAt { get; set; }
+        public int CourseId { get; set; }
+        public string MeetingLink { get; set; }
+    }
     public class UserScheduleDto
     {
         public Guid UserId { get; set; }
