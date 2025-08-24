@@ -271,6 +271,7 @@ namespace final_project_be_Application.Repository
 					Amount = p.Amount,
                     Status = p.Status,
                     ServiceType = p.ServiceType,
+                    hasPremiumModules = p.PaymentCourses?.FirstOrDefault()?.Courses?.Modules?.Any(m => m.IsPremium) ?? false,
                     CreatedAt = p.CreatedAt,
                 }).ToList();
 

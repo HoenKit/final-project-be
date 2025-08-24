@@ -20,6 +20,7 @@ namespace final_project_be_Domain.DTOs.Payment
         public decimal Amount { get; set; }
         public string Status { get; set; }
         public string ServiceType { get; set; }
+        public bool? hasPremiumModules { get; set; }
         public DateTime CreatedAt { get; set; }
     }
 
