@@ -39,24 +39,22 @@ namespace final_project_be.Controllers
 			return Ok(assignment);
 		}
 
-		// POST api/<AssignmentController>
-		[HttpPost]
-		public async Task<IActionResult> Post([FromBody] AssignmentDto dto)
-		{
-			try
-			{
-				if (!ModelState.IsValid)
-					return BadRequest(ModelState);
-				var assignment = await _assignmentRepository.CreateAssignment(dto);
-				return Ok(assignment);
-			}
-			catch (Exception e)
-			{
-				return Ok("Error" + e);
-			}
-		}
+        // POST api/<AssignmentController>
+        [HttpPost]
+        public async Task<IActionResult> Post([FromBody] AssignmentDto dto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
-         [HttpGet("by-creator")]
+            var (assignment, message) = await _assignmentRepository.CreateAssignment(dto);
+
+            if (assignment == null)
+                return BadRequest(new { message });
+
+            return CreatedAtAction(nameof(Post), new { id = assignment.AssignmentId }, assignment);
+        }
+
+        [HttpGet("by-creator")]
         public async Task<IActionResult> GetAssignmentsByUserId(Guid userId)
         {
             var assignments = await _assignmentRepository.GetAssignmentsBycreatorAsync(userId);

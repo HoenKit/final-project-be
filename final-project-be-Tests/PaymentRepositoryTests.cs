@@ -25,6 +25,8 @@ namespace final_project_be_Tests
         private readonly Mock<IUserCourseDAO> _userCourseDaoMock = new();
         private readonly Mock<ILogger<PaymentRepository>> _loggerMock = new();
         private readonly PaymentRepository _repository;
+        private readonly Mock<IPaymentPlanDAO> _paymentPlanDaoMock = new();
+        private readonly Mock<IMembershipPlanDAO> _membershipPlanDaoMock = new();
 
         public PaymentRepositoryTests()
         {
@@ -32,6 +34,8 @@ namespace final_project_be_Tests
                 _userDaoMock.Object,
                 _courseDaoMock.Object,
                 _paymentDaoMock.Object,
+                _paymentPlanDaoMock.Object,
+                _membershipPlanDaoMock.Object,
                 _paymentCourseDaoMock.Object,
                 _loggerMock.Object,
                 _mentorDaoMock.Object,
@@ -170,34 +174,36 @@ namespace final_project_be_Tests
         {
             var userId = Guid.NewGuid();
             var payments = new List<Payment>
+    {
+        new Payment
+        {
+            PaymentId = 1,
+            UserId = userId,
+            Amount = 100,
+            Status = "Success",
+            ServiceType = "Course",
+            CreatedAt = DateTime.UtcNow,
+            User = new User { Email = "test@example.com" },
+            PaymentCourses = new List<PaymentCourse>
             {
-                new Payment
-                {
-                    PaymentId = 1,
-                    UserId = userId,
-                    Amount = 100,
-                    Status = "Success",
-                    ServiceType = "Course",
-                    CreatedAt = DateTime.UtcNow,
-                    User = new User { Email = "test@example.com" },
-                    PaymentCourses = new List<PaymentCourse>
-                    {
-                        new PaymentCourse { CourseId = 2, Courses = new Courses { CourseName = "C#" } }
-                    },
-                    PaymentPlans = new List<PaymentPlan>
-                    {
-                        new PaymentPlan { MembershipPlan = new MembershipPlan { Name = "Gold" } }
-                    }
-                }
-            }.AsQueryable();
+                new PaymentCourse { CourseId = 2, Courses = new Courses { CourseName = "C#" } }
+            },
+            PaymentPlans = new List<PaymentPlan>
+            {
+                new PaymentPlan { MembershipPlan = new MembershipPlan { Name = "Gold" } }
+            }
+        }
+    }.AsQueryable();
 
             var paymentDaoMock = new Mock<IPaymentDAO>();
-            paymentDaoMock.Setup(d => d.GetAll()).Returns(payments);
+            paymentDaoMock.Setup(d => d.GetAll()).Returns(payments); // AsQueryable in-memory
 
             var repository = new PaymentRepository(
                 _userDaoMock.Object,
                 _courseDaoMock.Object,
-                paymentDaoMock.Object,
+                paymentDaoMock.Object, // dùng mock này
+                _paymentPlanDaoMock.Object,
+                _membershipPlanDaoMock.Object,
                 _paymentCourseDaoMock.Object,
                 _loggerMock.Object,
                 _mentorDaoMock.Object,
@@ -212,6 +218,7 @@ namespace final_project_be_Tests
             Assert.Equal("C#", result.Items.First().CourseName);
         }
 
+
         [Fact]
         public void GetAll_ShouldReturnEmptyResult_WhenExceptionThrown()
         {
@@ -221,7 +228,9 @@ namespace final_project_be_Tests
             var repository = new PaymentRepository(
                 _userDaoMock.Object,
                 _courseDaoMock.Object,
-                paymentDaoMock.Object,
+                _paymentDaoMock.Object,
+                _paymentPlanDaoMock.Object,
+                _membershipPlanDaoMock.Object,
                 _paymentCourseDaoMock.Object,
                 _loggerMock.Object,
                 _mentorDaoMock.Object,
@@ -239,32 +248,32 @@ namespace final_project_be_Tests
         public async Task GetStatisticsByMonth_ShouldReturnStats_WhenSuccess()
         {
             var payments = new List<Payment>
+        {
+            new Payment
             {
-                new Payment
+                PaymentId = 1,
+                Amount = 100,
+                Status = "Success",
+                ServiceType = "Premium",
+                CreatedAt = new DateTime(2024, 1, 15),
+                PaymentCourses = new List<PaymentCourse>
                 {
-                    PaymentId = 1,
-                    Amount = 100,
-                    Status = "Success",
-                    ServiceType = "Premium",
-                    CreatedAt = new DateTime(2024, 1, 15),
-                    PaymentCourses = new List<PaymentCourse>
-                    {
-                        new PaymentCourse { Courses = new Courses { IsDeleted = false, Modules = new List<Module>() } }
-                    }
-                },
-                new Payment
-                {
-                    PaymentId = 2,
-                    Amount = 200,
-                    Status = "Success",
-                    ServiceType = "Course",
-                    CreatedAt = new DateTime(2024, 1, 20),
-                    PaymentCourses = new List<PaymentCourse>
-                    {
-                        new PaymentCourse { Courses = new Courses { IsDeleted = false, Modules = new List<Module> { new Module { IsPremium = true } } } }
-                    }
+                    new PaymentCourse { Courses = new Courses { IsDeleted = false, Modules = new List<Module>() } }
                 }
-            }.AsQueryable();
+            },
+            new Payment
+            {
+                PaymentId = 2,
+                Amount = 200,
+                Status = "Success",
+                ServiceType = "Course",
+                CreatedAt = new DateTime(2024, 1, 20),
+                PaymentCourses = new List<PaymentCourse>
+                {
+                    new PaymentCourse { Courses = new Courses { IsDeleted = false, Modules = new List<Module> { new Module { IsPremium = true } } } }
+                }
+            }
+        }.AsQueryable();
 
             var paymentDaoMock = new Mock<IPaymentDAO>();
             paymentDaoMock.Setup(d => d.GetAll()).Returns(payments);
@@ -273,6 +282,8 @@ namespace final_project_be_Tests
                 _userDaoMock.Object,
                 _courseDaoMock.Object,
                 paymentDaoMock.Object,
+                _paymentPlanDaoMock.Object,
+                _membershipPlanDaoMock.Object,
                 _paymentCourseDaoMock.Object,
                 _loggerMock.Object,
                 _mentorDaoMock.Object,
