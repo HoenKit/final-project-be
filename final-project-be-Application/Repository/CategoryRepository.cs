@@ -108,7 +108,14 @@ namespace final_project_be_Application.Repository
 			try
 			{
 				await _categoryDAO.BeginTransactionAsync();
-				var category = _mapper.Map<Category>(dto);
+				var category = await _categoryDAO.GetByIdAsync(dto.CategoryId);
+				if (category == null)
+				{
+					_logger.LogWarning("Category not found with ID: {Id}", dto.CategoryId);
+					await _categoryDAO.RollbackTransactionAsync();
+					return null;
+				}
+				_mapper.Map(dto, category);
 				await _categoryDAO.UpdateAsync(category);
 				await _categoryDAO.CommitTransactionAsync();
 
