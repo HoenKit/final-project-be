@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace final_project_be.Controllers
 {
-    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class CouponController : ControllerBase
