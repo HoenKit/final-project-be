@@ -11,7 +11,6 @@ namespace final_project_be.Controllers
 {
 	[Route("api/[controller]")]
 	[ApiController]
-	[Authorize]
 	public class ModuleController : ControllerBase
 	{
 		private readonly IModuleRepository _moduleRepository;
@@ -73,7 +72,8 @@ namespace final_project_be.Controllers
 
 		// DELETE api/<ModuleController>/5
 		[HttpDelete("{id}")]
-		public async Task<IActionResult> Delete(int id)
+        [Authorize]
+        public async Task<IActionResult> Delete(int id)
 		{
 			if (!ModelState.IsValid) return BadRequest(ModelState);
 			await _moduleRepository.DeleteModule(id);

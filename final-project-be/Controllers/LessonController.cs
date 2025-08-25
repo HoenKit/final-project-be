@@ -10,7 +10,6 @@ namespace final_project_be.Controllers
 {
 	[Route("api/[controller]")]
 	[ApiController]
-	[Authorize]
 	public class LessonController : ControllerBase
 	{
 		private readonly ILessonRepository _lessonRepository;
@@ -39,7 +38,8 @@ namespace final_project_be.Controllers
 
 		// POST api/<LessonController>
 		[HttpPost]
-		public async Task<IActionResult> Post([FromForm] LessonDto dto)
+        [Authorize]
+        public async Task<IActionResult> Post([FromForm] LessonDto dto)
 		{
 			try
 			{
@@ -56,7 +56,8 @@ namespace final_project_be.Controllers
 
 		// PUT api/<LessonController>/5
 		[HttpPut]
-		public async Task<IActionResult> Put([FromForm] UpdateLessonDto dto)
+        [Authorize]
+        public async Task<IActionResult> Put([FromForm] UpdateLessonDto dto)
 		{
 			try
 			{
@@ -73,7 +74,8 @@ namespace final_project_be.Controllers
 
 		// DELETE api/<LessonController>/5
 		[HttpDelete("{id}")]
-		public async Task<IActionResult> Delete(int id)
+        [Authorize]
+        public async Task<IActionResult> Delete(int id)
 		{
 			if (!ModelState.IsValid) return BadRequest(ModelState);
 			await _lessonRepository.DeleteLesson(id);
