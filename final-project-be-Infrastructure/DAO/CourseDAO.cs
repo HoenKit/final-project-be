@@ -22,6 +22,7 @@ namespace final_project_be_Infrastructure.DAO
                         .ThenInclude(u => u.UserMetaData)
                 .Include(c => c.Modules)
                     .ThenInclude(m => m.Lessons)
+                    .ThenInclude(l => l.Assignments)
                 .FirstOrDefaultAsync(c => c.CourseId == id);
         }
     }
