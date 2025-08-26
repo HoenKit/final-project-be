@@ -1,4 +1,5 @@
-﻿using final_project_be_Domain.DTOs.Mentor;
+﻿using final_project_be_Domain.DTOs.Assignment;
+using final_project_be_Domain.DTOs.Mentor;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -30,5 +31,6 @@ namespace final_project_be_Domain.DTOs.Courses
 		public int CountModule { get; set; }
 		public int CountLesson { get; set; }
 		public MentorDto Mentor { get; set; }
+		public List<AssignmentDto>? Assignments { get; set; }
 	}
 }
