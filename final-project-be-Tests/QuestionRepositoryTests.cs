@@ -410,80 +410,84 @@ namespace final_project_be_Tests
                 _questionRepo.ImportQuestionsFromExcel(formFileMock.Object, lessonId: 1));
         }
         [Fact]
-        public async Task ImportQuizFromAI_ShouldImportSuccessfully()
+        public async Task ImportQuizFromAI_ShouldReturnTrue_WhenValidQuizReturned()
         {
             // Arrange
-            var jsonResponse = @"
-[
-  {
-    ""QuestionText"": ""What is the capital of France?"",
-    ""QuestionType"": ""SingleChoice"",
-    ""Answers"": [
-      { ""Text"": ""Paris"", ""IsCorrect"": true },
-      { ""Text"": ""London"", ""IsCorrect"": false },
-      { ""Text"": ""Berlin"", ""IsCorrect"": false },
-      { ""Text"": ""Madrid"", ""IsCorrect"": false }
-    ]
-  }
-]";
+            var fileMock = new Mock<IFormFile>();
+            var lessonId = 1;
+            var number = 2;
+            var difficulty = "easy";
+            var fileId = "file-123";
+            var quizJson = @"
+            [
+                {
+                    ""QuestionText"": ""What is 2+2?"",
+                    ""QuestionType"": ""SingleChoice"",
+                    ""Answers"": [
+                        { ""Text"": ""4"", ""IsCorrect"": true },
+                        { ""Text"": ""3"", ""IsCorrect"": false }
+                    ]
+                }
+            ]";
+            var aiResponse = $"```json{quizJson}```";
 
-            _embeddingServiceMock
-                .Setup(s => s.GetChatCompletionAsync(It.IsAny<string>()))
-                .ReturnsAsync(jsonResponse);
+            _embeddingServiceMock.Setup(s => s.UploadFileToOpenAIAsync(fileMock.Object)).ReturnsAsync(fileId);
+            _embeddingServiceMock.Setup(s => s.GenerateQuizFromPdfAsync(fileId, number, difficulty)).ReturnsAsync(aiResponse);
 
-            _questionDAOMock
-                .Setup(d => d.AddAsync(It.IsAny<Question>()))
-                .Returns((Question q) => Task.FromResult(q));
+            _questionDAOMock.Setup(d => d.BeginTransactionAsync()).Returns(Task.CompletedTask);
+            _questionDAOMock.Setup(d => d.AddAsync(It.IsAny<Question>())).Returns(Task.CompletedTask);
+            _questionDAOMock.Setup(d => d.CommitTransactionAsync()).Returns(Task.CompletedTask);
 
-            _answerRepositoryMock
-                .Setup(a => a.CreateAnswer(It.IsAny<AnswerDto>()))
-                .ReturnsAsync(new Answer());
+            _answerRepositoryMock.Setup(a => a.CreateAnswer(It.IsAny<AnswerDto>())).ReturnsAsync(new Answer());
 
             // Act
-            var result = await _questionRepo.ImportQuizFromAI("Geography", lessonId: 123, number: 1);
+            var result = await _questionRepo.ImportQuizFromAI(fileMock.Object, lessonId, number, difficulty);
 
             // Assert
             Assert.True(result);
-            _embeddingServiceMock.Verify(s => s.GetChatCompletionAsync(It.IsAny<string>()), Times.Once);
-            _questionDAOMock.Verify(q => q.AddAsync(It.IsAny<Question>()), Times.Once);
-            _answerRepositoryMock.Verify(a => a.CreateAnswer(It.IsAny<AnswerDto>()), Times.Exactly(4));
+            _embeddingServiceMock.Verify(s => s.UploadFileToOpenAIAsync(fileMock.Object), Times.Once);
+            _embeddingServiceMock.Verify(s => s.GenerateQuizFromPdfAsync(fileId, number, difficulty), Times.Once);
+            _answerRepositoryMock.Verify(a => a.CreateAnswer(It.IsAny<AnswerDto>()), Times.Exactly(2));
         }
 
         [Fact]
-        public async Task ImportQuizFromAI_ShouldReturnFalse_WhenJsonIsInvalid()
-        {
-            var invalidJson = @"{ ""invalid"": ""json"" ";
-
-            _embeddingServiceMock
-                .Setup(s => s.GetChatCompletionAsync(It.IsAny<string>()))
-                .ReturnsAsync(invalidJson);
-
-            // Act
-            var result = await _questionRepo.ImportQuizFromAI("Geography", lessonId: 123, number: 1);
-
-            // Assert
-            Assert.False(result);
-            _embeddingServiceMock.Verify(s => s.GetChatCompletionAsync(It.IsAny<string>()), Times.Once);
-            _questionDAOMock.Verify(q => q.AddAsync(It.IsAny<Question>()), Times.Never);
-            _answerRepositoryMock.Verify(a => a.CreateAnswer(It.IsAny<AnswerDto>()), Times.Never);
-        }
-        [Fact]
-        public async Task ImportQuizFromAI_ShouldReturnFalse_WhenOpenAIServiceFails()
+        public async Task ImportQuizFromAI_ShouldReturnFalse_WhenNoQuestions()
         {
             // Arrange
-            _embeddingServiceMock
-                .Setup(s => s.GetChatCompletionAsync(It.IsAny<string>()))
-                .ThrowsAsync(new Exception("OpenAI error"));
+            var fileMock = new Mock<IFormFile>();
+            var lessonId = 1;
+            var number = 2;
+            var difficulty = "easy";
+            var fileId = "file-123";
+            var aiResponse = "[]";
+
+            _embeddingServiceMock.Setup(s => s.UploadFileToOpenAIAsync(fileMock.Object)).ReturnsAsync(fileId);
+            _embeddingServiceMock.Setup(s => s.GenerateQuizFromPdfAsync(fileId, number, difficulty)).ReturnsAsync(aiResponse);
 
             // Act
-            var result = await _questionRepo.ImportQuizFromAI("Geography", lessonId: 123, number: 1);
+            var result = await _questionRepo.ImportQuizFromAI(fileMock.Object, lessonId, number, difficulty);
 
             // Assert
             Assert.False(result);
-            _embeddingServiceMock.Verify(s => s.GetChatCompletionAsync(It.IsAny<string>()), Times.Once);
-            _questionDAOMock.Verify(q => q.AddAsync(It.IsAny<Question>()), Times.Never);
-            _answerRepositoryMock.Verify(a => a.CreateAnswer(It.IsAny<AnswerDto>()), Times.Never);
         }
 
+        [Fact]
+        public async Task ImportQuizFromAI_ShouldReturnFalse_WhenExceptionThrown()
+        {
+            // Arrange
+            var fileMock = new Mock<IFormFile>();
+            var lessonId = 1;
+            var number = 2;
+            var difficulty = "easy";
+
+            _embeddingServiceMock.Setup(s => s.UploadFileToOpenAIAsync(fileMock.Object)).ThrowsAsync(new Exception("AI error"));
+
+            // Act
+            var result = await _questionRepo.ImportQuizFromAI(fileMock.Object, lessonId, number, difficulty);
+
+            // Assert
+            Assert.False(result);
+        }
     }
+
 }
