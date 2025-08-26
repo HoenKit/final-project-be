@@ -72,7 +72,7 @@ namespace final_project_be_Application.Ultils
                 }
                 else
                 {
-                    userCourse.Status = "NotStarted";
+                    userCourse.Status = "Not Started";
                     userCourse.CompletedAt = DateTime.UtcNow;
                 }
 
@@ -136,7 +136,7 @@ namespace final_project_be_Application.Ultils
                 }
                 else
                 {
-                    userModule.Status = "NotStarted";
+                    userModule.Status = "Not Started";
                     userModule.CompletedAt = null;
                 }
 
