@@ -222,31 +222,14 @@ namespace final_project_be_Application.Repository
 			}
 		}
 
-        public async Task<bool> ImportQuizFromAI(string topic, int lessonId, int number)
+        public async Task<bool> ImportQuizFromAI(IFormFile pdfFile, int lessonId, int number, string difficulty)
         {
-            var userPrompt = $@"
-Please generate exactly {number} multiple-choice questions on the topic '{topic}'.
-Each question should include a field 'QuestionType' with one of these values: 'SingleChoice' or 'MultipleChoice'.
-Return ONLY a valid JSON array with the following structure (no explanation, no extra text, no markdown):
-[
-  {{
-    ""QuestionText"": ""..."",
-    ""QuestionType"": ""SingleChoice"",
-    ""Answers"": [
-      {{ ""Text"": ""..."", ""IsCorrect"": true }},
-      {{ ""Text"": ""..."", ""IsCorrect"": false }},
-      {{ ""Text"": ""..."", ""IsCorrect"": false }},
-      {{ ""Text"": ""..."", ""IsCorrect"": false }}
-    ]
-  }}
-]
-";
-
             try
             {
-                string rawResponse = await _openAIService.GetChatCompletionAsync(userPrompt);
+                var fileId = await _openAIService.UploadFileToOpenAIAsync(pdfFile);
 
-                // Nếu OpenAI trả về có markdown thì bóc tách
+                string rawResponse = await _openAIService.GenerateQuizFromPdfAsync(fileId, number, difficulty);
+
                 var jsonMatch = Regex.Match(rawResponse, @"```json\s*(.+?)\s*```", RegexOptions.Singleline);
                 string jsonToDeserialize = jsonMatch.Success ? jsonMatch.Groups[1].Value : rawResponse;
 
@@ -262,11 +245,7 @@ Return ONLY a valid JSON array with the following structure (no explanation, no 
                 foreach (var q in quizQuestions)
                 {
                     var validTypes = new[] { "SingleChoice", "MultipleChoice" };
-                    if (!validTypes.Contains(q.QuestionType))
-                    {
-                        _logger.LogWarning($"Invalid QuestionType '{q.QuestionType}' for question: {q.QuestionText}");
-                        continue;
-                    }
+                    if (!validTypes.Contains(q.QuestionType)) continue;
 
                     var questionDto = new QuestionDto
                     {

@@ -88,19 +88,35 @@ namespace final_project_be.Controllers
         }
 
         [HttpPost("import-AI")]
-		public async Task<IActionResult> ImportQuizFromAI([FromBody] QuizImportRequest request)
-		{
-			if (string.IsNullOrWhiteSpace(request.Topic) || request.LessonId <= 0)
-			{
-				return BadRequest("Topic must not be empty and LessonId must be positive.");
-			}
+        public async Task<IActionResult> ImportQuizFromAI([FromForm] QuizImportRequest request)
+        {
+            if (request.PdfFile == null || request.PdfFile.Length == 0)
+            {
+                return BadRequest("PDF file must not be empty.");
+            }
 
-			var result = await _questionRepository.ImportQuizFromAI(request.Topic, request.LessonId, request.Number);
+            if (request.LessonId <= 0)
+            {
+                return BadRequest("LessonId must be positive.");
+            }
 
-			if (result)
-				return Ok(new { message = "Quiz imported successfully." });
-			else
-				return StatusCode(500, new { message = "Failed to import quiz from AI." });
-		}
-	}
+            if (string.IsNullOrWhiteSpace(request.Difficulty))
+            {
+                return BadRequest("Difficulty is required (e.g., Easy, Medium, Hard).");
+            }
+
+            var result = await _questionRepository.ImportQuizFromAI(
+                request.PdfFile,
+                request.LessonId,
+                request.Number,
+                request.Difficulty
+            );
+
+            if (result)
+                return Ok(new { message = "Quiz imported successfully." });
+            else
+                return StatusCode(500, new { message = "Failed to import quiz from AI." });
+        }
+
+    }
 }
