@@ -152,6 +152,7 @@ builder.Services.AddScoped<IOpenAIEmbeddingService, OpenAIEmbeddingService>();
 builder.Services.AddHttpClient<IOpenAIEmbeddingService, OpenAIEmbeddingService>();
 builder.Services.AddScoped<IGoogleMeetService, GoogleMeetService>();
 builder.Services.AddHostedService<PremiumExpirationService>();
+builder.Services.AddHostedService<UserCleanupService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddSingleton<ICloudinaryService,CloudinaryService>();
 builder.Services.Configure<CloudinarySettings>(

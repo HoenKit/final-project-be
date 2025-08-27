@@ -44,7 +44,7 @@ namespace final_project_be_Infrastructure.Data.Migrations
 
                     b.HasIndex("QuestionId");
 
-                    b.ToTable("Answers");
+                    b.ToTable("Answers", (string)null);
                 });
 
             modelBuilder.Entity("final_project_be_Domain.Models.Assignment", b =>
@@ -75,7 +75,7 @@ namespace final_project_be_Infrastructure.Data.Migrations
 
                     b.HasIndex("LessonId");
 
-                    b.ToTable("Assignment");
+                    b.ToTable("Assignment", (string)null);
                 });
 
             modelBuilder.Entity("final_project_be_Domain.Models.Category", b =>
@@ -110,7 +110,7 @@ namespace final_project_be_Infrastructure.Data.Migrations
 
                     b.HasIndex("ParentCategoryId");
 
-                    b.ToTable("categories");
+                    b.ToTable("categories", (string)null);
                 });
 
             modelBuilder.Entity("final_project_be_Domain.Models.Comment", b =>
@@ -151,7 +151,7 @@ namespace final_project_be_Infrastructure.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("comments");
+                    b.ToTable("comments", (string)null);
                 });
 
             modelBuilder.Entity("final_project_be_Domain.Models.Coupon", b =>
@@ -171,7 +171,7 @@ namespace final_project_be_Infrastructure.Data.Migrations
 
                     b.HasKey("CouponId");
 
-                    b.ToTable("Coupon");
+                    b.ToTable("Coupon", (string)null);
                 });
 
             modelBuilder.Entity("final_project_be_Domain.Models.CourseCoupon", b =>
@@ -189,7 +189,7 @@ namespace final_project_be_Infrastructure.Data.Migrations
 
                     b.HasIndex("CourseId");
 
-                    b.ToTable("courseCoupons");
+                    b.ToTable("courseCoupons", (string)null);
                 });
 
             modelBuilder.Entity("final_project_be_Domain.Models.CourseEmbedding", b =>
@@ -203,7 +203,7 @@ namespace final_project_be_Infrastructure.Data.Migrations
 
                     b.HasKey("CourseId");
 
-                    b.ToTable("CourseEmbeddings");
+                    b.ToTable("CourseEmbeddings", (string)null);
                 });
 
             modelBuilder.Entity("final_project_be_Domain.Models.Courses", b =>
@@ -271,7 +271,7 @@ namespace final_project_be_Infrastructure.Data.Migrations
 
                     b.HasIndex("MentorId");
 
-                    b.ToTable("Courses");
+                    b.ToTable("Courses", (string)null);
                 });
 
             modelBuilder.Entity("final_project_be_Domain.Models.Event", b =>
@@ -298,7 +298,7 @@ namespace final_project_be_Infrastructure.Data.Migrations
 
                     b.HasKey("EventId");
 
-                    b.ToTable("Events");
+                    b.ToTable("Events", (string)null);
                 });
 
             modelBuilder.Entity("final_project_be_Domain.Models.Lesson", b =>
@@ -329,7 +329,7 @@ namespace final_project_be_Infrastructure.Data.Migrations
 
                     b.HasIndex("ModuleId");
 
-                    b.ToTable("Lessons");
+                    b.ToTable("Lessons", (string)null);
                 });
 
             modelBuilder.Entity("final_project_be_Domain.Models.MembershipPlan", b =>
@@ -352,7 +352,7 @@ namespace final_project_be_Infrastructure.Data.Migrations
 
                     b.HasKey("PlanId");
 
-                    b.ToTable("MembershipPlans");
+                    b.ToTable("MembershipPlans", (string)null);
                 });
 
             modelBuilder.Entity("final_project_be_Domain.Models.Mentor", b =>
@@ -410,7 +410,7 @@ namespace final_project_be_Infrastructure.Data.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("Mentors");
+                    b.ToTable("Mentors", (string)null);
                 });
 
             modelBuilder.Entity("final_project_be_Domain.Models.MentorCertificate", b =>
@@ -436,7 +436,7 @@ namespace final_project_be_Infrastructure.Data.Migrations
 
                     b.HasIndex("MentorId");
 
-                    b.ToTable("MentorCertificates");
+                    b.ToTable("MentorCertificates", (string)null);
                 });
 
             modelBuilder.Entity("final_project_be_Domain.Models.Messages", b =>
@@ -472,7 +472,7 @@ namespace final_project_be_Infrastructure.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Messages");
+                    b.ToTable("Messages", (string)null);
                 });
 
             modelBuilder.Entity("final_project_be_Domain.Models.Module", b =>
@@ -499,7 +499,7 @@ namespace final_project_be_Infrastructure.Data.Migrations
 
                     b.HasIndex("CourseId");
 
-                    b.ToTable("Modules");
+                    b.ToTable("Modules", (string)null);
                 });
 
             modelBuilder.Entity("final_project_be_Domain.Models.Notification", b =>
@@ -527,7 +527,7 @@ namespace final_project_be_Infrastructure.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("notification");
+                    b.ToTable("notification", (string)null);
                 });
 
             modelBuilder.Entity("final_project_be_Domain.Models.Payment", b =>
@@ -559,7 +559,7 @@ namespace final_project_be_Infrastructure.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Payment");
+                    b.ToTable("Payment", (string)null);
                 });
 
             modelBuilder.Entity("final_project_be_Domain.Models.PaymentCourse", b =>
@@ -582,7 +582,7 @@ namespace final_project_be_Infrastructure.Data.Migrations
 
                     b.HasIndex("CourseId");
 
-                    b.ToTable("PaymentCourse");
+                    b.ToTable("PaymentCourse", (string)null);
                 });
 
             modelBuilder.Entity("final_project_be_Domain.Models.PaymentPlan", b =>
@@ -603,7 +603,7 @@ namespace final_project_be_Infrastructure.Data.Migrations
 
                     b.HasIndex("PlanId");
 
-                    b.ToTable("PaymentPlans");
+                    b.ToTable("PaymentPlans", (string)null);
                 });
 
             modelBuilder.Entity("final_project_be_Domain.Models.PollOption", b =>
@@ -635,7 +635,7 @@ namespace final_project_be_Infrastructure.Data.Migrations
 
                     b.HasIndex("PostId");
 
-                    b.ToTable("pollOptions");
+                    b.ToTable("pollOptions", (string)null);
                 });
 
             modelBuilder.Entity("final_project_be_Domain.Models.PollOptionVote", b =>
@@ -671,7 +671,7 @@ namespace final_project_be_Infrastructure.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("pollVotes");
+                    b.ToTable("pollVotes", (string)null);
                 });
 
             modelBuilder.Entity("final_project_be_Domain.Models.Post", b =>
@@ -716,7 +716,7 @@ namespace final_project_be_Infrastructure.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("posts");
+                    b.ToTable("posts", (string)null);
                 });
 
             modelBuilder.Entity("final_project_be_Domain.Models.PostFile", b =>
@@ -745,7 +745,7 @@ namespace final_project_be_Infrastructure.Data.Migrations
 
                     b.HasIndex("PostId");
 
-                    b.ToTable("postFiles");
+                    b.ToTable("postFiles", (string)null);
                 });
 
             modelBuilder.Entity("final_project_be_Domain.Models.Question", b =>
@@ -771,7 +771,7 @@ namespace final_project_be_Infrastructure.Data.Migrations
 
                     b.HasIndex("LessonId");
 
-                    b.ToTable("Question");
+                    b.ToTable("Question", (string)null);
                 });
 
             modelBuilder.Entity("final_project_be_Domain.Models.Report", b =>
@@ -799,7 +799,7 @@ namespace final_project_be_Infrastructure.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("report");
+                    b.ToTable("report", (string)null);
                 });
 
             modelBuilder.Entity("final_project_be_Domain.Models.ReportComment", b =>
@@ -814,7 +814,7 @@ namespace final_project_be_Infrastructure.Data.Migrations
 
                     b.HasIndex("CommentId");
 
-                    b.ToTable("reportComments");
+                    b.ToTable("reportComments", (string)null);
                 });
 
             modelBuilder.Entity("final_project_be_Domain.Models.ReportCourse", b =>
@@ -829,7 +829,7 @@ namespace final_project_be_Infrastructure.Data.Migrations
 
                     b.HasIndex("CourseId");
 
-                    b.ToTable("ReportCourse");
+                    b.ToTable("ReportCourse", (string)null);
                 });
 
             modelBuilder.Entity("final_project_be_Domain.Models.ReportEvent", b =>
@@ -844,7 +844,7 @@ namespace final_project_be_Infrastructure.Data.Migrations
 
                     b.HasIndex("EventId");
 
-                    b.ToTable("ReportEvents");
+                    b.ToTable("ReportEvents", (string)null);
                 });
 
             modelBuilder.Entity("final_project_be_Domain.Models.ReportPost", b =>
@@ -859,7 +859,7 @@ namespace final_project_be_Infrastructure.Data.Migrations
 
                     b.HasIndex("PostId");
 
-                    b.ToTable("reportPost");
+                    b.ToTable("reportPost", (string)null);
                 });
 
             modelBuilder.Entity("final_project_be_Domain.Models.ReportUser", b =>
@@ -874,7 +874,7 @@ namespace final_project_be_Infrastructure.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("reportUser");
+                    b.ToTable("reportUser", (string)null);
                 });
 
             modelBuilder.Entity("final_project_be_Domain.Models.ReportWorkShop", b =>
@@ -889,7 +889,7 @@ namespace final_project_be_Infrastructure.Data.Migrations
 
                     b.HasIndex("WorkshopId");
 
-                    b.ToTable("ReportWorkShop");
+                    b.ToTable("ReportWorkShop", (string)null);
                 });
 
             modelBuilder.Entity("final_project_be_Domain.Models.Review", b =>
@@ -928,7 +928,7 @@ namespace final_project_be_Infrastructure.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Reviews");
+                    b.ToTable("Reviews", (string)null);
                 });
 
             modelBuilder.Entity("final_project_be_Domain.Models.Role", b =>
@@ -951,7 +951,7 @@ namespace final_project_be_Infrastructure.Data.Migrations
 
                     b.HasKey("RoleId");
 
-                    b.ToTable("roles");
+                    b.ToTable("roles", (string)null);
                 });
 
             modelBuilder.Entity("final_project_be_Domain.Models.Schedule", b =>
@@ -983,7 +983,7 @@ namespace final_project_be_Infrastructure.Data.Migrations
 
                     b.HasIndex("MentorId");
 
-                    b.ToTable("Schedules");
+                    b.ToTable("Schedules", (string)null);
                 });
 
             modelBuilder.Entity("final_project_be_Domain.Models.Transaction", b =>
@@ -1019,7 +1019,7 @@ namespace final_project_be_Infrastructure.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Transaction");
+                    b.ToTable("Transaction", (string)null);
                 });
 
             modelBuilder.Entity("final_project_be_Domain.Models.User", b =>
@@ -1066,7 +1066,7 @@ namespace final_project_be_Infrastructure.Data.Migrations
 
                     b.HasKey("UserId");
 
-                    b.ToTable("users");
+                    b.ToTable("users", (string)null);
                 });
 
             modelBuilder.Entity("final_project_be_Domain.Models.UserAnswer", b =>
@@ -1081,7 +1081,7 @@ namespace final_project_be_Infrastructure.Data.Migrations
 
                     b.HasIndex("AnswerId");
 
-                    b.ToTable("UserAnswers");
+                    b.ToTable("UserAnswers", (string)null);
                 });
 
             modelBuilder.Entity("final_project_be_Domain.Models.UserAssignment", b =>
@@ -1108,7 +1108,7 @@ namespace final_project_be_Infrastructure.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserAssignments");
+                    b.ToTable("UserAssignments", (string)null);
                 });
 
             modelBuilder.Entity("final_project_be_Domain.Models.UserCourse", b =>
@@ -1136,7 +1136,7 @@ namespace final_project_be_Infrastructure.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserCourses");
+                    b.ToTable("UserCourses", (string)null);
                 });
 
             modelBuilder.Entity("final_project_be_Domain.Models.UserEmbedding", b =>
@@ -1153,7 +1153,7 @@ namespace final_project_be_Infrastructure.Data.Migrations
 
                     b.HasKey("UserId");
 
-                    b.ToTable("UserEmbeddings");
+                    b.ToTable("UserEmbeddings", (string)null);
                 });
 
             modelBuilder.Entity("final_project_be_Domain.Models.UserLesson", b =>
@@ -1185,7 +1185,7 @@ namespace final_project_be_Infrastructure.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserLessons");
+                    b.ToTable("UserLessons", (string)null);
                 });
 
             modelBuilder.Entity("final_project_be_Domain.Models.UserMetadata", b =>
@@ -1236,7 +1236,7 @@ namespace final_project_be_Infrastructure.Data.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("UserMetadata");
+                    b.ToTable("UserMetadata", (string)null);
                 });
 
             modelBuilder.Entity("final_project_be_Domain.Models.UserModule", b =>
@@ -1261,7 +1261,7 @@ namespace final_project_be_Infrastructure.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserModules");
+                    b.ToTable("UserModules", (string)null);
                 });
 
             modelBuilder.Entity("final_project_be_Domain.Models.UserRole", b =>
@@ -1276,7 +1276,7 @@ namespace final_project_be_Infrastructure.Data.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("userRoles");
+                    b.ToTable("userRoles", (string)null);
                 });
 
             modelBuilder.Entity("final_project_be_Domain.Models.UserSchedule", b =>
@@ -1291,7 +1291,7 @@ namespace final_project_be_Infrastructure.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserSchedules");
+                    b.ToTable("UserSchedules", (string)null);
                 });
 
             modelBuilder.Entity("final_project_be_Domain.Models.UserWorkshop", b =>
@@ -1306,7 +1306,7 @@ namespace final_project_be_Infrastructure.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserWorkshop");
+                    b.ToTable("UserWorkshop", (string)null);
                 });
 
             modelBuilder.Entity("final_project_be_Domain.Models.Withdraw", b =>
@@ -1336,7 +1336,7 @@ namespace final_project_be_Infrastructure.Data.Migrations
 
                     b.HasIndex("MentorId");
 
-                    b.ToTable("Withdraws");
+                    b.ToTable("Withdraws", (string)null);
                 });
 
             modelBuilder.Entity("final_project_be_Domain.Models.WorkShop", b =>
@@ -1368,7 +1368,7 @@ namespace final_project_be_Infrastructure.Data.Migrations
 
                     b.HasIndex("MentorId");
 
-                    b.ToTable("WorkShop");
+                    b.ToTable("WorkShop", (string)null);
                 });
 
             modelBuilder.Entity("final_project_be_Domain.Models.Answer", b =>

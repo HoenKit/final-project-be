@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,5 +11,7 @@ namespace final_project_be_Application.Interface
     {
         public Task<float[]> GetEmbeddingAsync(string input);
         public Task<string> GetChatCompletionAsync(string prompt);
+        public Task<string> UploadFileToOpenAIAsync(IFormFile pdfFile);
+        public Task<string> GenerateQuizFromPdfAsync(string fileId, int number, string difficulty);
     }
 }

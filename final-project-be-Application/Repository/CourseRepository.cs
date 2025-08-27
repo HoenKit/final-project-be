@@ -228,6 +228,18 @@ namespace final_project_be_Application.Repository
                 var courseDto = _mapper.Map<CourseResponseDto>(course);
                 courseDto.CountModule = course.Modules?.Count ?? 0;
                 courseDto.CountLesson = course.Modules?.Sum(m => m.Lessons?.Count ?? 0) ?? 0;
+                courseDto.Assignments = course.Modules?
+                    .SelectMany(m => m.Lessons ?? new List<Lesson>())
+                    .SelectMany(l => l.Assignments ?? new List<Assignment>())
+                    .Select(a => new AssignmentDto
+                    {
+                        AssignmentId = a.AssignmentId,
+                        LessonId = a.LessonId,
+                        ExamTime = a.ExamTime,
+                        Content = a.Content,
+                        MeetLink = a.MeetLink
+                    })
+                    .ToList();
 
                 await _courseDAO.CommitTransactionAsync();
 

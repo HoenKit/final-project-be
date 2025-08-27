@@ -17,6 +17,7 @@ namespace final_project_be_Application.Interface
 		public Task<Question> UpdateQuestion(UpdateQuestionDto dto);
 		public Task<ICollection<UpdateQuestionDto>> GetAllQuestionByLessonId(int lessonId);
 		public Task ImportQuestionsFromExcel(IFormFile file, int lessonId);
-		public Task<bool> ImportQuizFromAI(string topic, int lessonId, int number);
-	}
+		public Task<bool> ImportQuizFromAI(IFormFile pdfFile, int lessonId, int number, string difficulty);
+
+    }
 }
