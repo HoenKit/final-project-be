@@ -127,6 +127,7 @@ namespace final_project_be_Application.Repository
             {
                 AssignmentId = a.AssignmentId,
                 LessonId = a.LessonId,
+				ExamTime = a.ExamTime,
                 Content = a.Content,
                 MeetLink = a.MeetLink,
 				Title = a.Lesson?.Title
