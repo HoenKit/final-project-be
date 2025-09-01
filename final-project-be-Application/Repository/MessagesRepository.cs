@@ -65,7 +65,7 @@ namespace final_project_be_Application.Repository
                     {
                         UserId = u.UserId,
                         Avatar = u.UserMetaData.Avatar,
-                        FullName = u.UserMetaData.FirstName + u.UserMetaData.LastName,
+                        FullName = u.UserMetaData.FirstName +" "+ u.UserMetaData.LastName,
                         LastSentAt = g.LastSentAt
                     })
                 .OrderByDescending(x => x.LastSentAt)

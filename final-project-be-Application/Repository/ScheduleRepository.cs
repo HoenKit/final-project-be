@@ -110,22 +110,28 @@ namespace final_project_be_Application.Repository
             return scheduleDtos;
         }
 
-        public async Task<bool> DeleteSchedule(int id)
+        public async Task<bool> DeleteScheduleAsync(int scheduleId)
         {
             try
             {
-                await _scheduleDAO.BeginTransactionAsync();
-                await _scheduleDAO.DeleteAsync(id);
-                await _scheduleDAO.CommitTransactionAsync();
-                _logger.LogInformation("Delete Schedule success");
+                await _userScheduleDAO.BeginTransactionAsync();
+
+                // Xóa UserSchedules trước
+                await _userScheduleDAO.DeleteUserSchedulesByScheduleIdAsync(scheduleId);
+
+                // Xóa Schedule sau
+                await _scheduleDAO.DeleteAsync(scheduleId);
+
+                await _userScheduleDAO.CommitTransactionAsync();
                 return true;
             }
             catch (Exception ex)
             {
-                await _scheduleDAO.RollbackTransactionAsync();
-                _logger.LogError(ex, "Error when delete Schedule");
+                await _userScheduleDAO.RollbackTransactionAsync();
+                _logger.LogError(ex, "Error deleting Schedule {ScheduleId}", scheduleId);
                 return false;
             }
         }
+
     }
 }
