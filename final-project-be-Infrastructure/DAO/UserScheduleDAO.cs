@@ -12,6 +12,12 @@ namespace final_project_be_Infrastructure.DAO
         {
             _context = context;
         }
+        public async Task<List<UserSchedule>> GetByScheduleIdAsync(int scheduleId)
+        {
+            return await _context.UserSchedules
+                    .Where(us => us.ScheduleId == scheduleId)
+                    .ToListAsync();
+        }
         public async Task<List<UserSchedule>> GetSchedulesByUserIdAsync(Guid userId)
         {
             return await _context.UserSchedules
@@ -21,6 +27,15 @@ namespace final_project_be_Infrastructure.DAO
                     .ThenInclude(s => s.Mentor)
                 .Where(us => us.UserId == userId)
                 .ToListAsync();
+        }
+        public async Task DeleteUserSchedulesByScheduleIdAsync(int scheduleId)
+        {
+            var userSchedules = await GetByScheduleIdAsync(scheduleId);
+            if (userSchedules.Any())
+            {
+                _context.UserSchedules.RemoveRange(userSchedules);
+                await _context.SaveChangesAsync();
+            }
         }
     }
 
