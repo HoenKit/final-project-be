@@ -93,7 +93,7 @@ namespace final_project_be.Controllers
         public async Task<IActionResult> Delete(int id)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            await _Schedulerepository.DeleteSchedule(id);
+            await _Schedulerepository.DeleteScheduleAsync(id);
             return Ok();
         }
     }

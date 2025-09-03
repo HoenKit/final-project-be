@@ -14,7 +14,8 @@ namespace final_project_be_Domain.DTOs.Assignment
         public TimeSpan? ExamTime { get; set; }
         public string Content { get; set; }
 		public string? MeetLink { get; set; }
-	}
+        public DateTime? CreateAt { get; set; }
+    }
 
     public class GetAssignmentLessonDto
     {
