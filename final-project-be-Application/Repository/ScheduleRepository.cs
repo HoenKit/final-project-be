@@ -123,6 +123,7 @@ namespace final_project_be_Application.Repository
                 await _scheduleDAO.DeleteAsync(scheduleId);
 
                 await _userScheduleDAO.CommitTransactionAsync();
+                _logger.LogInformation("Delete Schedule success {ScheduleId}", scheduleId);
                 return true;
             }
             catch (Exception ex)
