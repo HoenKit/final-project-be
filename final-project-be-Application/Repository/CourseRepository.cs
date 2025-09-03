@@ -201,6 +201,7 @@ namespace final_project_be_Application.Repository
                                 .ThenByDescending(a => a.CreateAt)
                                 .Select(a => new AssignmentDto
                                 {
+                                    LessonId = a.LessonId,
                                     AssignmentId = a.AssignmentId,
                                     Content = a.Content,
                                     MeetLink = a.MeetLink
