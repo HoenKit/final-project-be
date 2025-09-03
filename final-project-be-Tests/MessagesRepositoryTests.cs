@@ -89,7 +89,7 @@ namespace final_project_be_Tests
 
             Assert.Single(result);
             Assert.Equal(partnerId, result[0].UserId);
-            Assert.Equal("JohnDoe", result[0].FullName);
+            Assert.Equal("John Doe", result[0].FullName);
             Assert.Equal("avatar.png", result[0].Avatar);
         }
 

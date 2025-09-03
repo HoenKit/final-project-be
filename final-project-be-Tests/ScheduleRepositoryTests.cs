@@ -215,14 +215,14 @@ namespace final_project_be_Tests
             int scheduleId = 1;
 
             // Act
-            var result = await _repository.DeleteSchedule(scheduleId);
+            var result = await _repository.DeleteScheduleAsync(scheduleId);
 
             // Assert
             Assert.True(result);
-            _scheduleDAOMock.Verify(d => d.BeginTransactionAsync(), Times.Once);
+            _userScheduleDAOMock.Verify(d => d.BeginTransactionAsync(), Times.Once);
             _scheduleDAOMock.Verify(d => d.DeleteAsync(scheduleId), Times.Once);
-            _scheduleDAOMock.Verify(d => d.CommitTransactionAsync(), Times.Once);
-            _scheduleDAOMock.Verify(d => d.RollbackTransactionAsync(), Times.Never);
+            _userScheduleDAOMock.Verify(d => d.CommitTransactionAsync(), Times.Once);
+            _userScheduleDAOMock.Verify(d => d.RollbackTransactionAsync(), Times.Never);
 
             _loggerMock.Verify(
                 l => l.Log(
@@ -243,24 +243,25 @@ namespace final_project_be_Tests
             _scheduleDAOMock.Setup(d => d.DeleteAsync(scheduleId)).ThrowsAsync(new Exception("DB error"));
 
             // Act
-            var result = await _repository.DeleteSchedule(scheduleId);
+            var result = await _repository.DeleteScheduleAsync(scheduleId);
 
             // Assert
             Assert.False(result);
-            _scheduleDAOMock.Verify(d => d.BeginTransactionAsync(), Times.Once);
+            _userScheduleDAOMock.Verify(d => d.BeginTransactionAsync(), Times.Once);
             _scheduleDAOMock.Verify(d => d.DeleteAsync(scheduleId), Times.Once);
-            _scheduleDAOMock.Verify(d => d.CommitTransactionAsync(), Times.Never);
-            _scheduleDAOMock.Verify(d => d.RollbackTransactionAsync(), Times.Once);
+            _userScheduleDAOMock.Verify(d => d.CommitTransactionAsync(), Times.Never);
+            _userScheduleDAOMock.Verify(d => d.RollbackTransactionAsync(), Times.Once);
 
             _loggerMock.Verify(
                 l => l.Log(
                     LogLevel.Error,
                     It.IsAny<EventId>(),
-                    It.Is<It.IsAnyType>((o, t) => o.ToString().Contains("Error when delete Schedule")),
+                    It.Is<It.IsAnyType>((o, t) => o.ToString().Contains("Error deleting Schedule")),
                     It.IsAny<Exception>(),
                     It.IsAny<Func<It.IsAnyType, Exception, string>>()),
                 Times.Once
             );
+
         }
 
         [Fact]
