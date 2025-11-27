@@ -502,15 +502,15 @@ namespace final_project_be_Application.Repository
         }
 
          public async Task ResetPasswordAsync(string Token,ResetPasswordDto Request)
-        {
-            var email = ValidateResetToken(Token);
-            var user = _UserDAO.GetUserbyEmail(email);
-            if (user == null)
-                throw new Exception("User not found");
+            {
+                var email = ValidateResetToken(Token);
+                var user = _UserDAO.GetUserbyEmail(email);
+                if (user == null)
+                    throw new Exception("User not found");
 
-            user.Password = new PasswordHasher<User>().HashPassword(user, Request.NewPassword); // or your own method
-            await _UserDAO.UpdateAsync(user);
-        }
+                user.Password = new PasswordHasher<User>().HashPassword(user, Request.NewPassword); // or your own method
+                await _UserDAO.UpdateAsync(user);
+            }
 
     }
 }
